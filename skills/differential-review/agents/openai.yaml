@@ -1,0 +1,4 @@
+interface:
+  display_name: "Differential Review"
+  short_description: "Ask Codex, Claude Code, or OpenCode to challenge a plan or PR"
+  default_prompt: "Use $differential-review to get a second opinion from Codex, Claude Code, or OpenCode Go GLM-5.2 on this plan or PR before acting."
