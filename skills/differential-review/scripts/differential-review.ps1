@@ -30,6 +30,10 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Carpeta temporal portable: en Windows resuelve a %TEMP%, en macOS/Linux a $TMPDIR (o /tmp).
+# $tempRoot no existe fuera de Windows, asi que Join-Path $tempRoot fallaria en macOS/Linux.
+$tempRoot = [System.IO.Path]::GetTempPath()
+
 function Resolve-ExecutablePath {
   param(
     [string] $ExplicitPath,
@@ -400,7 +404,7 @@ if ($PrintPromptOnly) {
   exit 0
 }
 
-$promptFile = Join-Path $env:TEMP ("$Reviewer-prompt-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.txt')
+$promptFile = Join-Path $tempRoot ("$Reviewer-prompt-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.txt')
 Set-Content -LiteralPath $promptFile -Value $finalPrompt -Encoding UTF8
 
 $toolLabel = switch ($Reviewer) {
@@ -408,7 +412,7 @@ $toolLabel = switch ($Reviewer) {
   'opencode' { 'opencode-run' }
   default { 'codex-exec' }
 }
-$outFile = Join-Path $env:TEMP ("$Reviewer-differential-review-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.md')
+$outFile = Join-Path $tempRoot ("$Reviewer-differential-review-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.md')
 
 $exePath = $null
 $args = @()
@@ -590,9 +594,9 @@ if ($Reviewer -eq 'codex') {
 Write-Host "[differential-review] Output target: $outFile" -ForegroundColor DarkGray
 Write-Host "[differential-review] Te doy feedback cada 1 minuto mientras $Reviewer corre." -ForegroundColor Cyan
 
-$errFile = Join-Path $env:TEMP ("$Reviewer-stderr-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.txt')
-$stdoutFile = Join-Path $env:TEMP ("$Reviewer-stdout-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.txt')
-$jobWorkingDirectory = if ($Reviewer -eq 'opencode' -or $Reviewer -eq 'claude') { $env:TEMP } else { $workingDirectory }
+$errFile = Join-Path $tempRoot ("$Reviewer-stderr-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.txt')
+$stdoutFile = Join-Path $tempRoot ("$Reviewer-stdout-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.txt')
+$jobWorkingDirectory = if ($Reviewer -eq 'opencode' -or $Reviewer -eq 'claude') { $tempRoot } else { $workingDirectory }
 
 if ($Reviewer -eq 'codex') {
   $argString = ($args | ForEach-Object {
