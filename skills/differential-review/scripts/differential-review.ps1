@@ -3,9 +3,9 @@ param(
   [string] $Prompt,
   [Alias('PR')]
   [string] $PullRequest = $(if ($env:DIFF_REVIEW_PULL_REQUEST) { $env:DIFF_REVIEW_PULL_REQUEST } else { '' }),
-  [ValidateSet('codex', 'claude', 'opencode')]
+  [ValidateSet('codex', 'claude', 'opencode', 'cursor')]
   [string] $Reviewer = $(if ($env:DIFF_REVIEW_REVIEWER) { $env:DIFF_REVIEW_REVIEWER } else { 'codex' }),
-  [ValidateSet('', 'codex', 'claude', 'opencode')]
+  [ValidateSet('', 'codex', 'claude', 'opencode', 'cursor')]
   [string] $Invoker = $(if ($env:DIFF_REVIEW_INVOKER) { $env:DIFF_REVIEW_INVOKER } else { '' }),
   [switch] $AllowSelfReview,
   [string] $Profile = $(if ($env:DIFF_REVIEW_PROFILE) { $env:DIFF_REVIEW_PROFILE } else { '' }),
@@ -18,6 +18,10 @@ param(
   [string] $OpenCodeModel = $(if ($env:DIFF_REVIEW_OPENCODE_MODEL) { $env:DIFF_REVIEW_OPENCODE_MODEL } else { 'opencode-go/glm-5.2' }),
   [ValidateSet('', 'high', 'max')]
   [string] $OpenCodeVariant = $(if ($env:DIFF_REVIEW_OPENCODE_VARIANT) { $env:DIFF_REVIEW_OPENCODE_VARIANT } else { 'max' }),
+  [string] $CursorPath = $(if ($env:DIFF_REVIEW_CURSOR_PATH) { $env:DIFF_REVIEW_CURSOR_PATH } else { '' }),
+  [string] $CursorModel = $(if ($env:DIFF_REVIEW_CURSOR_MODEL) { $env:DIFF_REVIEW_CURSOR_MODEL } else { 'gpt-5.5' }),
+  [ValidateSet('ask', 'plan')]
+  [string] $CursorMode = $(if ($env:DIFF_REVIEW_CURSOR_MODE) { $env:DIFF_REVIEW_CURSOR_MODE } else { 'ask' }),
   [string] $ClaudeModel = $(if ($env:DIFF_REVIEW_CLAUDE_MODEL) { $env:DIFF_REVIEW_CLAUDE_MODEL } else { 'claude-opus-4-8' }),
   [ValidateSet('low', 'medium', 'high', 'max')]
   [string] $ClaudeEffort = $(if ($env:DIFF_REVIEW_CLAUDE_EFFORT) { $env:DIFF_REVIEW_CLAUDE_EFFORT } else { 'max' }),
@@ -31,7 +35,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 # Carpeta temporal portable: en Windows resuelve a %TEMP%, en macOS/Linux a $TMPDIR (o /tmp).
-# $tempRoot no existe fuera de Windows, asi que Join-Path $tempRoot fallaria en macOS/Linux.
+# Se evita $env:TEMP porque no existe fuera de Windows y Join-Path con valor nulo falla.
 $tempRoot = [System.IO.Path]::GetTempPath()
 
 function Resolve-ExecutablePath {
@@ -410,6 +414,7 @@ Set-Content -LiteralPath $promptFile -Value $finalPrompt -Encoding UTF8
 $toolLabel = switch ($Reviewer) {
   'claude' { 'claude-code' }
   'opencode' { 'opencode-run' }
+  'cursor' { 'cursor-agent' }
   default { 'codex-exec' }
 }
 $outFile = Join-Path $tempRoot ("$Reviewer-differential-review-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.md')
@@ -533,6 +538,45 @@ if ($Reviewer -eq 'codex') {
     $args += $ExtraArgs
   }
   $args += @('--tools', 'Read,LS,Glob,Grep')
+} elseif ($Reviewer -eq 'cursor') {
+  if ([string]::IsNullOrWhiteSpace($env:CURSOR_API_KEY)) {
+    throw "Cursor requiere CURSOR_API_KEY para correr sin login interactivo. Sin sesion ni key, cursor-agent puede quedarse colgado en modo headless. Exporta CURSOR_API_KEY o usa otro revisor."
+  }
+  $cursorCandidates = @()
+  if ($env:LOCALAPPDATA) {
+    $cursorCandidates += (Join-Path $env:LOCALAPPDATA 'cursor-agent\cursor-agent.exe')
+    $cursorCandidates += (Join-Path $env:LOCALAPPDATA 'cursor-agent\*\cursor-agent.exe')
+  }
+  if ($env:HOME) {
+    $cursorCandidates += (Join-Path $env:HOME '.local/bin/cursor-agent')
+    $cursorCandidates += (Join-Path $env:HOME '.local/bin/agent')
+  }
+  $exePath = Resolve-ExecutablePath -ExplicitPath $CursorPath -CommandName 'cursor-agent' -GlobCandidates $cursorCandidates
+  $exeVersion = Get-ExecutableVersion $exePath
+  # El prompt se entrega como argumento posicional (lo agrega el job); cursor-agent no lee stdin.
+  $args = @(
+    '-p',
+    '--model', $CursorModel,
+    '--output-format', 'json',
+    '--mode', $CursorMode
+  )
+  $reviewerDetails = @(
+    "- Herramienta: $toolLabel",
+    "- Model: $CursorModel",
+    "- Mode: $CursorMode (solo lectura)",
+    "- Reasoning: medium (no configurable en el CLI de Cursor)",
+    "- Binary: $exePath",
+    "- Version: $(if ([string]::IsNullOrWhiteSpace($exeVersion)) { 'unknown' } else { $exeVersion })",
+    "- Repository access: read-only $workingDirectory"
+  )
+  if ($ExtraArgs) {
+    foreach ($arg in $ExtraArgs) {
+      if ($arg -match '^(-f|--force|--yolo|--sandbox|--approve-mcps|--trust|--mode|-m|--model|--output-format|-p|--print|--api-key)(=|,|$)') {
+        throw "-ExtraArgs cannot include '$arg' because cursor differential-review must stay read-only and non-interactive."
+      }
+    }
+    $args += $ExtraArgs
+  }
 } else {
   $OpenCodeModel = Normalize-OpenCodeModel $OpenCodeModel
   $opencodeConfigContent = New-OpenCodeReadOnlyConfig
@@ -586,6 +630,9 @@ if ($Reviewer -eq 'codex') {
 } elseif ($Reviewer -eq 'claude') {
   $claudeModeLabel = if ($ClaudeBare) { 'bare' } else { 'compatible' }
   Write-Host "[differential-review] Invoking Claude Code --model $ClaudeModel --effort $ClaudeEffort ($claudeModeLabel, plan, no session persistence, read-only repo tools) ..." -ForegroundColor Cyan
+} elseif ($Reviewer -eq 'cursor') {
+  Write-Host "[differential-review] Invoking cursor-agent -p --model $CursorModel --mode $CursorMode (read-only, json output) ..." -ForegroundColor Cyan
+  Write-Host "[differential-review] Cursor binary: $exePath$(if ([string]::IsNullOrWhiteSpace($exeVersion)) { '' } else { " ($exeVersion)" })" -ForegroundColor DarkGray
 } else {
   $modelLabel = if ([string]::IsNullOrWhiteSpace($OpenCodeModel)) { 'opencode default model' } else { $OpenCodeModel }
   $variantLabel = if ([string]::IsNullOrWhiteSpace($OpenCodeVariant)) { 'opencode default variant' } else { $OpenCodeVariant }
@@ -607,6 +654,28 @@ if ($Reviewer -eq 'codex') {
       $p = Start-Process -FilePath $JobExePath -ArgumentList $JobArgString -WorkingDirectory $JobWorkingDirectory -NoNewWindow -Wait -PassThru -RedirectStandardInput $JobPromptFile -RedirectStandardOutput $JobStdoutFile -RedirectStandardError $JobErrFile
       $p.ExitCode
   } -ArgumentList $exePath, $argString, $promptFile, $stdoutFile, $errFile, $jobWorkingDirectory
+} elseif ($Reviewer -eq 'cursor') {
+  $job = Start-Job -ScriptBlock {
+      param($JobExePath, [string[]] $JobArgs, $JobPromptFile, $JobStdoutFile, $JobErrFile, $JobWorkingDirectory)
+      $promptText = Get-Content -Raw -Encoding UTF8 -LiteralPath $JobPromptFile
+      $psi = [System.Diagnostics.ProcessStartInfo]::new()
+      $psi.FileName = $JobExePath
+      foreach ($a in $JobArgs) { $psi.ArgumentList.Add([string]$a) }
+      $psi.ArgumentList.Add($promptText)
+      $psi.WorkingDirectory = $JobWorkingDirectory
+      $psi.UseShellExecute = $false
+      $psi.RedirectStandardInput = $true
+      $psi.RedirectStandardOutput = $true
+      $psi.RedirectStandardError = $true
+      $p = [System.Diagnostics.Process]::Start($psi)
+      $p.StandardInput.Close()
+      $stdoutText = $p.StandardOutput.ReadToEnd()
+      $stderrText = $p.StandardError.ReadToEnd()
+      $p.WaitForExit()
+      Set-Content -LiteralPath $JobStdoutFile -Value $stdoutText -Encoding UTF8
+      Set-Content -LiteralPath $JobErrFile -Value $stderrText -Encoding UTF8
+      $p.ExitCode
+  } -ArgumentList $exePath, $args, $promptFile, $stdoutFile, $errFile, $jobWorkingDirectory
 } else {
   $job = Start-Job -ScriptBlock {
       param($JobExePath, [string[]] $JobArgs, $JobPromptFile, $JobStdoutFile, $JobErrFile, $JobWorkingDirectory, $JobOpenCodeConfigContent)
@@ -696,34 +765,34 @@ if ($exitCode -ne 0) {
   exit $exitCode
 }
 
-if ($Reviewer -eq 'claude') {
+if ($Reviewer -eq 'claude' -or $Reviewer -eq 'cursor') {
   if (Test-Path -LiteralPath $stdoutFile) {
     $reviewerStdout = Get-Content -Raw -Encoding UTF8 -LiteralPath $stdoutFile
     try {
-      $claudeResult = $reviewerStdout | ConvertFrom-Json -ErrorAction Stop
+      $jsonResult = $reviewerStdout | ConvertFrom-Json -ErrorAction Stop
     } catch {
       Remove-Item -LiteralPath $stdoutFile -Force -ErrorAction SilentlyContinue
       [Console]::Error.WriteLine($reviewerStdout)
-      Write-Host "[differential-review] Claude Code did not return valid JSON. Analysis file not modified." -ForegroundColor Yellow
+      Write-Host "[differential-review] $toolLabel did not return valid JSON. Analysis file not modified." -ForegroundColor Yellow
       exit 1
     }
 
-    if ($claudeResult.is_error -eq $true) {
+    if ($jsonResult.is_error -eq $true) {
       Remove-Item -LiteralPath $stdoutFile -Force -ErrorAction SilentlyContinue
-      $errorMessage = if ($null -ne $claudeResult.result) { [string] $claudeResult.result } else { $reviewerStdout }
+      $errorMessage = if ($null -ne $jsonResult.result) { [string] $jsonResult.result } else { $reviewerStdout }
       [Console]::Error.WriteLine($errorMessage)
-      Write-Host "[differential-review] Claude Code returned an error result. Analysis file not modified." -ForegroundColor Yellow
+      Write-Host "[differential-review] $toolLabel returned an error result. Analysis file not modified." -ForegroundColor Yellow
       exit 1
     }
 
-    if ($null -eq $claudeResult.result) {
+    if ($null -eq $jsonResult.result) {
       Remove-Item -LiteralPath $stdoutFile -Force -ErrorAction SilentlyContinue
       [Console]::Error.WriteLine($reviewerStdout)
-      Write-Host "[differential-review] Claude Code JSON did not include a result field. Analysis file not modified." -ForegroundColor Yellow
+      Write-Host "[differential-review] $toolLabel JSON did not include a result field. Analysis file not modified." -ForegroundColor Yellow
       exit 1
     }
 
-    Set-Content -LiteralPath $outFile -Value ([string] $claudeResult.result) -Encoding UTF8
+    Set-Content -LiteralPath $outFile -Value ([string] $jsonResult.result) -Encoding UTF8
   }
 } elseif ($Reviewer -eq 'opencode') {
   if (Test-Path -LiteralPath $stdoutFile) {

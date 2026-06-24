@@ -2,13 +2,14 @@
 name: differential-review
 description: >-
   Use when an agent (including Claude Code, Codex, or GLM-5.2 running inside opencode) wants a second
-  opinion from Codex, Claude Code, or OpenCode on a plan, analysis, hypothesis, or pending
+  opinion from Codex, Claude Code, OpenCode, or Cursor on a plan, analysis, hypothesis, or pending
   implementation, before editing files, or on an existing pull request without pasting the full diff,
-  or when the user asks to "validar con Codex", "validar con GLM", "consultar Codex", or
+  or when the user asks to "validar con Codex", "validar con GLM", "validar con Cursor", "consultar Codex", or
   "consultar OpenCode". Choose exactly one reviewer per run:
   Codex via `codex exec -m gpt-5.5 -c model_reasoning_effort="xhigh" --sandbox read-only` by default, or Claude Code via
   `claude -p --model claude-opus-4-8 --effort max --permission-mode
-  plan`, or OpenCode via `opencode run -m opencode-go/glm-5.2 --variant max`
+  plan`, or OpenCode via `opencode run -m opencode-go/glm-5.2 --variant max`,
+  or Cursor via `cursor-agent -p --model gpt-5.5 --mode ask` (read-only; fixed medium reasoning)
   when explicitly requested. Useful for challenging a recommendation, contrasting hypotheses,
   finding weak assumptions, and detecting scenarios where the current conclusion
   fails. Do not use for small obvious edits or when no real analysis exists to
@@ -17,7 +18,7 @@ description: >-
 
 # Differential Review
 
-Call one external reviewer when you already have a written analysis, plan, or hypothesis and want a differential pass that challenges it before acting. Use Codex by default, Claude Code when the user explicitly asks for Claude/Opus, or OpenCode when the user explicitly asks for OpenCode/GLM.
+Call one external reviewer when you already have a written analysis, plan, or hypothesis and want a differential pass that challenges it before acting. Use Codex by default, Claude Code when the user explicitly asks for Claude/Opus, OpenCode when the user explicitly asks for OpenCode/GLM, or Cursor when the user explicitly asks for Cursor/GPT.
 
 ## When to use
 
@@ -43,6 +44,7 @@ Call one external reviewer when you already have a written analysis, plan, or hy
    - `-Reviewer codex` (default): Codex binary resolved from `DIFF_REVIEW_CODEX_PATH`, `CODEX_CLI_PATH`, or common Codex Desktop install paths before PATH, so Claude Code does not accidentally use an older PATH shim. Defaults to `gpt-5.5` with `model_reasoning_effort="xhigh"`, the highest documented Codex reasoning effort. Runs with `--ephemeral` and `--sandbox read-only`, so Codex cannot edit files.
    - `-Reviewer claude`: Claude Code with `--model claude-opus-4-8`, `--effort max`, `--permission-mode plan`, `--no-session-persistence`, empty strict MCP config, temp working directory, and `--add-dir` pointing at the invocation repo. Only `Read`, `LS`, `Glob`, and `Grep` tools are enabled. It does not use `--bare` by default because Claude Code bare mode cannot use the normal claude.ai/keychain login.
    - `-Reviewer opencode`: OpenCode resolved from `DIFF_REVIEW_OPENCODE_PATH`, PATH, or common install paths. Defaults to `opencode-go/glm-5.2` with `--variant max` for the model's highest reasoning level. It runs with `--dir` pointing at the invocation repo and a per-run `differential-review-readonly` agent injected through `OPENCODE_CONFIG_CONTENT`; that agent allows read, list, glob, and grep, and denies edit, bash, tasks, web access, and external directories. If the user asks for `glm-5.2`, route it to `opencode-go/glm-5.2`.
+   - `-Reviewer cursor`: Cursor CLI (`cursor-agent`) resolved from `DIFF_REVIEW_CURSOR_PATH`, PATH, or common install paths (`~/.local/bin` on macOS/Linux, `%LOCALAPPDATA%\cursor-agent` on Windows). Defaults to `gpt-5.5` and runs `cursor-agent -p --mode ask --output-format json`, which is read-only by design. The prompt is passed as a positional argument (the CLI does not read stdin), and the JSON `result` field is read back. It requires `CURSOR_API_KEY` and fails fast if missing, to avoid hanging on an interactive login. Note: the Cursor CLI exposes no reasoning-effort control, so GPT-5.5 runs at a fixed "medium"; this reviewer is not equivalent to Codex at `xhigh`.
 3. The script blocks self-review by default when `-Invoker` or environment detection says the calling agent matches `-Reviewer`. Pass `-Invoker codex|claude|opencode` whenever the current agent is known; environment detection is only a best-effort backup. Use `-AllowSelfReview` only when the user explicitly wants the same agent to review itself.
 4. Codex writes its response to a temp file via `--output-last-message`; Claude and OpenCode write to stdout. The script redirects stdout/stderr noise and reads the final response.
 5. When `-PullRequest` is passed, the script builds a PR review prompt with the PR reference, small PR metadata when `gh pr view` is available, and the current repo path. It does not paste the PR diff. If `-AnalysisFile` is also passed, the script includes only that file path and asks the reviewer to read it through read-only tools instead of embedding the whole file.
@@ -73,6 +75,13 @@ Use OpenCode with GLM-5.2 max instead:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File <skill-root>\scripts\differential-review.ps1 -Invoker codex -Reviewer opencode -OpenCodeModel opencode-go/glm-5.2 -OpenCodeVariant max -AnalysisFile <analysis.md>
+```
+
+Use Cursor with GPT-5.5 (read-only, fixed medium reasoning) instead:
+
+```powershell
+$env:CURSOR_API_KEY = "..."  # required; the CLI can hang on interactive login otherwise
+powershell -ExecutionPolicy Bypass -File <skill-root>\scripts\differential-review.ps1 -Invoker claude -Reviewer cursor -AnalysisFile <analysis.md>
 ```
 
 Or with a direct prompt:
@@ -118,6 +127,9 @@ Defaults:
 - `DIFF_REVIEW_OPENCODE_PATH`: optional explicit path to OpenCode. If unset, the script tries PATH, `~\.bun\bin\opencode.exe`, and common npm shim paths.
 - `DIFF_REVIEW_OPENCODE_MODEL`: `opencode-go/glm-5.2`. The script normalizes `glm-5.2` to `opencode-go/glm-5.2`.
 - `DIFF_REVIEW_OPENCODE_VARIANT`: `max`. Use `high` when you want a cheaper/faster OpenCode review, or an empty value to let OpenCode use its provider default.
+- `DIFF_REVIEW_CURSOR_PATH`: optional explicit path to `cursor-agent`. If unset, the script tries PATH, `~/.local/bin/cursor-agent`, `~/.local/bin/agent`, and `%LOCALAPPDATA%\cursor-agent\cursor-agent.exe`.
+- `DIFF_REVIEW_CURSOR_MODEL`: `gpt-5.5`. Verify availability for your account with `cursor-agent models`.
+- `DIFF_REVIEW_CURSOR_MODE`: `ask` (read-only Q&A); `plan` is also read-only. Both avoid edits and shell. Cursor requires `CURSOR_API_KEY`; the script refuses to run without it to avoid a headless hang. The Cursor CLI has no reasoning-effort control (fixed medium), so it is not equivalent to Codex `xhigh`.
 - Sandbox is forced to `read-only` regardless of what the profile says. No `--full-auto`, no workspace writes. Codex can read the repo but not change it.
 - Claude and OpenCode also receive repo read access by default. Claude is limited to `Read`, `LS`, `Glob`, and `Grep`; OpenCode uses the per-run `differential-review-readonly` agent with read/list/glob/grep allowed and write/shell/web/task/external-directory permissions denied.
 - PR mode gives the reviewer the PR reference and the repo path. It may inspect PR metadata or diff through read-only tools, but the wrapper does not paste the diff into the prompt.
@@ -136,6 +148,7 @@ Overrides:
 - `-ClaudeBare` to opt into Claude Code bare mode. Bare mode requires `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, or `-ClaudeSettings`/`DIFF_REVIEW_CLAUDE_SETTINGS`; the normal claude.ai login is not available to `--bare`.
 - `-ClaudeSettings` / `$env:DIFF_REVIEW_CLAUDE_SETTINGS` to pass dedicated Claude Code settings without using `-ExtraArgs`.
 - `-OpenCodePath`, `-OpenCodeModel`, and `-OpenCodeVariant high|max` to change the OpenCode invocation.
+- `-CursorPath`, `-CursorModel`, and `-CursorMode ask|plan` to change the Cursor invocation. Cursor needs `CURSOR_API_KEY`.
 - `-PrintPromptOnly` to render the prompt and exit without invoking a reviewer. Use it for debugging or tests.
 - `-KeepOutputFile` to preserve the raw codex output in `%TEMP%`.
 - `-ExtraArgs` to pass additional harmless flags to the selected tool (use sparingly). The script rejects permission-changing flags for Codex and context/permission/tool overrides for Claude.
