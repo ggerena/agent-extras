@@ -1,0 +1,22 @@
+# Operating systems and editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# Local private data
+memories/
+
+# SQLite databases and runtime files
+*.sqlite
+*.sqlite3
+*.db
+*.db3
+*.sqlite-shm
+*.sqlite-wal
