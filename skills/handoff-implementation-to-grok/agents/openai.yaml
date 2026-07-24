@@ -1,0 +1,4 @@
+interface:
+  display_name: "Delegación supervisada a Grok"
+  short_description: "Delegar implementación a Grok con revisión"
+  default_prompt: "Use $handoff-implementation-to-grok para que Grok Build implemente una tarea y Codex revise el resultado."

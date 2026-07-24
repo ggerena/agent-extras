@@ -3,15 +3,15 @@ name: auto-pr-review
 description: >-
   Use when Codex, OpenCode, or Claude Code has finished an implementation and the user has explicitly
   authorized the operational close-out in the current session: verify locally, show git status/diff,
-  commit, push a feature branch, create or update a PR, and request external code review from another
-  agent before merge. Prefer Claude as reviewer for Codex/OpenCode work. Never use for merging PRs,
-  pushing protected branches, or committing without explicit user authorization.
+  commit, push a feature branch, and create or update a PR. Request external code review only when
+  the user explicitly asks for it. Never use for merging PRs, pushing protected branches,
+  or committing without explicit user authorization.
 ---
 
 # Auto PR Review
 
-Finish an implementation by turning local changes into a PR and asking another agent to review it.
-This skill orchestrates close-out; it does not replace repo rules.
+Finish an implementation by turning local changes into a PR. Request review from another agent only
+when the user explicitly asks for it. This skill orchestrates close-out; it does not replace repo rules.
 
 ## Before Running
 
@@ -24,14 +24,13 @@ Use this skill only when all are true:
 
 Do not use this skill to merge. A PR opened by this skill must remain open until the user explicitly asks for merge in the same session.
 
-## Reviewer Choice
+## Optional External Review
 
-- From Codex: use `-Invoker codex -Reviewer claude` by default.
-- From OpenCode: use `-Invoker opencode -Reviewer claude` by default.
-- From Claude Code: use `-Invoker claude -Reviewer codex`.
-- Use `-Reviewer opencode` only when the user requests GLM/OpenCode or Claude is unavailable.
+- Do not request an external review unless the user has explicitly authorized it for that PR.
+- When authorized, add `-RequestReview` and select a reviewer other than the invoker with `-Reviewer`.
+- Treat OpenCode/GLM as OpenCode Go with model `opencode-go/glm-5.2`.
 
-The bundled script calls `differential-review`, so self-review protection still applies.
+When requested, the bundled script calls `differential-review`, so self-review protection still applies.
 
 ## Run It
 
@@ -42,7 +41,6 @@ $checks = @("cargo fmt --check", "cargo test --lib")
 $paths = @("src", "tests", "docs")
 & <skill-root>\scripts\auto-pr-review.ps1 `
   -Invoker codex `
-  -Reviewer claude `
   -BaseBranch develop `
   -CommitMessage "Implement feature" `
   -PrTitle "Implement feature" `
@@ -50,6 +48,8 @@ $paths = @("src", "tests", "docs")
   -VerificationCommand $checks `
   -ConfirmedByUser
 ```
+
+When the user explicitly asks for an external review, append `-RequestReview -Reviewer opencode` (or another agent distinct from the invoker).
 
 Use `-StageAll` only when every changed file belongs to the implementation. Prefer `-Pathspec` for scoped changes.
 
@@ -70,7 +70,7 @@ powershell -ExecutionPolicy Bypass -File <skill-root>\scripts\auto-pr-review.ps1
 5. Creates a commit only when staged changes exist and `-CommitMessage` is provided.
 6. Pushes the feature branch to `private` when available, otherwise `origin`.
 7. Creates a PR toward `-BaseBranch`, or reuses an existing PR for the branch.
-8. Requests external review with `differential-review`, preferring Claude.
+8. Requests external review with `differential-review` only when `-RequestReview` is passed.
 
 ## Safety Rules
 
@@ -78,6 +78,7 @@ powershell -ExecutionPolicy Bypass -File <skill-root>\scripts\auto-pr-review.ps1
 - Never run `gh pr merge`, `git merge`, force-push, rebase, or amend.
 - Never push directly to `develop`, `main`, or `master`.
 - Never start dev servers. The script rejects common commands such as `npm run dev`, `yarn dev`, `npm start`, and `preview_start`.
+- Require `-RequestReview` for any external AI review.
 - Keep review ownership with the current agent. External review is input, not authorization to merge.
 
 ## Install

@@ -3,32 +3,38 @@ param(
   [string] $Prompt,
   [Alias('PR')]
   [string] $PullRequest = $(if ($env:DIFF_REVIEW_PULL_REQUEST) { $env:DIFF_REVIEW_PULL_REQUEST } else { '' }),
-  [ValidateSet('codex', 'claude', 'opencode', 'cursor')]
+  [ValidateSet('codex', 'claude', 'opencode', 'grok', 'cursor')]
   [string] $Reviewer = $(if ($env:DIFF_REVIEW_REVIEWER) { $env:DIFF_REVIEW_REVIEWER } else { 'codex' }),
-  [ValidateSet('', 'codex', 'claude', 'opencode', 'cursor')]
+  [ValidateSet('', 'codex', 'claude', 'opencode', 'grok', 'cursor')]
   [string] $Invoker = $(if ($env:DIFF_REVIEW_INVOKER) { $env:DIFF_REVIEW_INVOKER } else { '' }),
   [switch] $AllowSelfReview,
   [string] $Profile = $(if ($env:DIFF_REVIEW_PROFILE) { $env:DIFF_REVIEW_PROFILE } else { '' }),
   [string] $CodexPath = $(if ($env:DIFF_REVIEW_CODEX_PATH) { $env:DIFF_REVIEW_CODEX_PATH } else { '' }),
-  [string] $CodexModel = $(if ($env:DIFF_REVIEW_CODEX_MODEL) { $env:DIFF_REVIEW_CODEX_MODEL } else { 'gpt-5.5' }),
+  [string] $CodexModel = $(if ($env:DIFF_REVIEW_CODEX_MODEL) { $env:DIFF_REVIEW_CODEX_MODEL } else { 'gpt-5.6-sol' }),
   [ValidateSet('minimal', 'low', 'medium', 'high', 'xhigh')]
   [string] $CodexReasoningEffort = $(if ($env:DIFF_REVIEW_CODEX_REASONING_EFFORT) { $env:DIFF_REVIEW_CODEX_REASONING_EFFORT } else { 'xhigh' }),
   [string] $ClaudePath = $(if ($env:DIFF_REVIEW_CLAUDE_PATH) { $env:DIFF_REVIEW_CLAUDE_PATH } else { '' }),
+  [string] $GrokPath = $(if ($env:DIFF_REVIEW_GROK_PATH) { $env:DIFF_REVIEW_GROK_PATH } else { '' }),
   [string] $OpenCodePath = $(if ($env:DIFF_REVIEW_OPENCODE_PATH) { $env:DIFF_REVIEW_OPENCODE_PATH } else { '' }),
   [string] $OpenCodeModel = $(if ($env:DIFF_REVIEW_OPENCODE_MODEL) { $env:DIFF_REVIEW_OPENCODE_MODEL } else { 'opencode-go/glm-5.2' }),
   [ValidateSet('', 'high', 'max')]
   [string] $OpenCodeVariant = $(if ($env:DIFF_REVIEW_OPENCODE_VARIANT) { $env:DIFF_REVIEW_OPENCODE_VARIANT } else { 'max' }),
+  [string] $GrokModel = $(if ($env:DIFF_REVIEW_GROK_MODEL) { $env:DIFF_REVIEW_GROK_MODEL } else { 'grok-4.5' }),
   [string] $CursorPath = $(if ($env:DIFF_REVIEW_CURSOR_PATH) { $env:DIFF_REVIEW_CURSOR_PATH } else { '' }),
   [string] $CursorModel = $(if ($env:DIFF_REVIEW_CURSOR_MODEL) { $env:DIFF_REVIEW_CURSOR_MODEL } else { 'gpt-5.5' }),
   [ValidateSet('ask', 'plan')]
   [string] $CursorMode = $(if ($env:DIFF_REVIEW_CURSOR_MODE) { $env:DIFF_REVIEW_CURSOR_MODE } else { 'ask' }),
-  [string] $ClaudeModel = $(if ($env:DIFF_REVIEW_CLAUDE_MODEL) { $env:DIFF_REVIEW_CLAUDE_MODEL } else { 'claude-opus-4-8' }),
-  [ValidateSet('low', 'medium', 'high', 'max')]
-  [string] $ClaudeEffort = $(if ($env:DIFF_REVIEW_CLAUDE_EFFORT) { $env:DIFF_REVIEW_CLAUDE_EFFORT } else { 'max' }),
+  [ValidateSet('', 'fable', 'opus')]
+  [string] $ClaudePreset = $(if ($env:DIFF_REVIEW_CLAUDE_PRESET) { $env:DIFF_REVIEW_CLAUDE_PRESET } else { '' }),
+  [string] $ClaudeModel = $(if ($env:DIFF_REVIEW_CLAUDE_MODEL) { $env:DIFF_REVIEW_CLAUDE_MODEL } else { '' }),
+  [ValidateSet('', 'low', 'medium', 'high', 'max')]
+  [string] $ClaudeEffort = $(if ($env:DIFF_REVIEW_CLAUDE_EFFORT) { $env:DIFF_REVIEW_CLAUDE_EFFORT } else { '' }),
   [switch] $ClaudeBare,
   [string] $ClaudeSettings = $(if ($env:DIFF_REVIEW_CLAUDE_SETTINGS) { $env:DIFF_REVIEW_CLAUDE_SETTINGS } else { '' }),
   [switch] $PrintPromptOnly,
   [switch] $KeepOutputFile,
+  [ValidateRange(0, 86400)]
+  [int] $MaxRuntimeSeconds = $(if ($env:DIFF_REVIEW_MAX_RUNTIME_SECONDS) { [int] $env:DIFF_REVIEW_MAX_RUNTIME_SECONDS } else { 1800 }),
   [string[]] $ExtraArgs
 )
 
@@ -92,6 +98,7 @@ function Resolve-ExecutablePath {
   $hint = switch ($CommandName) {
     'codex' { 'DIFF_REVIEW_CODEX_PATH' }
     'claude' { 'DIFF_REVIEW_CLAUDE_PATH' }
+    'grok' { 'DIFF_REVIEW_GROK_PATH' }
     'opencode' { 'DIFF_REVIEW_OPENCODE_PATH' }
     default { 'PATH' }
   }
@@ -120,11 +127,54 @@ function Normalize-OpenCodeModel {
   }
 
   $normalized = $Model.Trim()
-  if ($normalized -eq 'glm-5.2') {
+  $modelAlias = $normalized.ToLowerInvariant() -replace '_', '-' -replace '\s+', ''
+  if ($modelAlias -in @('glm', 'glm5.2', 'glm-5.2', 'glm-5-2', 'opencode-go/glm-5-2')) {
     return 'opencode-go/glm-5.2'
   }
 
   return $normalized
+}
+
+function Resolve-ClaudeSelection {
+  param(
+    [string] $Preset,
+    [string] $Model,
+    [string] $Effort
+  )
+
+  $resolvedPreset = if ([string]::IsNullOrWhiteSpace($Preset)) { '' } else { $Preset.Trim().ToLowerInvariant() }
+  $resolvedModel = if ([string]::IsNullOrWhiteSpace($Model)) { '' } else { $Model.Trim() }
+  $resolvedEffort = if ([string]::IsNullOrWhiteSpace($Effort)) { '' } else { $Effort.Trim().ToLowerInvariant() }
+
+  if ([string]::IsNullOrWhiteSpace($resolvedPreset)) {
+    if ($resolvedModel -match 'fable') {
+      $resolvedPreset = 'fable'
+    } elseif ($resolvedModel -match 'opus') {
+      $resolvedPreset = 'opus'
+    } else {
+      $resolvedPreset = 'opus'
+    }
+  }
+
+  if ([string]::IsNullOrWhiteSpace($resolvedModel)) {
+    $resolvedModel = switch ($resolvedPreset) {
+      'opus' { 'claude-opus-4-8' }
+      default { 'claude-fable-5' }
+    }
+  }
+
+  if ([string]::IsNullOrWhiteSpace($resolvedEffort)) {
+    $resolvedEffort = switch ($resolvedPreset) {
+      'opus' { 'max' }
+      default { 'high' }
+    }
+  }
+
+  return @{
+    Preset = $resolvedPreset
+    Model = $resolvedModel
+    Effort = $resolvedEffort
+  }
 }
 
 function Resolve-InvokerAgent {
@@ -350,6 +400,11 @@ if ([string]::IsNullOrWhiteSpace($AnalysisFile) -and
   throw "Provide -AnalysisFile, -Prompt, or -PullRequest."
 }
 
+$claudeSelection = Resolve-ClaudeSelection -Preset $ClaudePreset -Model $ClaudeModel -Effort $ClaudeEffort
+$ClaudePreset = $claudeSelection.Preset
+$ClaudeModel = $claudeSelection.Model
+$ClaudeEffort = $claudeSelection.Effort
+
 $invokerAgent = Resolve-InvokerAgent $Invoker
 if (-not $AllowSelfReview -and
     -not [string]::IsNullOrWhiteSpace($invokerAgent) -and
@@ -414,6 +469,7 @@ Set-Content -LiteralPath $promptFile -Value $finalPrompt -Encoding UTF8
 $toolLabel = switch ($Reviewer) {
   'claude' { 'claude-code' }
   'opencode' { 'opencode-run' }
+  'grok' { 'grok-build' }
   'cursor' { 'cursor-agent' }
   default { 'codex-exec' }
 }
@@ -519,6 +575,7 @@ if ($Reviewer -eq 'codex') {
   }
   $reviewerDetails = @(
     "- Herramienta: $toolLabel",
+    "- Preset: $ClaudePreset",
     "- Model: $ClaudeModel",
     "- Effort: $ClaudeEffort",
     "- Permission mode: plan",
@@ -573,6 +630,47 @@ if ($Reviewer -eq 'codex') {
     foreach ($arg in $ExtraArgs) {
       if ($arg -match '^(-f|--force|--yolo|--sandbox|--approve-mcps|--trust|--mode|-m|--model|--output-format|-p|--print|--api-key)(=|,|$)') {
         throw "-ExtraArgs cannot include '$arg' because cursor differential-review must stay read-only and non-interactive."
+      }
+    }
+    $args += $ExtraArgs
+  }
+} elseif ($Reviewer -eq 'grok') {
+  $grokCandidates = @()
+  if ($env:USERPROFILE) {
+    $grokCandidates += (Join-Path $env:USERPROFILE '.grok\bin\grok.exe')
+  }
+  if ($env:HOME) {
+    $grokCandidates += (Join-Path $env:HOME '.grok/bin/grok')
+  }
+  $exePath = Resolve-ExecutablePath -ExplicitPath $GrokPath -CommandName 'grok' -GlobCandidates $grokCandidates -PreferGlobCandidates
+  $exeVersion = Get-ExecutableVersion $exePath
+  $args = @(
+    '--model', $GrokModel,
+    '--cwd', $workingDirectory,
+    '--prompt-file', $promptFile,
+    '--output-format', 'plain',
+    '--permission-mode', 'plan',
+    '--sandbox', 'read-only',
+    '--no-subagents',
+    '--no-memory',
+    '--disable-web-search'
+  )
+  $reviewerDetails = @(
+    "- Herramienta: $toolLabel",
+    "- Model: $GrokModel",
+    '- Permission mode: plan',
+    '- Sandbox: read-only',
+    '- Subagents: disabled',
+    '- Memory: disabled',
+    '- Web search: disabled',
+    "- Binary: $exePath",
+    "- Version: $(if ([string]::IsNullOrWhiteSpace($exeVersion)) { 'unknown' } else { $exeVersion })",
+    "- Repository access: read-only $workingDirectory"
+  )
+  if ($ExtraArgs) {
+    foreach ($arg in $ExtraArgs) {
+      if ($arg -match '^(--always-approve|--permission-mode|--sandbox|--allow|--deny|--tools|--disallowed-tools|--worktree|--worktree-ref|--continue|-c|--resume|-r|--session-id|-s|--agent|--agents|--model|-m|--prompt-file|--prompt-json|-p|--single|--output-format|--cwd|--no-subagents|--no-memory|--disable-web-search)(=|,|$)') {
+        throw "-ExtraArgs cannot include '$arg' because Grok differential-review must stay read-only and non-interactive."
       }
     }
     $args += $ExtraArgs
@@ -633,13 +731,19 @@ if ($Reviewer -eq 'codex') {
 } elseif ($Reviewer -eq 'cursor') {
   Write-Host "[differential-review] Invoking cursor-agent -p --model $CursorModel --mode $CursorMode (read-only, json output) ..." -ForegroundColor Cyan
   Write-Host "[differential-review] Cursor binary: $exePath$(if ([string]::IsNullOrWhiteSpace($exeVersion)) { '' } else { " ($exeVersion)" })" -ForegroundColor DarkGray
+} elseif ($Reviewer -eq 'grok') {
+  Write-Host "[differential-review] Invoking Grok Build --model $GrokModel (plan, sandbox=read-only, no subagents, no memory, no web search) ..." -ForegroundColor Cyan
+  Write-Host "[differential-review] Grok binary: $exePath$(if ([string]::IsNullOrWhiteSpace($exeVersion)) { '' } else { " ($exeVersion)" })" -ForegroundColor DarkGray
 } else {
   $modelLabel = if ([string]::IsNullOrWhiteSpace($OpenCodeModel)) { 'opencode default model' } else { $OpenCodeModel }
-  $variantLabel = if ([string]::IsNullOrWhiteSpace($OpenCodeVariant)) { 'opencode default variant' } else { $OpenCodeVariant }
-  Write-Host "[differential-review] Invoking opencode run --model $modelLabel --variant $variantLabel (read-only repo agent) ..." -ForegroundColor Cyan
+  $variantLabel = if ([string]::IsNullOrWhiteSpace($OpenCodeVariant)) { '' } else { " --variant $OpenCodeVariant" }
+  Write-Host "[differential-review] Invoking opencode run --model $modelLabel$variantLabel (read-only repo agent) ..." -ForegroundColor Cyan
 }
 Write-Host "[differential-review] Output target: $outFile" -ForegroundColor DarkGray
 Write-Host "[differential-review] Te doy feedback cada 1 minuto mientras $Reviewer corre." -ForegroundColor Cyan
+if ($MaxRuntimeSeconds -gt 0) {
+  Write-Host "[differential-review] Timeout: $MaxRuntimeSeconds segundos." -ForegroundColor DarkGray
+}
 
 $errFile = Join-Path $tempRoot ("$Reviewer-stderr-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.txt')
 $stdoutFile = Join-Path $tempRoot ("$Reviewer-stdout-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.txt')
@@ -650,13 +754,22 @@ if ($Reviewer -eq 'codex') {
       if ($_ -match '\s') { "`"$_`"" } else { [string] $_ }
   }) -join ' '
   $job = Start-Job -ScriptBlock {
-      param($JobExePath, $JobArgString, $JobPromptFile, $JobStdoutFile, $JobErrFile, $JobWorkingDirectory)
-      $p = Start-Process -FilePath $JobExePath -ArgumentList $JobArgString -WorkingDirectory $JobWorkingDirectory -NoNewWindow -Wait -PassThru -RedirectStandardInput $JobPromptFile -RedirectStandardOutput $JobStdoutFile -RedirectStandardError $JobErrFile
+      param($JobExePath, $JobArgString, $JobPromptFile, $JobStdoutFile, $JobErrFile, $JobWorkingDirectory, $JobMaxRuntimeSeconds)
+      $p = Start-Process -FilePath $JobExePath -ArgumentList $JobArgString -WorkingDirectory $JobWorkingDirectory -NoNewWindow -PassThru -RedirectStandardInput $JobPromptFile -RedirectStandardOutput $JobStdoutFile -RedirectStandardError $JobErrFile
+      if ($JobMaxRuntimeSeconds -gt 0) {
+        $timeoutMs = [Math]::Min($JobMaxRuntimeSeconds * 1000, [int]::MaxValue)
+        if (-not $p.WaitForExit($timeoutMs)) {
+          try { $p.Kill($true) } catch { $p.Kill() }
+          return 124
+        }
+      } else {
+        $p.WaitForExit()
+      }
       $p.ExitCode
-  } -ArgumentList $exePath, $argString, $promptFile, $stdoutFile, $errFile, $jobWorkingDirectory
+  } -ArgumentList $exePath, $argString, $promptFile, $stdoutFile, $errFile, $jobWorkingDirectory, $MaxRuntimeSeconds
 } elseif ($Reviewer -eq 'cursor') {
   $job = Start-Job -ScriptBlock {
-      param($JobExePath, [string[]] $JobArgs, $JobPromptFile, $JobStdoutFile, $JobErrFile, $JobWorkingDirectory)
+      param($JobExePath, [string[]] $JobArgs, $JobPromptFile, $JobStdoutFile, $JobErrFile, $JobWorkingDirectory, $JobMaxRuntimeSeconds)
       $promptText = Get-Content -Raw -Encoding UTF8 -LiteralPath $JobPromptFile
       $psi = [System.Diagnostics.ProcessStartInfo]::new()
       $psi.FileName = $JobExePath
@@ -669,16 +782,31 @@ if ($Reviewer -eq 'codex') {
       $psi.RedirectStandardError = $true
       $p = [System.Diagnostics.Process]::Start($psi)
       $p.StandardInput.Close()
-      $stdoutText = $p.StandardOutput.ReadToEnd()
-      $stderrText = $p.StandardError.ReadToEnd()
-      $p.WaitForExit()
+      $stdoutTask = $p.StandardOutput.ReadToEndAsync()
+      $stderrTask = $p.StandardError.ReadToEndAsync()
+      if ($JobMaxRuntimeSeconds -gt 0) {
+        $timeoutMs = [Math]::Min($JobMaxRuntimeSeconds * 1000, [int]::MaxValue)
+        if (-not $p.WaitForExit($timeoutMs)) {
+          try { $p.Kill($true) } catch { $p.Kill() }
+          $p.WaitForExit()
+          $stdoutText = $stdoutTask.GetAwaiter().GetResult()
+          $stderrText = $stderrTask.GetAwaiter().GetResult()
+          Set-Content -LiteralPath $JobStdoutFile -Value $stdoutText -Encoding UTF8
+          Set-Content -LiteralPath $JobErrFile -Value $stderrText -Encoding UTF8
+          return 124
+        }
+      } else {
+        $p.WaitForExit()
+      }
+      $stdoutText = $stdoutTask.GetAwaiter().GetResult()
+      $stderrText = $stderrTask.GetAwaiter().GetResult()
       Set-Content -LiteralPath $JobStdoutFile -Value $stdoutText -Encoding UTF8
       Set-Content -LiteralPath $JobErrFile -Value $stderrText -Encoding UTF8
       $p.ExitCode
-  } -ArgumentList $exePath, $args, $promptFile, $stdoutFile, $errFile, $jobWorkingDirectory
+  } -ArgumentList $exePath, $args, $promptFile, $stdoutFile, $errFile, $jobWorkingDirectory, $MaxRuntimeSeconds
 } else {
   $job = Start-Job -ScriptBlock {
-      param($JobExePath, [string[]] $JobArgs, $JobPromptFile, $JobStdoutFile, $JobErrFile, $JobWorkingDirectory, $JobOpenCodeConfigContent)
+      param($JobExePath, [string[]] $JobArgs, $JobPromptFile, $JobStdoutFile, $JobErrFile, $JobWorkingDirectory, $JobOpenCodeConfigContent, $JobMaxRuntimeSeconds)
       function Quote-ProcessArg {
         param([string] $Value)
         if ($null -eq $Value) { return '""' }
@@ -707,13 +835,28 @@ if ($Reviewer -eq 'codex') {
       $p = [System.Diagnostics.Process]::Start($psi)
       $p.StandardInput.Write($promptText)
       $p.StandardInput.Close()
-      $stdoutText = $p.StandardOutput.ReadToEnd()
-      $stderrText = $p.StandardError.ReadToEnd()
-      $p.WaitForExit()
+      $stdoutTask = $p.StandardOutput.ReadToEndAsync()
+      $stderrTask = $p.StandardError.ReadToEndAsync()
+      if ($JobMaxRuntimeSeconds -gt 0) {
+        $timeoutMs = [Math]::Min($JobMaxRuntimeSeconds * 1000, [int]::MaxValue)
+        if (-not $p.WaitForExit($timeoutMs)) {
+          try { $p.Kill($true) } catch { $p.Kill() }
+          $p.WaitForExit()
+          $stdoutText = $stdoutTask.GetAwaiter().GetResult()
+          $stderrText = $stderrTask.GetAwaiter().GetResult()
+          Set-Content -LiteralPath $JobStdoutFile -Value $stdoutText -Encoding UTF8
+          Set-Content -LiteralPath $JobErrFile -Value $stderrText -Encoding UTF8
+          return 124
+        }
+      } else {
+        $p.WaitForExit()
+      }
+      $stdoutText = $stdoutTask.GetAwaiter().GetResult()
+      $stderrText = $stderrTask.GetAwaiter().GetResult()
       Set-Content -LiteralPath $JobStdoutFile -Value $stdoutText -Encoding UTF8
       Set-Content -LiteralPath $JobErrFile -Value $stderrText -Encoding UTF8
       $p.ExitCode
-  } -ArgumentList $exePath, $args, $promptFile, $stdoutFile, $errFile, $jobWorkingDirectory, $opencodeConfigContent
+  } -ArgumentList $exePath, $args, $promptFile, $stdoutFile, $errFile, $jobWorkingDirectory, $opencodeConfigContent, $MaxRuntimeSeconds
 }
 
 $elapsedSeconds = 0
@@ -755,6 +898,9 @@ Remove-Item -LiteralPath $errFile -Force -ErrorAction SilentlyContinue
 
 if ($exitCode -ne 0) {
   Remove-Item -LiteralPath $stdoutFile -Force -ErrorAction SilentlyContinue
+  if ($exitCode -eq 124) {
+    [Console]::Error.WriteLine("$Reviewer exceeded MaxRuntimeSeconds=$MaxRuntimeSeconds.")
+  }
   if (-not [string]::IsNullOrWhiteSpace($stdoutText)) {
     [Console]::Error.WriteLine($stdoutText)
   }
@@ -794,7 +940,7 @@ if ($Reviewer -eq 'claude' -or $Reviewer -eq 'cursor') {
 
     Set-Content -LiteralPath $outFile -Value ([string] $jsonResult.result) -Encoding UTF8
   }
-} elseif ($Reviewer -eq 'opencode') {
+} elseif ($Reviewer -eq 'opencode' -or $Reviewer -eq 'grok') {
   if (Test-Path -LiteralPath $stdoutFile) {
     $reviewerStdout = Get-Content -Raw -Encoding UTF8 -LiteralPath $stdoutFile
     $reviewerStdout = $reviewerStdout -replace "`e\[[0-9;?]*[ -/]*[@-~]", ''

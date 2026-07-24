@@ -1,4 +1,4 @@
 interface:
   display_name: "Agent Handoff"
-  short_description: "Hand off work to another agent (Codex, Claude Code, OpenCode) with a ready-to-resume package"
-  default_prompt: "Use $agent-handoff to transfer this work to OpenCode (or another agent) with a self-contained handoff Markdown built from git state."
+  short_description: "Hand off work to Codex, Claude Code, OpenCode, or Grok Build with a ready-to-resume package"
+  default_prompt: "Use $agent-handoff to transfer this work to Grok Build (or another agent) with a self-contained handoff Markdown built from git state."

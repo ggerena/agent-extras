@@ -7,19 +7,25 @@ $ErrorActionPreference = 'Stop'
 
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $skillRoot = Split-Path -Parent $scriptRoot
-$installBase = Join-Path $env:USERPROFILE '.agents\skills'
+$agentsInstallBase = Join-Path $env:USERPROFILE '.agents\skills'
+$codexHome = if ([string]::IsNullOrWhiteSpace($env:CODEX_HOME)) { Join-Path $env:USERPROFILE '.codex' } else { $env:CODEX_HOME }
+$codexInstallBase = Join-Path $codexHome 'skills'
 
 $destinations = @(
-  (Join-Path $installBase 'agent-handoff')
+  (Join-Path $agentsInstallBase 'agent-handoff'),
+  (Join-Path $codexInstallBase 'agent-handoff')
 )
 
 function Assert-InstallPath {
   param([string] $Path)
-  $baseFull = [System.IO.Path]::GetFullPath($installBase).TrimEnd([char[]] @('\', '/'))
   $pathFull = [System.IO.Path]::GetFullPath($Path)
-  if (-not $pathFull.StartsWith($baseFull + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
-    throw "Ruta fuera de .agents\skills: $pathFull"
+  foreach ($base in @($agentsInstallBase, $codexInstallBase)) {
+    $baseFull = [System.IO.Path]::GetFullPath($base).TrimEnd([char[]] @('\', '/'))
+    if ($pathFull.StartsWith($baseFull + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+      return
+    }
   }
+  throw "Ruta fuera de los directorios de skills permitidos: $pathFull"
 }
 
 Write-Host "[install] Source: $skillRoot" -ForegroundColor Cyan
@@ -86,5 +92,5 @@ foreach ($dest in $destinations) {
 if ($DryRun) {
   Write-Host "[install] Dry run completo." -ForegroundColor Yellow
 } else {
-  Write-Host "[install] Resumen: copiados=$copied, omitidos=$skipped. Destino unico: .agents." -ForegroundColor Green
+  Write-Host "[install] Resumen: copiados=$copied, omitidos=$skipped. Destinos: .agents y Codex." -ForegroundColor Green
 }
