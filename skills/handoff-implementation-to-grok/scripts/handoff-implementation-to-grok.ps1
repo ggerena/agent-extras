@@ -1,195 +1,134 @@
 param(
-  [ValidateSet('codex', 'claude')]
+  [ValidatePattern('^[A-Za-z0-9._-]+$')]
   [string] $Invoker = 'codex',
+  [ValidateSet('implement', 'review', 'closeout')]
+  [string] $Mode = 'implement',
   [string] $Objective = '',
   [string] $ReviewSummary = '',
   [ValidateSet('pass', 'blocked', 'needs-user')]
   [string] $ReviewVerdict = 'pass',
   [string] $NextStep = '',
   [string] $RepoPath = '',
-  [string] $OutDir = 'docs',
+  [string] $WorkspaceRoot = '',
+  [string] $HandoffRoot = '',
+  [string] $PhaseId = '',
+  [string] $PhaseDirectory = '',
+  [string] $PlanPath = '',
+  [ValidateSet('auto', 'full', 'verify', 'none')]
+  [string] $PlanReadPolicy = 'auto',
+  [switch] $RequireFullPlanRead,
+  [string[]] $AllowedPaths = @(),
+  [string[]] $ValidationCommands = @(),
+  [string] $RuntimeSetupCommand = '',
+  [string] $ReviewSkillPath = '',
+  [string] $CloseoutAction = '',
+  [switch] $AllowGitCloseout,
+  [string] $GitRemote = 'origin',
+  [string] $BaseBranch = 'develop',
+  [string] $CommitMessage = '',
+  [string] $PrTitle = '',
+  [string] $PrBody = '',
+  [switch] $UpdateExistingPr,
   [string] $GrokModel = 'grok-4.5',
+  [ValidateSet('medium', 'high')]
+  [string] $GrokReasoningEffort = '',
+  [string] $ReasoningRationale = '',
+  [switch] $RequireReviewAfter,
   [switch] $SkipReviewGate,
   [switch] $ForceHandoff,
+  [string] $ForceReason = '',
   [switch] $DryRun,
   [switch] $Launch
 )
 
 $ErrorActionPreference = 'Stop'
 
-function Invoke-GitSafe {
-  param([string] $Repo, [string[]] $GitArgs)
-  try {
-    $result = & git -C $Repo @GitArgs 2>$null
-    if ($LASTEXITCODE -ne 0) { return '' }
-    return ($result -join "`n")
-  } catch {
-    return ''
+function Resolve-PythonCommand {
+  $python = Get-Command python -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandType -in @('Application', 'ExternalScript') } |
+    Select-Object -First 1
+  if ($python -and $python.Source) {
+    return [ordered]@{ executable = $python.Source; prefix = @() }
+  }
+  $launcher = Get-Command py -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandType -in @('Application', 'ExternalScript') } |
+    Select-Object -First 1
+  if ($launcher -and $launcher.Source) {
+    return [ordered]@{ executable = $launcher.Source; prefix = @('-3') }
+  }
+  throw 'Python 3 is required. Install it or invoke scripts/grok_handoff.py from a Python 3 environment.'
+}
+
+function Add-StringArgument {
+  param(
+    [System.Collections.Generic.List[string]] $List,
+    [string] $Name,
+    [string] $Value
+  )
+  if (-not [string]::IsNullOrWhiteSpace($Value)) {
+    $List.Add($Name)
+    $List.Add($Value)
   }
 }
 
-function Resolve-GrokBinary {
-  $candidates = @()
-  if ($env:USERPROFILE) { $candidates += (Join-Path $env:USERPROFILE '.grok\bin\grok.exe') }
-  if ($env:HOME) { $candidates += (Join-Path $env:HOME '.grok/bin/grok') }
-  foreach ($candidate in $candidates) {
-    if (Test-Path -LiteralPath $candidate) { return $candidate }
-  }
-  $command = Get-Command grok -ErrorAction SilentlyContinue | Where-Object { $_.CommandType -eq 'Application' } | Select-Object -First 1
-  if ($command -and $command.Source) { return $command.Source }
-  return ''
+function Add-SwitchArgument {
+  param(
+    [System.Collections.Generic.List[string]] $List,
+    [string] $Name,
+    [bool] $Enabled
+  )
+  if ($Enabled) { $List.Add($Name) }
 }
 
-function Quote-PowerShellArgument {
-  param([string] $Value)
-  return "'" + ($Value -replace "'", "''") + "'"
+$pythonCommand = Resolve-PythonCommand
+$script = Join-Path $PSScriptRoot 'grok_handoff.py'
+if (-not (Test-Path -LiteralPath $script -PathType Leaf)) {
+  throw "Portable handoff script not found: $script"
 }
 
-if ([string]::IsNullOrWhiteSpace($RepoPath)) { $RepoPath = (Get-Location).Path }
-if (-not (Test-Path -LiteralPath $RepoPath -PathType Container)) { throw "Repo path not found: $RepoPath" }
-$RepoPath = (Resolve-Path -LiteralPath $RepoPath).Path
-
-if ([string]::IsNullOrWhiteSpace($Objective)) { throw 'Objective is required.' }
-if (-not $SkipReviewGate -and [string]::IsNullOrWhiteSpace($ReviewSummary)) {
-  throw 'Review gate missing. Provide -ReviewSummary or pass -SkipReviewGate explicitly.'
+$arguments = [System.Collections.Generic.List[string]]::new()
+foreach ($prefix in $pythonCommand.prefix) { $arguments.Add($prefix) }
+$arguments.Add($script)
+$arguments.Add('start')
+Add-StringArgument $arguments '--invoker' $Invoker
+Add-StringArgument $arguments '--mode' $Mode
+Add-StringArgument $arguments '--objective' $Objective
+Add-StringArgument $arguments '--review-summary' $ReviewSummary
+Add-StringArgument $arguments '--review-verdict' $ReviewVerdict
+Add-StringArgument $arguments '--next-step' $NextStep
+Add-StringArgument $arguments '--repo-path' $RepoPath
+Add-StringArgument $arguments '--workspace-root' $WorkspaceRoot
+Add-StringArgument $arguments '--handoff-root' $HandoffRoot
+Add-StringArgument $arguments '--phase-id' $PhaseId
+Add-StringArgument $arguments '--phase-dir' $PhaseDirectory
+Add-StringArgument $arguments '--plan-path' $PlanPath
+Add-StringArgument $arguments '--plan-read-policy' $PlanReadPolicy
+foreach ($path in $AllowedPaths) {
+  Add-StringArgument $arguments '--allowed-path' $path
 }
-if ($ReviewVerdict -ne 'pass' -and -not $ForceHandoff) {
-  throw "Review verdict is '$ReviewVerdict'. Delegation blocked unless -ForceHandoff is passed."
+foreach ($command in $ValidationCommands) {
+  Add-StringArgument $arguments '--validation-command' $command
 }
-if ([string]::IsNullOrWhiteSpace($NextStep)) {
-  $NextStep = 'Implementar solo el alcance indicado, ejecutar validaciones razonables y completar el reporte para revision de Codex.'
-}
+Add-StringArgument $arguments '--runtime-setup-command' $RuntimeSetupCommand
+Add-StringArgument $arguments '--review-skill-path' $ReviewSkillPath
+Add-StringArgument $arguments '--closeout-action' $CloseoutAction
+Add-StringArgument $arguments '--git-remote' $GitRemote
+Add-StringArgument $arguments '--base-branch' $BaseBranch
+Add-StringArgument $arguments '--commit-message' $CommitMessage
+Add-StringArgument $arguments '--pr-title' $PrTitle
+Add-StringArgument $arguments '--pr-body' $PrBody
+Add-StringArgument $arguments '--model' $GrokModel
+Add-StringArgument $arguments '--reasoning-effort' $GrokReasoningEffort
+Add-StringArgument $arguments '--reasoning-rationale' $ReasoningRationale
+Add-StringArgument $arguments '--force-reason' $ForceReason
+Add-SwitchArgument $arguments '--require-full-plan-read' $RequireFullPlanRead.IsPresent
+Add-SwitchArgument $arguments '--allow-git-closeout' $AllowGitCloseout.IsPresent
+Add-SwitchArgument $arguments '--update-existing-pr' $UpdateExistingPr.IsPresent
+Add-SwitchArgument $arguments '--require-review-after' $RequireReviewAfter.IsPresent
+Add-SwitchArgument $arguments '--skip-review-gate' $SkipReviewGate.IsPresent
+Add-SwitchArgument $arguments '--force-handoff' $ForceHandoff.IsPresent
+Add-SwitchArgument $arguments '--dry-run' $DryRun.IsPresent
+Add-SwitchArgument $arguments '--launch' $Launch.IsPresent
 
-$branch = Invoke-GitSafe $RepoPath @('rev-parse', '--abbrev-ref', 'HEAD')
-$head = Invoke-GitSafe $RepoPath @('rev-parse', 'HEAD')
-$status = Invoke-GitSafe $RepoPath @('status', '--porcelain')
-$log = Invoke-GitSafe $RepoPath @('log', '--oneline', '-10')
-$diffStat = Invoke-GitSafe $RepoPath @('diff', '--stat')
-$dateStamp = Get-Date -Format 'yyyyMMdd'
-$timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm'
-$outFull = if ([System.IO.Path]::IsPathRooted($OutDir)) { $OutDir } else { Join-Path $RepoPath $OutDir }
-$baseName = "${dateStamp}_DELEGATION-${Invoker}-to-grok"
-$handoffName = "$baseName.md"
-$handoffPath = Join-Path $outFull $handoffName
-$suffix = 2
-while (Test-Path -LiteralPath $handoffPath) {
-  $handoffName = "$baseName-$suffix.md"
-  $handoffPath = Join-Path $outFull $handoffName
-  $suffix++
-}
-$promptName = ([System.IO.Path]::GetFileNameWithoutExtension($handoffName)) + '-prompt.txt'
-$statusName = ([System.IO.Path]::GetFileNameWithoutExtension($handoffName)) + '-status.md'
-$promptPath = Join-Path $outFull $promptName
-$statusPath = Join-Path $outFull $statusName
-$relativeOut = if ([System.IO.Path]::IsPathRooted($OutDir)) { $outFull } else { $OutDir }
-$promptDisplayPath = (Join-Path $relativeOut $promptName) -replace '\\', '/'
-$statusDisplayPath = (Join-Path $relativeOut $statusName) -replace '\\', '/'
-
-$reviewText = if ($SkipReviewGate -and [string]::IsNullOrWhiteSpace($ReviewSummary)) { 'Review gate omitido explicitamente.' } else { "Veredicto: $ReviewVerdict`n`n$ReviewSummary" }
-$destinationPrompt = @"
-Eres el implementador. Codex conserva la coordinacion, las decisiones y la revision final. Trabaja solo en este objetivo: $Objective
-
-Lee primero el handoff en $((Join-Path $relativeOut $handoffName) -replace '\\', '/'), respeta AGENTS.md y cualquier regla local. Siguiente paso: $NextStep
-
-No hagas commit, push, PR, merge, cambios fuera del alcance ni decisiones de producto/arquitectura no definidas. Ejecuta validaciones razonables. Al terminar o si necesitas una decision, completa el reporte $statusDisplayPath con cambios, validaciones, bloqueos y una pregunta concreta para Codex. Si existe un bloqueo, detente despues del reporte.
-"@.Trim()
-
-$handoff = @"
-# Delegacion supervisada: $Invoker -> Grok Build
-
-- Fecha: $timestamp
-- Coordinador: $Invoker
-- Implementador: Grok Build ($GrokModel)
-- Repo: $RepoPath
-- Rama: $(if ($branch) { $branch } else { 'no disponible' })
-- HEAD: $(if ($head) { $head } else { 'no disponible' })
-
-## Objetivo acotado
-
-$Objective
-
-## Review previo
-
-$reviewText
-
-## Siguiente paso para Grok
-
-$NextStep
-
-## Estado objetivo del repo
-
-### Cambios pendientes
-
-````text
-$(if ($status) { $status } else { 'Sin cambios pendientes o git no disponible.' })
-````
-
-### Historial reciente
-
-````text
-$(if ($log) { $log } else { 'No disponible.' })
-````
-
-### Resumen del diff actual
-
-````text
-$(if ($diffStat) { $diffStat } else { 'Sin cambios sin confirmar o git no disponible.' })
-````
-
-## Regla de coordinacion
-
-Grok implementa; $Invoker revisa y decide. Si falta una decision, Grok documenta una pregunta concreta en $statusDisplayPath y se detiene.
-"@
-
-$statusTemplate = @"
-# Reporte de Grok para Codex
-
-## Resultado
-
-_Pendiente._
-
-## Cambios realizados
-
-_Pendiente._
-
-## Validaciones ejecutadas
-
-_Pendiente._
-
-## Bloqueos o decisiones que necesita Codex
-
-_Ninguno por ahora. Si hay uno, explicar el contexto, las opciones y la recomendacion._
-
-## Siguiente paso propuesto
-
-_Pendiente de revision de Codex._
-"@
-
-$suggestedCommand = "grok --model $(Quote-PowerShellArgument $GrokModel) --cwd $(Quote-PowerShellArgument $RepoPath) --prompt-file $(Quote-PowerShellArgument $promptPath)"
-
-if ($DryRun) {
-  Write-Host '[handoff-implementation-to-grok] Dry run: no se escriben archivos.' -ForegroundColor Yellow
-  Write-Host $handoff
-  Write-Host '[handoff-implementation-to-grok] Comando sugerido:' -ForegroundColor Cyan
-  Write-Host $suggestedCommand
-  exit 0
-}
-
-New-Item -ItemType Directory -Force -Path $outFull | Out-Null
-Set-Content -LiteralPath $handoffPath -Value $handoff -Encoding UTF8
-Set-Content -LiteralPath $promptPath -Value $destinationPrompt -Encoding UTF8
-Set-Content -LiteralPath $statusPath -Value $statusTemplate -Encoding UTF8
-Write-Host "[handoff-implementation-to-grok] Handoff escrito: $handoffPath" -ForegroundColor Green
-Write-Host "[handoff-implementation-to-grok] Reporte para Codex: $statusPath" -ForegroundColor Green
-Write-Host '[handoff-implementation-to-grok] Comando sugerido:' -ForegroundColor Cyan
-Write-Host $suggestedCommand
-
-if ($Launch) {
-  $grokBin = Resolve-GrokBinary
-  if ([string]::IsNullOrWhiteSpace($grokBin)) {
-    Write-Host '[handoff-implementation-to-grok] No se encontro grok; -Launch omitido.' -ForegroundColor Yellow
-  } else {
-    & $grokBin --model $GrokModel --cwd $RepoPath --prompt-file $promptPath
-    exit $LASTEXITCODE
-  }
-}
+& $pythonCommand.executable @arguments
+exit $LASTEXITCODE

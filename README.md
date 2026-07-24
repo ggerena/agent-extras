@@ -7,6 +7,7 @@ Small collection of agent skills and helper scripts.
 - `skills/agent-handoff`: creates handoff notes for moving work between coding agents.
 - `skills/auto-pr-review`: prepares a branch/PR review flow with an optional external reviewer.
 - `skills/differential-review`: asks another agent to challenge an analysis, plan, or pending implementation.
+- `skills/handoff-implementation-to-grok`: delegates scoped implementation, review, and approved closeout phases to Grok Build.
 - `skills/handoff-implementation-to-opencode`: keeps Codex as coordinator/reviewer, then hands implementation to OpenCode GLM-5.2.
 
 ## Platform notes
