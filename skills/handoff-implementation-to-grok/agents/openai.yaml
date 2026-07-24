@@ -1,0 +1,4 @@
+interface:
+  display_name: "Delegación supervisada a Grok"
+  short_description: "Delegar fases a Grok con revisión y guardrails"
+  default_prompt: "Usa $handoff-implementation-to-grok para que Grok implemente, valide, revise y cierre una fase en una sesión compacta, con guardrails automáticos y PR sin merge."

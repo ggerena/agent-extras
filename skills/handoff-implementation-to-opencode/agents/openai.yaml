@@ -1,0 +1,4 @@
+interface:
+  display_name: "Handoff Implementation to OpenCode"
+  short_description: "Review, then delegate work to OpenCode"
+  default_prompt: "Use $handoff-implementation-to-opencode to review the current state, then hand implementation off to OpenCode GLM-5.2."

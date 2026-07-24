@@ -1,18 +1,19 @@
 ---
 name: agent-handoff
 description: >-
-  Use when an agent (Codex, Claude Code, or OpenCode) needs to hand off ongoing work to another
+  Use when an agent (Codex, Claude Code, OpenCode, or Grok Build) needs to hand off ongoing work to another
   agent because it got lost, hit a wall, started wasting time, or the user wants to switch who is
   in charge. Builds a self-contained handoff Markdown from objective repo state (git status, git
   log, git diff, BITACORA, repo rules) plus agent-supplied objective/reason/next step, and emits a
-  ready prompt for the destination agent. First supported direction: Codex to OpenCode. Do not use
+  ready prompt and launch command for the destination agent. Supports Grok Build with Grok 4.5.
+  Do not use
   for consultative second opinions that keep the same agent in charge; use differential-review for
   that.
 ---
 
 # Agent Handoff
 
-Transfer ownership of a piece of work to another agent with a ready-to-resume package. The first and validated direction is Codex -> OpenCode. Other directions (Claude -> Codex, OpenCode -> Claude, etc.) are parameterized but not yet validated end to end.
+Transfer ownership of a piece of work to another agent with a ready-to-resume package. Codex -> OpenCode, Claude Code, and Grok Build are supported. Other source/destination combinations are parameterized but not yet validated end to end.
 
 This is not a review. The origin agent stops being in charge and the destination agent continues.
 
@@ -45,7 +46,7 @@ This is not a review. The origin agent stops being in charge and the destination
    - dudas abiertas
 4. It writes `docs/YYYYMMDD_HANDOFF-<from>-to-<to>.md` filled with facts, separating hechos comprobados, inferencias and dudas.
 5. It writes `docs/HANDOFF-index.md` (or updates it) with the newest handoff at the top, so chained handoffs stay navigable.
-6. It prints a ready prompt for the destination agent and the suggested launch command.
+6. It prints a ready prompt for the destination agent and the suggested launch command, including a Grok Build interactive session when `-To grok`.
 
 The origin agent does not push, merge, or start servers. It only writes the handoff Markdown and the index.
 
@@ -70,6 +71,16 @@ Output:
 - A suggested `opencode run` one-shot command. In the observed local setup, that command records a session that appears in OpenCode Desktop, so the user can continue it there without opening another terminal.
 
 The script does not auto-launch OpenCode by default. Pass `-Launch` to opt into a non-interactive `opencode run` first pass. The default is to print the command; when run, OpenCode Desktop can show the recorded session for continuation.
+
+## Direction Codex -> Grok Build
+
+Use the local Grok Build CLI with Grok 4.5:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.codex\skills\agent-handoff\scripts\agent-handoff.ps1" -From codex -To grok -GrokModel grok-4.5 -Objective "objetivo original en una linea" -Reason "por que se traspasa" -NextStep "siguiente paso recomendado"
+```
+
+The script writes the handoff Markdown and prints a `grok --cwd ... --prompt-file ...` command. Run that command to open an interactive Grok Build session in the same repo. It keeps Grok's normal permission flow and never adds `--always-approve` or bypass-permission flags. Pass `-Launch` only if you explicitly want the script to start that interactive session immediately.
 
 ## Direction Codex -> Claude Code
 
@@ -105,20 +116,22 @@ Defaults:
 - `-From` defaults to `codex`, `-To` defaults to `opencode`.
 - `-OutDir` defaults to `docs` inside the repo.
 - `-RepoPath` defaults to the current working directory.
-- `-OpenCodeModel` defaults to `opencode-go/glm-5.2`. The script normalizes `glm-5.2` to `opencode-go/glm-5.2`.
+- `-OpenCodeModel` defaults to `opencode-go/glm-5.2`. The script normalizes `glm`, `glm-5-2`, and `glm-5.2` to `opencode-go/glm-5.2`.
 - `-OpenCodeVariant` defaults to `max`.
 - `-ClaudeModel` defaults to `claude-opus-4-8`.
 - `-ClaudeEffort` defaults to `medium`.
 - `-ClaudePermissionMode` defaults to `plan`.
+- `-GrokModel` defaults to `grok-4.5`.
 - `-BitacoraTail` defaults to `40` lines.
 
 Overrides:
 
-- `-From codex|claude|opencode` and `-To codex|claude|opencode` choose the direction.
+- `-From codex|claude|opencode|grok` and `-To codex|claude|opencode|grok` choose the direction.
 - `-Objective`, `-Reason`, `-NextStep`, `-OpenQuestions` supply agent context inline.
 - `-NotesFile` reads the same fields from a Markdown file (sections `## Objetivo`, `## Motivo`, `## Siguiente paso`, `## Dudas`).
 - `-ClaudeModel`, `-ClaudeEffort`, and `-ClaudePermissionMode` customize the generated Claude Code command.
-- `-Launch` opts into a non-interactive `opencode run` first pass when `-To opencode`.
+- `-GrokModel` customizes the model in the generated Grok Build command.
+- `-Launch` opts into a non-interactive `opencode run` first pass when `-To opencode`, or starts an interactive Grok Build session when `-To grok`.
 - `-DryRun` prints without writing.
 
 ## Post-handoff protocol
@@ -165,6 +178,7 @@ With `-Force`, the installer replaces the existing `.agents` install from the re
 The installer copies the skill to:
 
 - `%USERPROFILE%\.agents\skills\agent-handoff`
+- `%CODEX_HOME%\skills\agent-handoff` (or `%USERPROFILE%\.codex\skills\agent-handoff` when `CODEX_HOME` is unset)
 
 Re-run it with `-Force` after any change to update the installed copy.
 

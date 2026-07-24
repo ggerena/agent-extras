@@ -5,7 +5,7 @@ param(
   [ValidateSet('codex', 'claude', 'opencode')]
   [string] $Invoker = 'codex',
   [ValidateSet('claude', 'codex', 'opencode')]
-  [string] $Reviewer = 'claude',
+  [string] $Reviewer = 'opencode',
   [string] $Branch = '',
   [string] $CommitMessage,
   [string] $PrTitle,
@@ -14,6 +14,7 @@ param(
   [string[]] $VerificationCommand = @(),
   [switch] $StageAll,
   [switch] $SkipCommit,
+  [switch] $RequestReview,
   [switch] $SkipReview,
   [switch] $DryRun,
   [switch] $ConfirmedByUser
@@ -101,6 +102,25 @@ function Resolve-RemoteName {
   throw 'No git remote found.'
 }
 
+function Resolve-RepositoryName {
+  param(
+    [string] $RemoteName,
+    [string] $RepositoryRoot
+  )
+
+  $remoteUrl = (Get-GitOutput -Arguments @('remote', 'get-url', $RemoteName) | Select-Object -First 1)
+  if (-not [string]::IsNullOrWhiteSpace($remoteUrl)) {
+    $normalizedUrl = $remoteUrl.Trim().TrimEnd('/').Replace('\', '/')
+    $remoteLeaf = ($normalizedUrl -split '/')[-1]
+    $remoteRepositoryName = $remoteLeaf -replace '\.git$', ''
+    if (-not [string]::IsNullOrWhiteSpace($remoteRepositoryName)) {
+      return $remoteRepositoryName
+    }
+  }
+
+  return (Split-Path -Leaf $RepositoryRoot)
+}
+
 function Resolve-DifferentialReviewScript {
   $candidates = @()
   if ($env:USERPROFILE) {
@@ -166,10 +186,17 @@ try {
   }
 
   $remoteName = Resolve-RemoteName $Remote
+  if ($RequestReview -and $SkipReview) {
+    throw 'Use either -RequestReview or -SkipReview, not both.'
+  }
 
   Write-Host "[auto-pr-review] Repo: $repoRoot" -ForegroundColor Cyan
   Write-Host "[auto-pr-review] Branch: $currentBranch -> $BaseBranch via $remoteName" -ForegroundColor Cyan
-  Write-Host "[auto-pr-review] Reviewer: $Reviewer (invoker: $Invoker)" -ForegroundColor Cyan
+  if ($RequestReview) {
+    Write-Host "[auto-pr-review] Reviewer: $Reviewer (invoker: $Invoker)" -ForegroundColor Cyan
+  } else {
+    Write-Host '[auto-pr-review] External review: not requested.' -ForegroundColor Cyan
+  }
 
   Write-Host "[auto-pr-review] git status --short" -ForegroundColor Cyan
   git status --short
@@ -254,7 +281,7 @@ try {
 
   Write-Host "[auto-pr-review] PR: $prUrl" -ForegroundColor Green
 
-  if (-not $SkipReview) {
+  if ($RequestReview) {
     $reviewScript = Resolve-DifferentialReviewScript
     $reviewPrompt = @"
 Review PR $prUrl from branch $currentBranch into $BaseBranch.

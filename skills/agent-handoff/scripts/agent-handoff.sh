@@ -18,6 +18,7 @@ OPENCODE_VARIANT="max"
 CLAUDE_MODEL="claude-opus-4-8"
 CLAUDE_EFFORT="medium"
 CLAUDE_PERMISSION_MODE="plan"
+GROK_MODEL="grok-4.5"
 BITACORA_TAIL=40
 DRY_RUN=0
 LAUNCH=0
@@ -27,8 +28,8 @@ usage() {
 Usage: agent-handoff.sh -From codex -To opencode [options]
 
 Options:
-  -From codex|claude|opencode       Origin agent (default codex)
-  -To codex|claude|opencode         Destination agent (default opencode)
+  -From codex|claude|opencode|grok  Origin agent (default codex)
+  -To codex|claude|opencode|grok    Destination agent (default opencode)
   -Objective "..."                  Original objective
   -Reason "..."                     Reason for the handoff
   -NextStep "..."                   Recommended next step
@@ -44,9 +45,10 @@ Options:
   -ClaudeModel claude-opus-4-8      Claude Code model (default claude-opus-4-8)
   -ClaudeEffort low|medium|high|max Claude Code effort (default medium)
   -ClaudePermissionMode plan        Claude Code permission mode (default plan)
+  -GrokModel grok-4.5               Grok Build model (default grok-4.5)
   -BitacoraTail 40                  Lines of BITACORA.md to embed (default 40)
   -DryRun                           Print without writing files
-  -Launch                           Run opencode non-interactively when -To opencode
+  -Launch                           Run OpenCode or Grok Build when that is the destination
 EOF
 }
 
@@ -69,6 +71,7 @@ while [ $# -gt 0 ]; do
     -ClaudeModel) CLAUDE_MODEL="$2"; shift 2;;
     -ClaudeEffort) CLAUDE_EFFORT="$2"; shift 2;;
     -ClaudePermissionMode) CLAUDE_PERMISSION_MODE="$2"; shift 2;;
+    -GrokModel) GROK_MODEL="$2"; shift 2;;
     -BitacoraTail) BITACORA_TAIL="$2"; shift 2;;
     -DryRun) DRY_RUN=1; shift;;
     -Launch) LAUNCH=1; shift;;
@@ -77,8 +80,8 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-case "$FROM" in codex|claude|opencode) :;; *) echo "-From must be codex|claude|opencode" >&2; exit 2;; esac
-case "$TO" in codex|claude|opencode) :;; *) echo "-To must be codex|claude|opencode" >&2; exit 2;; esac
+case "$FROM" in codex|claude|opencode|grok) :;; *) echo "-From must be codex|claude|opencode|grok" >&2; exit 2;; esac
+case "$TO" in codex|claude|opencode|grok) :;; *) echo "-To must be codex|claude|opencode|grok" >&2; exit 2;; esac
 case "$CLAUDE_EFFORT" in low|medium|high|max) :;; *) echo "-ClaudeEffort must be low|medium|high|max" >&2; exit 2;; esac
 
 if [ -z "$REPO_PATH" ]; then REPO_PATH="$(pwd)"; fi
@@ -87,7 +90,11 @@ if [ ! -d "$REPO_PATH" ]; then echo "Repo path not found: $REPO_PATH" >&2; exit 
 normalize_opencode_model() {
   local m="$1"
   if [ -z "$m" ]; then echo "opencode-go/glm-5.2"; return; fi
-  if [ "$m" = "glm-5.2" ]; then echo "opencode-go/glm-5.2"; return; fi
+  local alias
+  alias="$(printf '%s' "$m" | tr '[:upper:]' '[:lower:]' | tr '_' '-' | tr -d '[:space:]')"
+  case "$alias" in
+    glm|glm5.2|glm-5.2|glm-5-2|opencode-go/glm-5-2) echo "opencode-go/glm-5.2"; return;;
+  esac
   echo "$m"
 }
 OPENCODE_MODEL="$(normalize_opencode_model "$OPENCODE_MODEL")"
@@ -296,6 +303,7 @@ PROMPT_COMMAND_SUBSTITUTION="\$(cat $(shell_quote "$PROMPT_DISPLAY_PATH"))"
 case "$TO" in
   opencode) LAUNCH_CMD="opencode run $(shell_quote "$DEST_PROMPT") --dir $(shell_quote "$REPO_PATH") --model $OPENCODE_MODEL$VARIANT_ARG --file $(shell_quote "$HANDOFF_DISPLAY_PATH")";;
   claude) LAUNCH_CMD="claude --model $(shell_quote "$CLAUDE_MODEL") --effort $(shell_quote "$CLAUDE_EFFORT")$CLAUDE_PERMISSION_ARG --add-dir $(shell_quote "$REPO_PATH") --name $(shell_quote "$SESSION_NAME") \"$PROMPT_COMMAND_SUBSTITUTION\"";;
+  grok) LAUNCH_CMD="grok --model $(shell_quote "$GROK_MODEL") --cwd $(shell_quote "$REPO_PATH") --prompt-file $(shell_quote "$PROMPT_DISPLAY_PATH")";;
   codex) LAUNCH_CMD="codex exec --sandbox read-only -m gpt-5.5 -c model_reasoning_effort=\"xhigh\" < $(shell_quote "$PROMPT_DISPLAY_PATH")";;
 esac
 
@@ -361,6 +369,8 @@ if [ "$TO" = "claude" ]; then
   echo '[agent-handoff] Claude Code se inicia en modo interactivo y la sesion queda nombrada para /resume.'
 elif [ "$TO" = "opencode" ]; then
   echo '[agent-handoff] opencode run registra una sesion visible en OpenCode Desktop. Abre Desktop y continua esa sesion; no hace falta abrir otra terminal.'
+elif [ "$TO" = "grok" ]; then
+  echo '[agent-handoff] El comando inicia una sesion interactiva de Grok Build en el repo. Usa los permisos normales de Grok; no agrega aprobacion automatica.'
 fi
 
 if [ "$LAUNCH" -eq 1 ] && [ "$TO" = "opencode" ]; then
@@ -373,6 +383,16 @@ if [ "$LAUNCH" -eq 1 ] && [ "$TO" = "opencode" ]; then
     else
       opencode run "$DEST_PROMPT" --dir "$REPO_PATH" --model "$OPENCODE_MODEL" --file "$HANDOFF_PATH"
     fi
+    exit $?
+  fi
+fi
+
+if [ "$LAUNCH" -eq 1 ] && [ "$TO" = "grok" ]; then
+  if ! command -v grok >/dev/null 2>&1; then
+    echo "[agent-handoff] No se encontro binario grok; -Launch omitido." >&2
+  else
+    echo "[agent-handoff] Ejecutando Grok Build interactivo..."
+    grok --model "$GROK_MODEL" --cwd "$REPO_PATH" --prompt-file "$PROMPT_FILE_PATH"
     exit $?
   fi
 fi

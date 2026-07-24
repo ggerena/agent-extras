@@ -1,4 +1,4 @@
 interface:
   display_name: "Auto PR Review"
-  short_description: "Open a PR and request agent review"
-  default_prompt: "Use $auto-pr-review to verify this implementation, open a PR, and request review from another agent before merge."
+  short_description: "Open a PR with optional agent review"
+  default_prompt: "Use $auto-pr-review to verify this implementation and open a PR. Request review from another agent only if I explicitly ask for it."

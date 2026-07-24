@@ -9,6 +9,8 @@ desktop.ini
 *.tmp
 *.bak
 *.log
+__pycache__/
+*.pyc
 
 # Local private data
 memories/

@@ -1,7 +1,7 @@
 param(
-  [ValidateSet('codex', 'claude', 'opencode')]
+  [ValidateSet('codex', 'claude', 'opencode', 'grok')]
   [string] $From = 'codex',
-  [ValidateSet('codex', 'claude', 'opencode')]
+  [ValidateSet('codex', 'claude', 'opencode', 'grok')]
   [string] $To = 'opencode',
   [string] $Objective = '',
   [string] $Reason = '',
@@ -20,6 +20,7 @@ param(
   [ValidateSet('low', 'medium', 'high', 'max')]
   [string] $ClaudeEffort = 'medium',
   [string] $ClaudePermissionMode = 'plan',
+  [string] $GrokModel = 'grok-4.5',
   [int] $BitacoraTail = 40,
   [switch] $DryRun,
   [switch] $Launch
@@ -74,7 +75,8 @@ function Normalize-OpenCodeModel {
   param([string] $Model)
   if ([string]::IsNullOrWhiteSpace($Model)) { return 'opencode-go/glm-5.2' }
   $normalized = $Model.Trim()
-  if ($normalized -eq 'glm-5.2') { return 'opencode-go/glm-5.2' }
+  $modelAlias = $normalized.ToLowerInvariant() -replace '_', '-' -replace '\s+', ''
+  if ($modelAlias -in @('glm', 'glm5.2', 'glm-5.2', 'glm-5-2', 'opencode-go/glm-5-2')) { return 'opencode-go/glm-5.2' }
   return $normalized
 }
 
@@ -87,6 +89,18 @@ function Resolve-OpenCodeBinary {
     if (Test-Path -LiteralPath $c) { return $c }
   }
   $cmd = Get-Command opencode -ErrorAction SilentlyContinue | Where-Object { $_.CommandType -eq 'Application' } | Select-Object -First 1
+  if ($cmd -and $cmd.Source) { return $cmd.Source }
+  return $null
+}
+
+function Resolve-GrokBinary {
+  $candidates = @()
+  if ($env:USERPROFILE) { $candidates += (Join-Path $env:USERPROFILE '.grok\bin\grok.exe') }
+  if ($env:HOME) { $candidates += (Join-Path $env:HOME '.grok/bin/grok') }
+  foreach ($c in $candidates) {
+    if (Test-Path -LiteralPath $c) { return $c }
+  }
+  $cmd = Get-Command grok -ErrorAction SilentlyContinue | Where-Object { $_.CommandType -eq 'Application' } | Select-Object -First 1
   if ($cmd -and $cmd.Source) { return $cmd.Source }
   return $null
 }
@@ -345,6 +359,7 @@ $mdText = ($md -join "`n")
 
 $OpenCodeModel = Normalize-OpenCodeModel $OpenCodeModel
 $opencodeBin = Resolve-OpenCodeBinary
+$grokBin = Resolve-GrokBinary
 $promptFileName = "${baseName}-prompt.txt"
 if ($handoffName -ne "${baseName}.md") {
   $seqMatch = [regex]::Match($handoffName, '-(\d+)\.md$')
@@ -361,6 +376,8 @@ if ($To -eq 'opencode') {
   $claudePermissionArg = if ([string]::IsNullOrWhiteSpace($ClaudePermissionMode)) { '' } else { " --permission-mode $(Quote-PowerShellArgument $ClaudePermissionMode)" }
   $promptSubexpression = Quote-PowerShellExpandableArgument "`$(Get-Content -Raw -LiteralPath $(Quote-PowerShellArgument $promptDisplayPath))"
   $launchCmd = "claude --model $(Quote-PowerShellArgument $ClaudeModel) --effort $(Quote-PowerShellArgument $ClaudeEffort)$claudePermissionArg --add-dir $(Quote-PowerShellArgument $RepoPath) --name $(Quote-PowerShellArgument $sessionName) $promptSubexpression"
+} elseif ($To -eq 'grok') {
+  $launchCmd = "grok --model $(Quote-PowerShellArgument $GrokModel) --cwd $(Quote-PowerShellArgument $RepoPath) --prompt-file $(Quote-PowerShellArgument $promptDisplayPath)"
 } else {
   $launchCmd = "Get-Content -Raw -LiteralPath $(Quote-PowerShellArgument $promptDisplayPath) | codex exec --sandbox read-only -m gpt-5.5 -c model_reasoning_effort=`"xhigh`""
 }
@@ -429,6 +446,8 @@ if ($To -eq 'claude') {
   Write-Host '[agent-handoff] Claude Code se inicia en modo interactivo y la sesion queda nombrada para /resume.' -ForegroundColor DarkGray
 } elseif ($To -eq 'opencode') {
   Write-Host '[agent-handoff] opencode run registra una sesion visible en OpenCode Desktop. Abre Desktop y continua esa sesion; no hace falta abrir otra ventana de PowerShell.' -ForegroundColor DarkGray
+} elseif ($To -eq 'grok') {
+  Write-Host '[agent-handoff] El comando inicia una sesion interactiva de Grok Build en el repo. Usa los permisos normales de Grok; no agrega aprobacion automatica.' -ForegroundColor DarkGray
 }
 
 if ($Launch -and $To -eq 'opencode') {
@@ -440,6 +459,14 @@ if ($Launch -and $To -eq 'opencode') {
     if (-not [string]::IsNullOrWhiteSpace($OpenCodeVariant)) { $launchArgs += @('--variant', $OpenCodeVariant) }
     $launchArgs += @('--file', $handoffPath)
     & $opencodeBin @launchArgs
+    exit $LASTEXITCODE
+  }
+} elseif ($Launch -and $To -eq 'grok') {
+  if ([string]::IsNullOrWhiteSpace($grokBin)) {
+    Write-Host "[agent-handoff] No se encontro binario grok; -Launch omitido." -ForegroundColor Yellow
+  } else {
+    Write-Host "[agent-handoff] Ejecutando Grok Build interactivo: $grokBin" -ForegroundColor Cyan
+    & $grokBin --model $GrokModel --cwd $RepoPath --prompt-file $promptFilePath
     exit $LASTEXITCODE
   }
 }
