@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cerrar PR"
+  short_description: "Revisa, corrige, verifica y abre un PR"
+  default_prompt: "Use $cerrar-pr to review and correct these completed changes, verify them, commit on a safe branch, push, and open or update the PR."

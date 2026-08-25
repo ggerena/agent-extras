@@ -5,8 +5,10 @@ Small collection of agent skills and helper scripts.
 ## Contents
 
 - `skills/agent-handoff`: creates handoff notes for moving work between coding agents.
-- `skills/auto-pr-review`: prepares a branch/PR review flow with an optional external reviewer.
+- `skills/cerrar-pr`: reviews and corrects completed changes, verifies them, commits and pushes a safe branch, and opens or updates its PR.
 - `skills/differential-review`: asks another agent to challenge an analysis, plan, or pending implementation.
+- `skills/autodev`: executes an existing plan through tests, local review, and reviewed PRs.
+- `skills/fin-sesion`: preserves session context and closes completed changes through `cerrar-pr`.
 
 ## Platform notes
 

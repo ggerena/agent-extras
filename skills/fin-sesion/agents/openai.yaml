@@ -1,0 +1,5 @@
+interface:
+  display_name: "Fin de sesión"
+  short_description: "Guarda contexto y cierra cambios listos"
+  default_prompt: "Use $fin-sesion to preserve this session's context and close completed changes through reviewed pull requests."
+

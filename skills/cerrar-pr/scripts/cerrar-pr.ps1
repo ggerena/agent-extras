@@ -2,10 +2,6 @@ param(
   [string] $RepoPath = (Get-Location).Path,
   [string] $BaseBranch = 'develop',
   [string] $Remote = '',
-  [ValidateSet('codex', 'claude', 'opencode')]
-  [string] $Invoker = 'codex',
-  [ValidateSet('claude', 'codex', 'opencode')]
-  [string] $Reviewer = 'claude',
   [string] $Branch = '',
   [string] $CommitMessage,
   [string] $PrTitle,
@@ -14,13 +10,12 @@ param(
   [string[]] $VerificationCommand = @(),
   [switch] $StageAll,
   [switch] $SkipCommit,
-  [switch] $SkipReview,
   [switch] $DryRun,
+  [switch] $ReviewPassed,
   [switch] $ConfirmedByUser
 )
 
 $ErrorActionPreference = 'Stop'
-$script:AutoPrReviewScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 function Invoke-Git {
   param([string[]] $Arguments)
@@ -45,9 +40,9 @@ function Invoke-External {
     [string] $Command
   )
 
-  Write-Host "[auto-pr-review] $Label" -ForegroundColor Cyan
+  Write-Host "[cerrar-pr] $Label" -ForegroundColor Cyan
   if ($DryRun) {
-    Write-Host "[auto-pr-review] Dry run: $Command" -ForegroundColor Yellow
+    Write-Host "[cerrar-pr] Dry run: $Command" -ForegroundColor Yellow
     return
   }
 
@@ -101,26 +96,23 @@ function Resolve-RemoteName {
   throw 'No git remote found.'
 }
 
-function Resolve-DifferentialReviewScript {
-  $candidates = @()
-  if ($env:USERPROFILE) {
-    $candidates += (Join-Path $env:USERPROFILE '.codex\skills\differential-review\scripts\differential-review.ps1')
-    $candidates += (Join-Path $env:USERPROFILE '.agents\skills\differential-review\scripts\differential-review.ps1')
-    $candidates += (Join-Path $env:USERPROFILE '.claude\skills\differential-review\scripts\differential-review.ps1')
-  }
+function Resolve-RepositoryName {
+  param(
+    [string] $RemoteName,
+    [string] $RepositoryRoot
+  )
 
-  $scriptRoot = $script:AutoPrReviewScriptRoot
-  $skillRoot = Split-Path -Parent $scriptRoot
-  $repoSkill = Join-Path (Split-Path -Parent $skillRoot) 'differential-review\scripts\differential-review.ps1'
-  $candidates += $repoSkill
-
-  foreach ($candidate in $candidates) {
-    if (Test-Path -LiteralPath $candidate) {
-      return (Resolve-Path -LiteralPath $candidate).Path
+  $remoteUrl = (Get-GitOutput -Arguments @('remote', 'get-url', $RemoteName) | Select-Object -First 1)
+  if (-not [string]::IsNullOrWhiteSpace($remoteUrl)) {
+    $normalizedUrl = $remoteUrl.Trim().TrimEnd('/').Replace('\', '/')
+    $remoteLeaf = ($normalizedUrl -split '/')[-1]
+    $remoteRepositoryName = $remoteLeaf -replace '\.git$', ''
+    if (-not [string]::IsNullOrWhiteSpace($remoteRepositoryName)) {
+      return $remoteRepositoryName
     }
   }
 
-  throw 'differential-review skill not found. Install it before requesting external review.'
+  return (Split-Path -Leaf $RepositoryRoot)
 }
 
 function Get-ExistingPrUrl {
@@ -146,6 +138,10 @@ if (-not $DryRun -and -not $ConfirmedByUser) {
   throw 'Refusing to commit, push, or create PR without -ConfirmedByUser.'
 }
 
+if (-not $DryRun -and -not $ReviewPassed) {
+  throw 'Refusing to close the PR before the mandatory local review loop passes. Run /revisa, correct valid high and medium findings, rerun verification, then pass -ReviewPassed.'
+}
+
 $repoRoot = (Resolve-Path -LiteralPath $RepoPath).Path
 Push-Location $repoRoot
 try {
@@ -166,16 +162,16 @@ try {
   }
 
   $remoteName = Resolve-RemoteName $Remote
+  Write-Host "[cerrar-pr] Repo: $repoRoot" -ForegroundColor Cyan
+  Write-Host "[cerrar-pr] Branch: $currentBranch -> $BaseBranch via $remoteName" -ForegroundColor Cyan
+  Write-Host "[cerrar-pr] Local review gate: $(if ($ReviewPassed) { 'passed' } else { 'dry-run only; not asserted' })" -ForegroundColor Cyan
+  Write-Host '[cerrar-pr] External review is handled separately.' -ForegroundColor Cyan
 
-  Write-Host "[auto-pr-review] Repo: $repoRoot" -ForegroundColor Cyan
-  Write-Host "[auto-pr-review] Branch: $currentBranch -> $BaseBranch via $remoteName" -ForegroundColor Cyan
-  Write-Host "[auto-pr-review] Reviewer: $Reviewer (invoker: $Invoker)" -ForegroundColor Cyan
-
-  Write-Host "[auto-pr-review] git status --short" -ForegroundColor Cyan
+  Write-Host "[cerrar-pr] git status --short" -ForegroundColor Cyan
   git status --short
-  Write-Host "[auto-pr-review] git diff --stat" -ForegroundColor Cyan
+  Write-Host "[cerrar-pr] git diff --stat" -ForegroundColor Cyan
   git diff --stat
-  Write-Host "[auto-pr-review] git diff --cached --stat" -ForegroundColor Cyan
+  Write-Host "[cerrar-pr] git diff --cached --stat" -ForegroundColor Cyan
   git diff --cached --stat
 
   foreach ($command in $VerificationCommand) {
@@ -189,13 +185,13 @@ try {
 
   if ($StageAll) {
     if ($DryRun) {
-      Write-Host '[auto-pr-review] Dry run: git add --sparse --all' -ForegroundColor Yellow
+      Write-Host '[cerrar-pr] Dry run: git add --sparse --all' -ForegroundColor Yellow
     } else {
       Invoke-Git -Arguments @('add', '--sparse', '--all')
     }
   } elseif ($Pathspec.Count -gt 0) {
     if ($DryRun) {
-      Write-Host "[auto-pr-review] Dry run: git add --sparse -- $($Pathspec -join ' ')" -ForegroundColor Yellow
+      Write-Host "[cerrar-pr] Dry run: git add --sparse -- $($Pathspec -join ' ')" -ForegroundColor Yellow
     } else {
       Invoke-Git -Arguments (@('add', '--sparse', '--') + $Pathspec)
     }
@@ -208,21 +204,21 @@ try {
 
     $staged = Get-GitOutput -Arguments @('diff', '--cached', '--name-only')
     if ($staged.Count -gt 0) {
-      Write-Host '[auto-pr-review] Staged files:' -ForegroundColor Cyan
+      Write-Host '[cerrar-pr] Staged files:' -ForegroundColor Cyan
       $staged | ForEach-Object { Write-Host "  $_" }
       if ($DryRun) {
-        Write-Host "[auto-pr-review] Dry run: git commit -m `"$CommitMessage`"" -ForegroundColor Yellow
+        Write-Host "[cerrar-pr] Dry run: git commit -m `"$CommitMessage`"" -ForegroundColor Yellow
       } else {
         Invoke-Git -Arguments @('commit', '-m', $CommitMessage)
       }
     } else {
-      Write-Host '[auto-pr-review] No staged changes to commit.' -ForegroundColor Yellow
+      Write-Host '[cerrar-pr] No staged changes to commit.' -ForegroundColor Yellow
     }
   }
 
   if ($DryRun) {
-    Write-Host "[auto-pr-review] Dry run: git push -u $remoteName $currentBranch" -ForegroundColor Yellow
-    Write-Host "[auto-pr-review] Dry run: gh pr create/list for $currentBranch -> $BaseBranch" -ForegroundColor Yellow
+    Write-Host "[cerrar-pr] Dry run: git push -u $remoteName $currentBranch" -ForegroundColor Yellow
+    Write-Host "[cerrar-pr] Dry run: gh pr create/list for $currentBranch -> $BaseBranch" -ForegroundColor Yellow
     return
   }
 
@@ -233,9 +229,9 @@ try {
     if ([string]::IsNullOrWhiteSpace($PrTitle)) {
       throw 'Provide -PrTitle when creating a new PR.'
     }
-    $bodyFile = Join-Path $env:TEMP ("auto-pr-review-pr-body-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.md')
+    $bodyFile = Join-Path $env:TEMP ("cerrar-pr-body-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.md')
     $body = if ([string]::IsNullOrWhiteSpace($PrBody)) {
-      "Automated close-out PR created by auto-pr-review.`n`nNo merge is performed by this skill."
+      "Close-out PR created by cerrar-pr.`n`nNo merge is performed by this skill."
     } else {
       $PrBody
     }
@@ -249,31 +245,12 @@ try {
       Remove-Item -LiteralPath $bodyFile -Force -ErrorAction SilentlyContinue
     }
   } else {
-    Write-Host "[auto-pr-review] Reusing existing PR: $prUrl" -ForegroundColor Cyan
+    Write-Host "[cerrar-pr] Reusing existing PR: $prUrl" -ForegroundColor Cyan
   }
 
-  Write-Host "[auto-pr-review] PR: $prUrl" -ForegroundColor Green
+  Write-Host "[cerrar-pr] PR: $prUrl" -ForegroundColor Green
 
-  if (-not $SkipReview) {
-    $reviewScript = Resolve-DifferentialReviewScript
-    $reviewPrompt = @"
-Review PR $prUrl from branch $currentBranch into $BaseBranch.
-
-Focus on code review blockers:
-1. Bugs or behavior regressions.
-2. Missing tests or weak validation.
-3. Security, secrets, or unsafe git workflow issues.
-4. Simpler implementation if the PR overcomplicates the change.
-
-Return findings first, then a final recommendation: merge as-is, merge after small fix, or do not merge.
-"@
-    powershell -ExecutionPolicy Bypass -File $reviewScript -Invoker $Invoker -Reviewer $Reviewer -Prompt $reviewPrompt
-    if ($LASTEXITCODE -ne 0) {
-      throw "External review failed with exit code $LASTEXITCODE"
-    }
-  }
-
-  Write-Host '[auto-pr-review] Done. PR left open; no merge performed.' -ForegroundColor Green
+  Write-Host '[cerrar-pr] Done. PR left open; no merge performed.' -ForegroundColor Green
 } finally {
   Pop-Location
 }
