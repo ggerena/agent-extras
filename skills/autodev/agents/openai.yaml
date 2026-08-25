@@ -1,0 +1,5 @@
+interface:
+  display_name: "Autodev"
+  short_description: "Ejecuta planes completos hasta PRs revisados"
+  default_prompt: "Use $autodev to execute this existing implementation plan through reviewed pull requests."
+
