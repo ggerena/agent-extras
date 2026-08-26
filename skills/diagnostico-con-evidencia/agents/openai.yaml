@@ -1,0 +1,3 @@
+interface:
+  display_name: "Diagnostico con evidencia"
+  short_description: "Encuentra causas con reproduccion y evidencia"

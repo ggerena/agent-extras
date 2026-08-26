@@ -9,6 +9,12 @@ Small collection of agent skills and helper scripts.
 - `skills/differential-review`: asks another agent to challenge an analysis, plan, or pending implementation.
 - `skills/autodev`: executes an existing plan through tests, local review, and reviewed PRs.
 - `skills/fin-sesion`: preserves session context and closes completed changes through `cerrar-pr`.
+- `skills/cambio-minimo`: favors the smallest maintainable implementation that solves the verified need.
+- `skills/code-review`: reviews PRs and branch diffs without modifying files.
+- `skills/diagnostico-con-evidencia`: diagnoses failures through reproduction and evidence before correction.
+- `skills/km-analyze`: analyzes repository health with the `km` metrics CLI.
+- `skills/markitdown`: documents conversion of supported files to Markdown with Microsoft MarkItDown.
+- `skills/mira`: provides a deliberately shallow README-only repository overview.
 
 ## Platform notes
 
