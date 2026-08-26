@@ -9,7 +9,8 @@ You have access to the `km` CLI tool for comprehensive code analysis. Use it to 
 
 ## Available Commands
 
-Run these via the Bash tool. Always use `--json` for machine-readable output.
+Run these from the shell available in the current environment; the examples work in Bash and
+PowerShell. Always use `--json` for machine-readable output.
 
 ### Lines of Code
 ```bash

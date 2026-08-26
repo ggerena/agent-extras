@@ -27,8 +27,10 @@ Do not invent a missing plan. If no usable plan exists, stop after identifying t
 2. Create or reuse one safe feature branch per repository. Never push directly to `main`, `master`,
    or `develop`, and do not use worktrees unless the user explicitly requested them.
 3. Execute phases in dependency order. Apply `cambio-minimo` principles and include or update tests
-   for every feature and bug fix. Follow the current project rules for any permitted delegation;
-   this skill does not require subagents or a specific external agent.
+   for every feature and bug fix. Follow the current project rules for any permitted delegation.
+   Use the implementation handoff configured by the current environment for code changes and
+   reserve subagents for read-only exploration. This skill does not itself authorize or require
+   delegation.
 4. After implementation is complete, run the relevant tests, lint, typecheck, build, or equivalent
    verification in every affected repository. Never start development servers.
 5. Run `code-review` (`/revisa`) over each complete branch and working-tree diff. Validate every
@@ -47,4 +49,3 @@ fails, or the review gate cannot pass. Also stop for a material product decision
 new access, production operation, or scope expansion that the original plan did not authorize.
 
 Never merge. Do not add workflow or AI attribution to commit messages, PR titles, or PR bodies.
-

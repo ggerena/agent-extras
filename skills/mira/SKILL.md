@@ -19,7 +19,8 @@ Use this meaning for prompts such as:
 
 ## Workflow
 
-1. If the repository is not local and the user gave a URL or `owner/repo`, clone it under `C:\Users\gery_\Code`.
+1. If the repository is not local and the user gave a URL or `owner/repo`, clone it in the user's
+   configured code directory or another safe workspace location. Do not hardcode a user-specific path.
 2. Read only the main README file from the repository root, preferring `README.md`, `README.MD`, then other README variants.
 3. Explain in simple Spanish:
    - what the project is for;
