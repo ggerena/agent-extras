@@ -19,6 +19,7 @@ Determina la causa con evidencia suficiente y evita convertir una hipotesis plau
 6. Declara una causa solo cuando la evidencia conecte el mecanismo con el sintoma y descarte alternativas razonables. Separa siempre hechos observados, inferencias y elementos `NO PROBADO`.
 7. Si la correccion fue autorizada, aplica el cambio permanente mas pequeno en la capa responsable y agrega o adapta una prueba de regresion que detecte el fallo.
 8. Ejecuta una verificacion fresca del mismo recorrido. Una prueba distinta, un lint aislado o la confianza del agente no demuestran que el sintoma desaparecio.
+   Para regresiones de rendimiento, compara antes y despues con la misma carga, datos y condiciones; registra la metrica y su variacion. Si el resultado fluctua, repite lo suficiente para distinguir la mejora del ruido y declara los limites de la comparacion.
 
 ## Limites
 
