@@ -27,6 +27,7 @@ Detente en la primera opcion suficiente:
 - Prefiere codigo claro y convencional a codigo comprimido o ingenioso. Menos lineas no justifican menor legibilidad.
 - No simplifiques validacion en limites de confianza, seguridad, accesibilidad ni manejo de errores que evite perdida de datos.
 - Si la solucion minima tiene un limite conocido y relevante, deja explicitos ese limite y la condicion observable que justificaria ampliarla. Usa un comentario en el codigo solo cuando ese contexto deba quedar junto a la implementacion.
+- Cuando el cambio afecte un comportamiento que deba comprobarse en operacion, identifica una señal existente que permita verificar su resultado o detectar su fallo. Amplia la instrumentacion solo si hay una brecha concreta dentro del encargo; no agregues infraestructura ni accedas a ambientes sin autorizacion.
 - Respeta todos los requisitos explicitos del usuario y las instrucciones del proyecto.
 - Reutiliza o amplia las pruebas existentes. Agrega la verificacion mas pequena que demuestre el comportamiento y la regresion corregida.
 
