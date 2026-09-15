@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cerrar PR"
+  short_description: "Respalda en PR borrador y verifica antes de cerrar"
+  default_prompt: "Use $cerrar-pr to back up these authorized code changes in a safe branch and draft PR, then verify and review before marking ready, without merging."
