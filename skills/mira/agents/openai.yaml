@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mira"
+  short_description: "Leer README y explicar un repo por encima"
+  default_prompt: "Use $mira to read only the README of a repository and explain what it does at a high level."

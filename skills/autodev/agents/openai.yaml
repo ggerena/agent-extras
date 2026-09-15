@@ -1,0 +1,4 @@
+interface:
+  display_name: "Autodev"
+  short_description: "Ejecuta planes con respaldo temprano y revision"
+  default_prompt: "Use $autodev to execute this existing plan with early draft PR backups in code repositories, then complete tests and reviews without merging."
