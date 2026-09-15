@@ -11,6 +11,7 @@ param(
   [switch] $StageAll,
   [switch] $SkipCommit,
   [switch] $DryRun,
+  [switch] $Backup,
   [switch] $ReviewPassed,
   [switch] $ConfirmedByUser
 )
@@ -96,50 +97,64 @@ function Resolve-RemoteName {
   throw 'No git remote found.'
 }
 
-function Resolve-RepositoryName {
-  param(
-    [string] $RemoteName,
-    [string] $RepositoryRoot
-  )
+function Resolve-GitHubRepository {
+  param([string] $RemoteName)
 
-  $remoteUrl = (Get-GitOutput -Arguments @('remote', 'get-url', $RemoteName) | Select-Object -First 1)
-  if (-not [string]::IsNullOrWhiteSpace($remoteUrl)) {
-    $normalizedUrl = $remoteUrl.Trim().TrimEnd('/').Replace('\', '/')
-    $remoteLeaf = ($normalizedUrl -split '/')[-1]
-    $remoteRepositoryName = $remoteLeaf -replace '\.git$', ''
-    if (-not [string]::IsNullOrWhiteSpace($remoteRepositoryName)) {
-      return $remoteRepositoryName
-    }
+  $pushUrls = @(Get-GitOutput -Arguments @('remote', 'get-url', '--push', '--all', $RemoteName))
+  if ($pushUrls.Count -ne 1) {
+    throw 'Exactly one push URL is required to identify the PR repository safely.'
   }
-
-  return (Split-Path -Leaf $RepositoryRoot)
+  $remoteUrl = $pushUrls[0].Trim().TrimEnd('/')
+  if ($remoteUrl -notmatch '^(?:https://|ssh://git@|git@)([a-zA-Z0-9.-]+)[:/]([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_.-]+)$') {
+    throw 'Cannot safely identify host/owner/repository from the selected push URL.'
+  }
+  return "$($Matches[1])/$($Matches[2])/$($Matches[3] -replace '\.git$', '')"
 }
 
-function Get-ExistingPrUrl {
+function Get-ExistingPr {
   param(
     [string] $HeadBranch,
-    [string] $TargetBase
+    [string] $TargetBase,
+    [string] $Repository
   )
 
-  $json = gh pr list --head $HeadBranch --base $TargetBase --state open --json url 2>$null
+  $json = (gh pr list --repo $Repository --head $HeadBranch --state open --json url,isDraft,baseRefName,isCrossRepository) -join "`n"
   if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($json)) {
-    return ''
+    throw 'Cannot determine existing PR state; refusing to push.'
   }
 
-  $items = $json | ConvertFrom-Json
-  if ($items.Count -gt 0) {
-    return [string] $items[0].url
+  if (-not $json.Trim().StartsWith('[')) {
+    throw 'Invalid PR list response; refusing to push.'
+  }
+  $parsedItems = ConvertFrom-Json -InputObject $json
+  $items = @($parsedItems)
+  if ($items.Count -gt 1) {
+    throw 'Multiple open PRs for this branch; refusing to push until the target is resolved.'
+  }
+  if ($items.Count -eq 1) {
+    $pr = $items[0]
+    if ($pr.isCrossRepository -isnot [bool] -or $pr.isCrossRepository) {
+      throw 'PR head repository is unknown or cross-repository; refusing to push.'
+    }
+    if ([string]::IsNullOrWhiteSpace($pr.url) -or $pr.isDraft -isnot [bool] -or $pr.baseRefName -ne $TargetBase) {
+      throw 'Existing PR has an unknown state or different base; refusing to push.'
+    }
+    return $pr
   }
 
-  return ''
+  return $null
 }
 
 if (-not $DryRun -and -not $ConfirmedByUser) {
   throw 'Refusing to commit, push, or create PR without -ConfirmedByUser.'
 }
 
-if (-not $DryRun -and -not $ReviewPassed) {
-  throw 'Refusing to close the PR before the mandatory local review loop passes. Run /revisa, correct valid high and medium findings, rerun verification, then pass -ReviewPassed.'
+if ($Backup -and $ReviewPassed) {
+  throw 'Use -Backup for incomplete checkpoints or -ReviewPassed for reviewed close-out, not both.'
+}
+
+if (-not $DryRun -and -not $Backup -and -not $ReviewPassed) {
+  throw 'Use -Backup for a draft checkpoint, or finish verification and /revisa before passing -ReviewPassed.'
 }
 
 $repoRoot = (Resolve-Path -LiteralPath $RepoPath).Path
@@ -157,14 +172,15 @@ try {
   $currentBranch = $headBranch
 
   $protectedBranches = @('develop', 'main', 'master')
-  if (($protectedBranches -contains $currentBranch) -or ($currentBranch -eq $BaseBranch)) {
+  if (($protectedBranches -contains $currentBranch) -or ($currentBranch -eq $BaseBranch) -or ($currentBranch -eq 'HEAD')) {
     throw "Refusing to push directly to '$currentBranch'."
   }
 
   $remoteName = Resolve-RemoteName $Remote
+  $githubRepository = Resolve-GitHubRepository $remoteName
   Write-Host "[cerrar-pr] Repo: $repoRoot" -ForegroundColor Cyan
   Write-Host "[cerrar-pr] Branch: $currentBranch -> $BaseBranch via $remoteName" -ForegroundColor Cyan
-  Write-Host "[cerrar-pr] Local review gate: $(if ($ReviewPassed) { 'passed' } else { 'dry-run only; not asserted' })" -ForegroundColor Cyan
+  Write-Host "[cerrar-pr] Local review gate: $(if ($ReviewPassed) { 'passed (caller assertion)' } elseif ($Backup) { 'not asserted; draft backup only' } else { 'dry-run only; not asserted' })" -ForegroundColor Cyan
   Write-Host '[cerrar-pr] External review is handled separately.' -ForegroundColor Cyan
 
   Write-Host "[cerrar-pr] git status --short" -ForegroundColor Cyan
@@ -217,27 +233,40 @@ try {
   }
 
   if ($DryRun) {
+    Write-Host '[cerrar-pr] Dry run: inspect existing PR; convert ready PR to draft before push.' -ForegroundColor Yellow
     Write-Host "[cerrar-pr] Dry run: git push -u $remoteName $currentBranch" -ForegroundColor Yellow
-    Write-Host "[cerrar-pr] Dry run: gh pr create/list for $currentBranch -> $BaseBranch" -ForegroundColor Yellow
+    Write-Host "[cerrar-pr] Dry run: create/reuse draft PR in $githubRepository for $currentBranch -> $BaseBranch" -ForegroundColor Yellow
     return
+  }
+
+  $existingPr = Get-ExistingPr -HeadBranch $currentBranch -TargetBase $BaseBranch -Repository $githubRepository
+  if ($null -eq $existingPr -and [string]::IsNullOrWhiteSpace($PrTitle)) {
+    throw 'Provide -PrTitle when creating a new PR.'
+  }
+  if ($null -ne $existingPr -and -not $existingPr.isDraft) {
+    gh pr ready $existingPr.url --undo --repo $githubRepository
+    if ($LASTEXITCODE -ne 0) {
+      throw 'Cannot convert existing PR to draft; refusing to push.'
+    }
+    $existingPr = Get-ExistingPr -HeadBranch $currentBranch -TargetBase $BaseBranch -Repository $githubRepository
+    if ($null -eq $existingPr -or -not $existingPr.isDraft) {
+      throw 'Draft state was not confirmed; refusing to push.'
+    }
   }
 
   Invoke-Git -Arguments @('push', '-u', $remoteName, $currentBranch)
 
-  $prUrl = Get-ExistingPrUrl -HeadBranch $currentBranch -TargetBase $BaseBranch
-  if ([string]::IsNullOrWhiteSpace($prUrl)) {
-    if ([string]::IsNullOrWhiteSpace($PrTitle)) {
-      throw 'Provide -PrTitle when creating a new PR.'
-    }
-    $bodyFile = Join-Path $env:TEMP ("cerrar-pr-body-" + (Get-Date).ToString('yyyyMMddHHmmss') + '.md')
+  $prUrl = if ($null -ne $existingPr) { [string] $existingPr.url } else { '' }
+  if ($null -eq $existingPr) {
+    $bodyFile = Join-Path $env:TEMP ("cerrar-pr-body-" + [guid]::NewGuid().ToString('N') + '.md')
     $body = if ([string]::IsNullOrWhiteSpace($PrBody)) {
-      "Close-out PR created by cerrar-pr.`n`nNo merge is performed by this skill."
+      "Work in progress.`n`nRequired tests and reviews must be confirmed for the published head before marking ready."
     } else {
       $PrBody
     }
     Set-Content -LiteralPath $bodyFile -Value $body -Encoding UTF8
     try {
-      $prUrl = gh pr create --base $BaseBranch --head $currentBranch --title $PrTitle --body-file $bodyFile
+      $prUrl = gh pr create --repo $githubRepository --draft --base $BaseBranch --head $currentBranch --title $PrTitle --body-file $bodyFile
       if ($LASTEXITCODE -ne 0) {
         throw 'gh pr create failed.'
       }
@@ -250,7 +279,7 @@ try {
 
   Write-Host "[cerrar-pr] PR: $prUrl" -ForegroundColor Green
 
-  Write-Host '[cerrar-pr] Done. PR left open; no merge performed.' -ForegroundColor Green
+  Write-Host '[cerrar-pr] Backup published. PR left draft; readiness and merge were not performed.' -ForegroundColor Green
 } finally {
   Pop-Location
 }

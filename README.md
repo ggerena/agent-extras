@@ -2,6 +2,9 @@
 
 Small collection of agent skills and helper scripts.
 
+For the skills listed below, `skills/` is the editable source. Keep the active installation for
+the current agent synchronized in the same change; do not maintain divergent copies.
+
 ## Current skills
 
 - `skills/agent-handoff`: creates handoff notes for moving work between coding agents.
@@ -12,6 +15,7 @@ Small collection of agent skills and helper scripts.
 - `skills/diagnostico-con-evidencia`: diagnoses failures through reproduction and evidence before correction.
 - `skills/km-analyze`: analyzes repository health with the `km` metrics CLI.
 - `skills/mira`: provides a deliberately shallow README-only repository overview.
+- `skills/retrospectiva-agentes`: turns observed agent-session friction into small, evidence-based improvements, with emphasis on reducing repeated context and calls.
 
 ## Retired backups
 
