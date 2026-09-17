@@ -16,6 +16,7 @@ the current agent synchronized in the same change; do not maintain divergent cop
 - `skills/km-analyze`: analyzes repository health with the `km` metrics CLI.
 - `skills/mira`: provides a deliberately shallow README-only repository overview.
 - `skills/retrospectiva-agentes`: turns observed agent-session friction into small, evidence-based improvements, with emphasis on reducing repeated context and calls.
+- `skills/se-pego-mi-pc`: captures a short, low-impact Windows snapshot before recovering a frozen or CPU-saturated PC or application.
 
 ## Retired backups
 

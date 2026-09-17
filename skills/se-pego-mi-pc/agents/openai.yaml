@@ -1,0 +1,4 @@
+interface:
+  display_name: "Se pego mi PC"
+  short_description: "Captura evidencia breve de un PC Windows saturado"
+  default_prompt: "Use $se-pego-mi-pc para tomar una muestra segura del equipo antes de intentar recuperarlo."
