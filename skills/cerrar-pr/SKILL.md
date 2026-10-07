@@ -35,6 +35,8 @@ Choose one mode:
   `-ReviewPassed` only for the exact current diff. The script still leaves the PR draft; after
   publication, follow step 7 for remote checks, reviews and any readiness needed to trigger CI.
 
+Build `-PrBody` from the repository PR template (`.github/pull_request_template.md` or equivalent) when one exists, completing its required sections; CI may reject a PR that omits them.
+
 If an existing PR is ready, return it to draft before pushing another iteration. Keep the work
 incomplete until all required tests and reviews pass with no pending findings or reviews. Keep the
 PR draft too, unless applicable repository rules require `ready` to trigger CI; in that case,
