@@ -14,6 +14,7 @@ the current agent synchronized in the same change; do not maintain divergent cop
 - `skills/code-review`: reviews PRs and branch diffs without modifying files.
 - `skills/diagnostico-con-evidencia`: diagnoses failures through reproduction and evidence before correction.
 - `skills/handoff-implementation-to-codex`: delegates supervised implement, review, and approved closeout phases to Codex CLI (GPT-6.1 Sol) with per-mode sandboxes and Git/path guardrails.
+- `skills/handoff-implementation-to-grok`: delegates supervised implement, review, and approved closeout phases to Grok Build with per-mode permission rules and Git/path guardrails.
 - `skills/km-analyze`: analyzes repository health with the `km` metrics CLI.
 - `skills/mira`: provides a deliberately shallow README-only repository overview.
 - `skills/retrospectiva-agentes`: turns observed agent-session friction into small, evidence-based improvements, with emphasis on reducing repeated context and calls.
