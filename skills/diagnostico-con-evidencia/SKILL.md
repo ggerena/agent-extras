@@ -1,33 +1,35 @@
 ---
 name: diagnostico-con-evidencia
-description: Diagnostica errores, fallos intermitentes o regresiones de rendimiento mediante una reproduccion verificable, hipotesis ordenadas e instrumentacion antes de corregir. Usar cuando se pida diagnosticar, depurar, encontrar la causa o explicar por que algo falla o esta lento; no usar para revisar un diff sin ejecutar, seguir un smoke test predefinido, restaurar de urgencia un servicio ni medir la carga de una pagina web con metricas, que corresponde a web-perf.
+description: Diagnostica errores, fallos intermitentes o regresiones de rendimiento mediante una reproducción verificable, hipótesis ordenadas e instrumentación antes de corregir. Usar cuando se pida diagnosticar, depurar, encontrar la causa o explicar por qué algo falla o está lento; no usar para revisar un diff sin ejecutar, seguir una prueba básica predefinida, restaurar de urgencia un servicio ni medir la carga de una página web con métricas, que corresponde a web-perf como referencia externa.
 ---
 
-# Diagnostico con evidencia
+# Diagnóstico con evidencia
 
-**Cual corresponde:** esta skill encuentra la causa cuando no se sabe por que falla. Si la causa ya esta identificada y solo hay que corregirla, corresponde `cambio-minimo`. Pueden encadenarse: diagnosticar aqui y corregir despues con la skill de cambio.
+**Cuál corresponde:** esta skill encuentra la causa cuando no se sabe por qué falla. Si la causa ya está identificada y solo hay que corregirla, corresponde `cambio-minimo`. Pueden encadenarse: diagnosticar aquí y corregir después con la skill de cambio.
 
-Determina la causa con evidencia suficiente y evita convertir una hipotesis plausible en una conclusion. Diagnosticar no autoriza modificar: si el usuario pidio solo analisis, detente antes de corregir.
+Para medir la carga de una página web, consulta `web-perf` en el [catálogo de referencias externas](../../docs/SOURCES.md#skills-especializadas); sus herramientas deben estar disponibles y autorizadas antes de usarla.
 
-## Metodo
+Determina la causa con evidencia suficiente y evita convertir una hipótesis plausible en una conclusión. Diagnosticar no autoriza modificar: si el usuario pidió solo análisis, detente antes de corregir.
 
-1. Define el sintoma observable, el comportamiento esperado, el entorno afectado y una condicion clara de exito.
-2. Construye el ciclo de comprobacion mas pequeno que recorra el fallo real: un comando, prueba o interaccion repetible que falle por el sintoma informado. Si es intermitente, registra ocurrencias y condiciones en vez de asumir una causa.
-3. Reduce el caso y compara una ruta que funciona con otra que falla. Ordena pocas hipotesis por evidencia, probabilidad y costo de comprobarlas.
-4. Revisa primero las fuentes que pueden explicar el comportamiento sin cambiarlo: configuracion, variables de entorno, datos, dependencias, logs y limites externos cuando apliquen.
-5. Instrumenta solo lo necesario para distinguir hipotesis. Prueba una variable por vez y conserva evidencia de lo observado. En un encargo de solo lectura, limitate a logs existentes, contadores del sistema, consultas de lectura y ejecuciones aisladas; agregar trazas al codigo es una modificacion y requiere autorizacion explicita.
-6. Declara una causa solo cuando la evidencia conecte el mecanismo con el sintoma y descarte alternativas razonables. Separa siempre hechos observados, inferencias y elementos `NO PROBADO`.
-7. Si la correccion fue autorizada, aplica el cambio permanente mas pequeno en la capa responsable y reutiliza la verificacion pertinente. Crear o ampliar tests depende de la politica aplicable: no ordenes casos nuevos fuera de ella. Si corresponde el unico test de reproduccion permitido, comprueba antes que falle por el motivo previsto, cita comando y fallo observado, y despues que pase con la correccion.
-8. Ejecuta una verificacion fresca del mismo recorrido. Una prueba distinta, un lint aislado o la confianza del agente no demuestran que el sintoma desaparecio.
-   Para regresiones de rendimiento, compara con configuracion, carga, datos y condiciones equivalentes. Comprueba resultados correctos, trabajo real completado y errores en ambas versiones; omitir trabajo o fallar antes no acredita mejora. Mide el recorrido completo afectado y registra metrica y variacion. Repite lo necesario para distinguir mejora de ruido y declara los limites.
+## Método
 
-## Limites
+1. Define el síntoma observable, el comportamiento esperado, el entorno afectado y una condición clara de éxito.
+2. Construye el ciclo de comprobación más pequeño que recorra el fallo real: un comando, prueba o interacción repetible que falle por el síntoma informado. Si es intermitente, registra ocurrencias y condiciones en vez de asumir una causa.
+3. Reduce el caso y compara una ruta que funciona con otra que falla. Ordena pocas hipótesis por evidencia, probabilidad y costo de comprobarlas.
+4. Revisa primero las fuentes que pueden explicar el comportamiento sin cambiarlo: configuración, variables de entorno, datos, dependencias, logs y límites externos cuando apliquen.
+5. Instrumenta solo lo necesario para distinguir hipótesis. Prueba una variable por vez y conserva evidencia de lo observado. En un encargo de solo lectura, limítate a logs existentes, contadores del sistema, consultas de lectura y ejecuciones aisladas; agregar trazas al código es una modificación y requiere autorización explícita.
+6. Declara una causa solo cuando la evidencia conecte el mecanismo con el síntoma y descarte alternativas razonables. Separa siempre hechos observados, inferencias y elementos `NO PROBADO`.
+7. Si la corrección fue autorizada, aplica el cambio permanente más pequeño en la capa responsable y reutiliza la verificación pertinente. Crear o ampliar pruebas depende de la política aplicable: no ordenes casos nuevos fuera de ella. Si corresponde la única prueba de reproducción permitida, comprueba antes que falle por el motivo previsto, cita comando y fallo observado, y después que pase con la corrección.
+8. Ejecuta una verificación fresca del mismo recorrido. Una prueba distinta, un lint aislado o la confianza del agente no demuestran que el síntoma desapareció.
+   Para regresiones de rendimiento, compara con configuración, carga, datos y condiciones equivalentes. Comprueba resultados correctos, trabajo real completado y errores en ambas versiones; omitir trabajo o fallar antes no acredita mejora. Mide el recorrido completo afectado y registra métrica y variación. Repite lo necesario para distinguir mejora de ruido y declara los límites.
 
-- No parches varias hipotesis a la vez ni modifiques el entorno solo para que la reproduccion deje de fallar.
+## Límites
+
+- No parches varias hipótesis a la vez ni modifiques el entorno solo para que la reproducción deje de fallar.
 - Si no puedes reproducir ni obtener evidencia equivalente, informa el alcance revisado, lo descartado y lo que queda `NO PROBADO`; no inventes una causa.
-- Antes de acciones sobre Produccion, datos reales, credenciales o servicios compartidos, respeta las autorizaciones y restricciones del proyecto.
+- Antes de acciones sobre Producción, datos reales, credenciales o servicios compartidos, respeta las autorizaciones y restricciones del proyecto.
 - No inicies servidores, despliegues ni otras operaciones externas salvo que el usuario o las instrucciones del proyecto lo autoricen.
 
 ## Entrega
 
-Resume sintoma, reproduccion, causa demostrada o hipotesis restantes, evidencia, correccion si fue autorizada, verificacion ejecutada y riesgos residuales.
+Resume síntoma, reproducción, causa demostrada o hipótesis restantes, evidencia, corrección si fue autorizada, verificación ejecutada y riesgos residuales.

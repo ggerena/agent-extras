@@ -1,77 +1,87 @@
 ---
 name: autodev
-description: Ejecuta un plan de implementacion existente con respaldo temprano en PRs borrador para repos de codigo, cambios minimos, tests y revision obligatorios antes de darlo por listo. Usar con /autodev o para llevar un plan hasta PRs revisados; no crear el plan, desplegar, operar en Prod ni hacer merge.
+description: Ejecuta un plan de implementación existente con respaldo temprano en PR borrador para repositorios de código, cambios mínimos, pruebas y revisión obligatorias antes de darlo por listo. Usar con /autodev o para llevar un plan hasta PR revisados; no crear el plan, desplegar, operar en Producción ni hacer merge.
 ---
 
 # Autodev
 
-Take an existing implementation plan through early draft backups and completed, reviewed pull requests. Reuse
-`cambio-minimo` for implementation decisions, `code-review` for the read-only review gate,
-and `cerrar-pr` for commit, push, and PR creation instead of duplicating those workflows.
+Lleva un plan de implementación existente desde su respaldo temprano en borrador hasta completar
+los PR con revisión. Reutiliza `cambio-minimo` para las decisiones de implementación, `code-review`
+para la revisión en solo lectura y `cerrar-pr` para commit, push y creación del PR, sin duplicar
+esos procedimientos.
 
-## Authorization
+## Autorización
 
-An explicit `/autodev` request or an explicit request to execute a plan end to end authorizes the
-in-scope local implementation, non-destructive verification, safe feature branches, commits, pushes,
-and pull requests required by that plan. It never authorizes merge, deployment, production changes,
-destructive actions, or expansion beyond the plan. A narrower user instruction takes precedence.
-For code repositories, an applicable standing backup instruction also authorizes early publication
-of requested changes without a new routine confirmation. Follow any documentary direct-push
-exceptions in the applicable client or project instructions; do not duplicate their repository
-list here. Those narrower workflows stay outside this PR workflow.
+Un pedido explícito de `/autodev` o de ejecutar un plan de principio a fin autoriza la implementación
+local dentro del alcance, la verificación no destructiva, las ramas de trabajo seguras, los commits,
+los push y los PR que requiera ese plan. Nunca autoriza merge, despliegue, cambios en Producción,
+acciones destructivas ni ampliaciones del plan. Prevalece cualquier instrucción más restrictiva
+del usuario. En repositorios de código, una instrucción permanente aplicable de respaldo también
+autoriza publicar temprano los cambios solicitados sin otra confirmación rutinaria. Respeta las
+excepciones documentales de push directo de las instrucciones aplicables del cliente o proyecto;
+no dupliques aquí su lista de repositorios. Esos procedimientos específicos quedan fuera de este
+flujo de PR.
 
-Do not invent a missing plan. If no usable plan exists, stop after identifying that prerequisite.
+No inventes un plan que falta. Si no existe un plan utilizable, detente tras identificar ese requisito.
 
-## Workflow
+## Flujo
 
-1. Locate and read the complete plan plus the applicable `AGENTS.md` and project instructions.
-   Identify affected repositories, base branches, dependencies, success criteria, and phases. Before
-   changing code, inspect relevant configuration, environment, and data state when they can explain
-   or alter the requested behavior.
-2. Create or reuse one safe feature branch per repository; never push directly to `main`, `master`,
-   or `develop`, except when applicable instructions define a documentary direct-push workflow.
-   Use a worktree only when applicable client and project instructions allow it and the isolation
-   materially helps preserve local changes or parallel work; otherwise prefer the existing
-   checkout and a normal branch.
-3. Execute phases in dependency order. Apply `cambio-minimo` and verify each feature or bug fix
-   under the applicable test policy; this skill does not authorize otherwise prohibited new cases.
-   Follow the current project rules for any permitted delegation.
-   Choose the current agent or a suitable subagent available in the current environment for each
-   implementation phase, following that client's delegation policy. Keep one writer per repo and
-   branch. If no subagent is available, implement directly when capable and authorized; do not
-   replace an explicitly required independent reviewer with self-review. Delegation does not
-   expand the authorized scope, access, or publication permissions.
-4. In code repositories, invoke `cerrar-pr` in `-Backup` mode after the first scoped change and
-   at meaningful implementation/correction checkpoints. Check secrets, unrelated staged files,
-   outgoing commits and the intended remote before publication. Do not wait for the complete
-   plan, tests or reviews to create the draft PR. Reuse the same branch and PR; convert a ready
-   PR back to draft before a new push. Do not reproduce the Git/GitHub procedure here.
-5. Run the relevant tests, lint, typecheck, build, or equivalent verification in every affected
-   repository. Reuse existing verification guides and test harnesses. When repository edits are authorized, fill
-   a missing guide for the affected feature with preconditions and test data without secrets, role, actions, expected final state
-   and observable evidence; distinguish executed from pending checks. In read-only work, report the missing guide without creating it. Do not create another test system.
-   Never start development servers. Browser smoke tests require an explicit request.
-6. Run `code-review` (`/revisa`) over each complete branch and working-tree diff. Validate every
-   finding, immediately correct valid high and medium findings, maintain tests within policy, rerun verification,
-   and repeat the review until no valid high or medium findings remain. Correct low findings only
-   when the change is direct, safe, and within the plan.
-   If the same verification and review already passed under an enclosing workflow for the exact
-   content, base and environment, reuse that evidence. Repeat only after a change, failure,
-   uncertainty or an instruction that explicitly requires a fresh run.
-7. For repositories using the PR workflow, invoke `cerrar-pr` in reviewed mode after the local gate
-   passes. Keep the work incomplete until required tests and reviews for the published head pass.
-   Keep the PR draft unless repository rules require `ready` to trigger CI; then readiness starts
-   validation but does not prove completion. Never merge automatically.
-8. Update the plan only with states proven during this run, then report completed phases, verification
-   evidence, branches, PR URLs, and remaining blockers.
+1. Localiza y lee el plan completo, el `AGENTS.md` aplicable y las instrucciones del proyecto.
+   Identifica repositorios afectados, ramas base, dependencias, criterios de éxito y fases. Antes
+   de cambiar código, revisa configuración, entorno y estado de los datos pertinentes cuando
+   puedan explicar o alterar el comportamiento solicitado.
+2. Crea o reutiliza una rama de trabajo segura por repositorio; nunca hagas push directo a `main`,
+   `master` o `develop`, salvo que las instrucciones aplicables definan un procedimiento documental
+   de push directo. Usa un worktree solo cuando lo permitan las instrucciones del cliente y del
+   proyecto y el aislamiento ayude de forma material a preservar cambios locales o trabajo paralelo;
+   en otro caso, prefiere la copia de trabajo existente y una rama normal.
+3. Ejecuta las fases en orden de dependencia. Aplica `cambio-minimo` y verifica cada función o
+   corrección según la política de pruebas aplicable; esta skill no autoriza casos nuevos que esa
+   política prohíba. Respeta las reglas vigentes del proyecto para cualquier delegación permitida.
+   Elige al agente actual o a un subagente adecuado disponible en el entorno para cada fase de
+   implementación, según la política de delegación del cliente. Mantén un solo escritor por
+   repositorio y rama. Si no hay subagente disponible, implementa directamente cuando tengas
+   capacidad y autorización; no sustituyas una revisión independiente expresamente requerida por
+   una autorrevisión. Delegar no amplía el alcance, los accesos ni los permisos de publicación.
+4. En repositorios de código, invoca `cerrar-pr` en modo `-Backup` tras el primer cambio dentro
+   del alcance y en puntos significativos de implementación o corrección. Antes de publicar,
+   revisa secretos, archivos preparados ajenos, commits salientes y remoto de destino. No esperes
+   a completar el plan, las pruebas ni las revisiones para crear el PR borrador. Reutiliza la misma
+   rama y PR; devuelve un PR listo a borrador antes de otro push. No repitas aquí el procedimiento
+   de Git/GitHub.
+5. Ejecuta pruebas, lint, comprobación de tipos, compilación o verificación equivalente pertinentes
+   en cada repositorio afectado. Reutiliza guías y herramientas de pruebas existentes. Si están
+   autorizadas las ediciones del repositorio y falta una guía de la función afectada, complétala
+   con condiciones previas, datos de prueba sin secretos, rol, acciones, estado final esperado y
+   evidencia observable; distingue comprobaciones ejecutadas y pendientes. En un trabajo de solo
+   lectura, informa que falta la guía sin crearla. No crees otro sistema de pruebas.
+   Nunca inicies servidores de desarrollo. Las pruebas básicas en navegador requieren un pedido explícito.
+6. Ejecuta `code-review` (`/revisa`) sobre el diff completo de cada rama y sus cambios locales.
+   Valida cada hallazgo, corrige de inmediato los hallazgos altos y medios válidos, mantén las
+   pruebas dentro de la política aplicable, vuelve a verificar y repite la revisión hasta que no
+   queden hallazgos altos o medios válidos. Corrige hallazgos bajos solo cuando el cambio sea
+   directo, seguro y esté dentro del plan.
+   Si la misma verificación y revisión ya fueron satisfactorias en un flujo que contiene este
+   procedimiento para el contenido, base y entorno exactos, reutiliza esa evidencia. Repite solo
+   tras un cambio, fallo, incertidumbre o instrucción que exija expresamente una nueva ejecución.
+7. En repositorios que usen el flujo de PR, invoca `cerrar-pr` en modo revisado tras aprobar las
+   comprobaciones locales. Mantén el trabajo incompleto hasta que pasen las pruebas y revisiones
+   requeridas para el último commit publicado. Mantén el PR en borrador, salvo que las reglas del
+   repositorio requieran `ready` para activar CI; en ese caso, marcarlo listo inicia la validación,
+   pero no demuestra que haya terminado. Nunca hagas merge automáticamente.
+8. Actualiza el plan solo con estados demostrados durante esta ejecución y después informa fases
+   completadas, evidencia de verificación, ramas, enlaces a los PR y bloqueos restantes.
 
-## Stop Conditions
+## Condiciones de parada
 
-Incomplete implementation, failed/pending tests or reviews block completion; readiness follows the
-CI trigger exception in step 7. They do not block a safe draft backup in a code repository. Preserve verified progress in the draft and continue
-authorized corrections. Stop publication for secrets, unrelated changes that cannot be safely
-excluded, uncertain destination, or missing publication authority. Stop the affected work for a
-material product decision, destructive action, new access, production operation, or scope expansion
-that the original plan did not authorize. Report blockers without claiming completion.
+Una implementación incompleta o pruebas y revisiones fallidas o pendientes bloquean el cierre;
+marcar el PR listo sigue la excepción de activación de CI del paso 7. Esas condiciones no bloquean
+un respaldo seguro en borrador en un repositorio de código. Conserva el progreso verificado en el
+borrador y continúa las correcciones autorizadas. Detén la publicación si hay secretos, cambios
+ajenos que no puedas excluir con seguridad, destino incierto o falta de autorización para publicar.
+Detén el trabajo afectado ante una decisión material de producto, acción destructiva, acceso nuevo,
+operación en Producción o ampliación de alcance que el plan original no autorice. Informa los
+bloqueos sin afirmar que el trabajo está completo.
 
-Never merge. Do not add workflow or AI attribution to commit messages, PR titles, or PR bodies.
+Nunca hagas merge. No agregues atribuciones al flujo de trabajo ni a una IA en mensajes de commit,
+títulos o descripciones de PR.

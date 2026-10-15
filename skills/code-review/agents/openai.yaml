@@ -1,4 +1,4 @@
 interface:
-  display_name: "Code Review"
-  short_description: "Review PRs or branch diffs without editing files."
-  default_prompt: "Use $code-review to review this PR or current branch diff."
+  display_name: "Revisión de código"
+  short_description: "Revisa PR o diferencias de ramas sin editar archivos."
+  default_prompt: "Usa $code-review para revisar este PR o el diff de la rama actual."

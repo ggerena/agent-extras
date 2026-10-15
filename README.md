@@ -1,37 +1,49 @@
 # agent-extras
 
-Reusable agent skills, small helper scripts, and portable templates for Codex and Claude Code.
+Skills reutilizables para conocer un repositorio, investigar un fallo, planificar, implementar y revisar cambios con un agente de IA, con utilidades adicionales para tareas autorizadas.
 
-**Start here / Empieza aquí:** [how to use the skills, a copyable first prompt, and workflow examples](docs/USAGE.md). The guide also covers agents without native skill support; individual skills can still require specific tools or clients.
+**Empieza aquí:** [cómo usar las skills, primer mensaje copiable y ejemplos de flujo](docs/USAGE.md). Puedes leerlas sin instalarlas; algunas etapas requieren herramientas concretas y permisos explícitos.
 
-See [sources and adaptations](docs/SOURCES.md) for original skill references and licenses, and [portability and validation](docs/PORTABILITY.md) before installing.
+## Siete flujos principales
 
-## Maintained workflows
+| Necesidad | Skill | Límite principal |
+| --- | --- | --- |
+| Conocer un repositorio | [mira](skills/mira/SKILL.md) | Lee solo el README y explica qué hace. |
+| Encontrar la causa de un fallo | [diagnostico-con-evidencia](skills/diagnostico-con-evidencia/SKILL.md) | Reúne evidencia; diagnosticar no autoriza corregir. |
+| Implementar un cambio acotado | [cambio-minimo](skills/cambio-minimo/SKILL.md) | Reutiliza lo existente y corrige en la capa responsable. |
+| Preparar un plan | [crear-spec](skills/crear-spec/SKILL.md) | Guarda una especificación verificable; no la implementa. |
+| Ejecutar un plan existente | [autodev](skills/autodev/SKILL.md) | Implementa, respalda y revisa; no hace merge ni despliega. |
+| Revisar código | [code-review](skills/code-review/SKILL.md) | Revisa una rama o PR en solo lectura. |
+| Respaldar y cerrar una implementación | [cerrar-pr](skills/cerrar-pr/SKILL.md) | Publica cuando esté autorizado y exige pruebas y revisión para cerrar. |
 
-`agent-handoff`, `autodev`, `cambio-minimo`, `cerrar-pr`, `code-review`, `diagnostico-con-evidencia`, `handoff-implementation-to-codex`, `handoff-implementation-to-grok`, `km-analyze`, `mira`, `retrospectiva-agentes`, `revisa-grok`, and `se-pego-mi-pc`.
+`autodev` utiliza `cambio-minimo`, `code-review` y `cerrar-pr` durante sus etapas. Las demás skills se pueden aplicar por separado. No necesitas leerlas todas para empezar.
 
-For these skills, `skills/` is the editable source. Synchronize authorized changes with the active installation; preserve supporting files and do not maintain accidental divergent copies. Presence in this repository does not mean every skill is installed.
+## Utilidades adicionales
 
-## Portable exports requiring local configuration
+| Necesidad | Skill |
+| --- | --- |
+| Traspasar la responsabilidad de un trabajo a otro agente | [agent-handoff](skills/agent-handoff/SKILL.md) |
+| Delegar una fase y conservar la coordinación | [handoff-implementation-to-codex](skills/handoff-implementation-to-codex/SKILL.md), [handoff-implementation-to-grok](skills/handoff-implementation-to-grok/SKILL.md) |
+| Medir complejidad y salud del código | [km-analyze](skills/km-analyze/SKILL.md) |
+| Preparar o revisar una versión | [crear-release](skills/crear-release/SKILL.md) |
+| Resumir actividad comprobada | [daily](skills/daily/SKILL.md) |
+| Analizar dificultades en sesiones con agentes | [retrospectiva-agentes](skills/retrospectiva-agentes/SKILL.md) |
+| Actualizar agentes en Windows | [actualiza-todo](skills/actualiza-todo/SKILL.md) |
+| Auditar o restaurar controles locales de Grok | [revisa-grok](skills/revisa-grok/SKILL.md) |
+| Capturar evidencia de un bloqueo de Windows | [se-pego-mi-pc](skills/se-pego-mi-pc/SKILL.md) |
+| Enviar un mensaje autorizado por WhatsApp | [whatsapp-notify](skills/whatsapp-notify/SKILL.md) |
+| Encargar trabajo por Buzz con autorización específica | [mandalo-por-buzz](skills/mandalo-por-buzz/SKILL.md) |
 
-`actualiza-todo`, `crear-release`, `crear-spec`, `daily`, `whatsapp-notify`, and `mandalo-por-buzz`.
+## Uso y requisitos
 
-These are neutral adaptations, not identical backups of private operating rules. Configure repositories, recipients, environments, paths and permissions locally. Do not overwrite a private installation with these templates without reconciling its requirements. Buzz requires a separately configured helper; no private transport script is included.
+Lee la [guía de uso](docs/USAGE.md) y las instrucciones del proyecto objetivo. Si tu aplicación puede leer archivos, puede consultar un `SKILL.md` directamente; no necesita reconocer un comando especial. Comprueba las [dependencias y límites de portabilidad](docs/PORTABILITY.md) antes de instalar o ejecutar recursos.
 
-## Third-party snapshots
+Las fuentes editables están en `skills/`. Conserva toda la carpeta de la skill, incluidos sus metadatos y scripts cuando existan. `crear-spec` y las plantillas operativas requieren definir rutas, repositorios, permisos u otros datos locales. `cerrar-pr` incluye scripts PowerShell y requiere `git` y `gh` para publicar. Las delegaciones necesitan el CLI del agente de destino; las utilidades de Windows tienen dependencias propias.
 
-`cloudflare`, `cloudflare-email-service`, `cloudflare-one`, `durable-objects`, `frontend-ui-engineering`, `owasp-security`, `react-best-practices`, `security-audit`, `teach`, `typesafe-ai`, `web-perf`, `workers-best-practices`, and `wrangler`.
+Instala únicamente lo necesario y en los destinos autorizados. La presencia de una skill aquí no significa que esté instalada ni autoriza ejecutar sus scripts. Las reglas del usuario y del proyecto determinan el alcance, las pruebas, la publicación y cualquier revisión independiente.
 
-Supporting resources and existing attribution are retained. Original references, licenses and differences are listed in [SOURCES.md](docs/SOURCES.md). These are snapshots of installed skills, not automatic upgrades to upstream.
+## Referencias externas
 
-## Retired material
+El [catálogo de fuentes e influencias](docs/SOURCES.md) enlaza bibliotecas públicas para trabajos especializados. Consulta sus instrucciones, herramientas y licencias en origen; son referencias externas al catálogo mantenido aquí.
 
-`differential-review` and `fin-sesion` remain for recovery and historical reference; do not install them as active workflows. Legacy source-command variants exist only in older history.
-
-## Installation and scope
-
-Read the selected skill first and install only what is needed. Shared installations can use `~/.agents/skills`; Claude Code can access the same folders through its supported skills directory/link. Preserve `agents/` metadata and supporting resources. Client-specific tools and dependencies must be available before use; matching file layouts alone do not prove runtime compatibility.
-
-Most scripts require PowerShell; `agent-handoff` also includes Bash. `actualiza-todo` is Windows-specific. No script should be run merely to install a skill or inspect its instructions.
-
-Keep private memories, user rules, customer procedures, contacts, credentials, application code, machine-specific configuration, generated outputs and local backups outside this repository. Authorization always comes from the current user and applicable project instructions.
+Mantén memorias privadas, reglas personales, datos de clientes, contactos, credenciales, código de aplicaciones, configuración de máquina, archivos generados y respaldos locales fuera de esta biblioteca.

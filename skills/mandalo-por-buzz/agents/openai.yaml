@@ -1,5 +1,5 @@
 interface:
   display_name: "Encargo por Buzz"
-  short_description: "Envía un encargo autorizado con helper local"
+  short_description: "Envía un encargo autorizado con un script auxiliar local"
 policy:
   allow_implicit_invocation: false

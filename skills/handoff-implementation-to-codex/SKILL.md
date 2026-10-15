@@ -1,29 +1,29 @@
 ---
 name: handoff-implementation-to-codex
-description: Use when the user asks to delegate a large cohesive coding phase to Codex CLI (GPT-6.1 Sol) so the coordinator spends minimal quota while Codex implements, validates, reviews, corrects, and operationally closes it. Prefer substantial self-contained work packages over small sequential tasks, with one repo and branch per phase. Provides medium/high/xhigh effort selection, two-file phase sessions, source-plan hashing, per-mode sandboxes (read-only review, workspace-write implement), automatic Git/path guardrails, detached monitoring, approved commit/push/PR closeout without merge, Markdown reporting, cleanup, and portable Python/PowerShell launchers. Do not use for a one-off question or second opinion (run `codex exec` directly), full ownership transfer, merge, or deploy.
+description: 'Usar cuando el usuario pida delegar una fase grande y coherente de código a Codex CLI (GPT-6.1 Sol) para reducir el consumo de cuota del coordinador mientras Codex implementa, valida, revisa, corrige y completa el cierre operativo. Preferir paquetes sustanciales y autocontenidos, con un repositorio y rama por fase. Incluye esfuerzos medium/high/xhigh, sesiones de dos archivos, hash del plan fuente, entornos aislados por modo (revisión read-only e implementación workspace-write), controles automáticos de Git y rutas, seguimiento en segundo plano, cierre autorizado con commit/push/PR sin merge, informes Markdown, limpieza y lanzadores Python/PowerShell portables. No usar para una pregunta o segunda opinión puntual (ejecutar codex exec directamente), traspaso total de responsabilidad, merge ni despliegue.'
 ---
 
 # Delegación supervisada a Codex
 
 Mantener al invocador como coordinador y aprobador. Delegar a Codex (GPT-6.1
-Sol) la mayor fase coherente y verificable que quepa dentro de un repo y una
-rama, con paths explícitos.
+Sol) la mayor fase coherente y verificable que quepa dentro de un repositorio y una
+rama, con rutas explícitas.
 
 ## Tamaño de la delegación
 
 - Preferir paquetes grandes y autocontenidos: implementación, pruebas,
   correcciones relacionadas, validaciones y preparación del cierre del mismo
   objetivo deben viajar juntos.
-- No crear microfases por archivo, hallazgo, test o ajuste cuando Codex pueda
+- No crear microfases por archivo, hallazgo, prueba o ajuste cuando Codex pueda
   resolverlos razonablemente en una sola ejecución.
-- Agrupar todos los hallazgos conocidos del mismo repo y objetivo antes de
+- Agrupar todos los hallazgos conocidos del mismo repositorio y objetivo antes de
   lanzar `implement`.
-- Dividir solo por una frontera real: repos o ramas distintos, bloqueo externo,
+- Dividir solo por una frontera real: repositorios o ramas distintos, bloqueo externo,
   autorización diferente, riesgo operacional independiente o un conjunto de
   `AllowedPaths` que deje de ser auditable.
-- Mantener una fase auditable por repo, pero lanzar en paralelo todas las fases
+- Mantener una fase auditable por repositorio, pero lanzar en paralelo todas las fases
   grandes que puedan avanzar con un contrato esperado explícito. No serializar
-  repos por defecto: una dependencia parcial no obliga a esperar si Codex puede
+  repositorios por defecto: una dependencia parcial no obliga a esperar si Codex puede
   implementar, probar y reportar el punto de integración pendiente sin inventar
   el contrato.
 - No interrumpir a Codex para asignarle trabajo adicional que ya podía incluirse
@@ -33,25 +33,25 @@ rama, con paths explícitos.
 ## Flujo obligatorio
 
 1. Leer `AGENTS.md`, estado Git y plan fuente.
-2. Consolidar todos los cambios claros y relacionados del repo; luego definir
-   objetivo, `AllowedPaths` (incluyendo los archivos de test), validaciones
-   —siempre con la ejecución de tests— y esfuerzo:
+2. Consolidar todos los cambios claros y relacionados del repositorio; luego definir
+   objetivo, `AllowedPaths` (incluyendo los archivos de prueba), validaciones
+   —siempre con la ejecución de pruebas— y esfuerzo:
    - `high` es el valor por defecto y sirve para casi todo.
    - `medium` solo si el cambio es trivial y quieres que termine antes.
    - `xhigh` para lo realmente delicado: seguridad, concurrencia o migraciones.
-3. Exigir un gate previo `pass`; no usar `SkipReviewGate` salvo autorización
+3. Exigir un control previo `pass`; no usar `SkipReviewGate` salvo autorización
    explícita mediante `ForceHandoff` y `ForceReason`.
 4. Iniciar `implement` y conservar su `phaseDirectory`.
 5. Monitorear con `wait-codex-handoff.ps1` en ventanas de hasta 55 segundos. El
-   estado efectivo debe tener guardrails sin violaciones.
-6. Reutilizar la misma fase para un run separado `review` en `high` o `xhigh`.
+   estado efectivo debe tener controles de alcance sin violaciones.
+6. Reutilizar la misma fase para una ejecución separada `review` en `high` o `xhigh`.
 7. Si hay hallazgos, reutilizarla para `implement` correctivo y luego otro
-   `review`. El coordinador revisa el diff después del review de Codex.
+   `review`. El coordinador revisa el diff después de la revisión de Codex.
 8. Tras aprobación, reutilizarla para `closeout`.
 9. Generar el reporte Markdown y limpiar la fase cuando su información ya esté
    absorbida.
 
-Lanzar en paralelo las fases de repos distintos siempre que el prompt declare
+Lanzar en paralelo las fases de repositorios distintos siempre que el mensaje de instrucciones declare
 el contrato esperado, los puntos todavía pendientes y la prohibición de
 inventarlos. Esperar el resultado de otra fase solo cuando sea materialmente
 imposible implementar o validar sin su diff definitivo.
@@ -67,15 +67,15 @@ Usar una carpeta estable por fase:
 ```
 
 - Reutilizarla con `PhaseDirectory`; no crear una carpeta por implementación,
-  review, corrección y cierre.
+  revisión, corrección y cierre.
 - `handoff.json` conserva hasta 20 resultados compactos en `history`.
 - `result.json` contiene el intento actual, diagnóstico del proceso, consumo de
-  tokens y guardrails.
+  tokens y controles de alcance.
 - Codex devuelve JSON estructurado; el supervisor escribe `result.json` de forma
   atómica. Codex no debe editarlo directamente.
 - Junto a esos dos archivos el supervisor deja material de trabajo propio
   (`prompt.md`, `schema.json`, `last-message.json`); se borra con la fase.
-- No escribir intercambio dentro del repo objetivo.
+- No escribir intercambio dentro del repositorio objetivo.
 
 Resolver la raíz mediante `HandoffRoot`, `AGENT_HANDOFF_ROOT`,
 `WorkspaceRoot`/`AGENT_WORKSPACE_ROOT`, `.agent-handoffs` o el `AGENTS.md`
@@ -88,13 +88,13 @@ ancestral más cercano.
 - Los intentos posteriores de la misma fase usan `verify`: comprueban ruta y
   SHA-256 y consumen el historial compacto sin releer el plan completo.
 - Si cambia el hash, bloquear `verify` y exigir otra lectura `full`.
-- No duplicar el prompt ni copiar contenido del plan al handoff.
+- No duplicar el mensaje de instrucciones ni copiar contenido del plan al traspaso.
 - No repetir mecánicamente todas las validaciones de Codex; el coordinador
   profundiza solo ante fallos, riesgo o evidencia incompleta.
 - `result.json` registra `usage` por intento (tokens de entrada, en caché, de
   salida y de razonamiento) y `usage_total` cuando corre la cadena automática.
 
-## Guardrails automáticos
+## Controles de alcance automáticos
 
 `get-codex-handoff-status.ps1` y `codex_handoff.py status` deben verificar:
 
@@ -105,35 +105,35 @@ ancestral más cercano.
 - coherencia entre commit reportado y HEAD;
 - proceso `pending` sin PID vivo como fallo;
 - resultado JSON válido y perteneciente a la fase/intento;
-- integridad: `result.json` guarda un SHA-256 de modo, `AllowedPaths` y foto
+- integridad: `result.json` guarda un SHA-256 de modo, `AllowedPaths` y captura
   original; si `handoff.json` (que Codex podría escribir) no coincide, es
   violación;
 - en `closeout`, las ramas `main`, `master`, `develop` y `BaseBranch` del remoto
   (`git ls-remote`) no deben cambiar entre el inicio y el final; y si se
   declara push, el commit publicado debe coincidir con HEAD (se acepta la rama
-  remota o el upstream; las reglas piden `git push -u`).
+  remota o la rama remota de seguimiento; las reglas piden `git push -u`).
 
 Tratar cualquier violación como `failed`, aunque Codex haya declarado `pass`.
-El sandbox es la primera barrera; los guardrails son la segunda y la única que
+El entorno aislado es la primera barrera; los controles de alcance son la segunda y la única que
 cubre las rutas permitidas.
 
-Límite conocido: los guardrails solo ven lo que `git` reporta dentro del repo.
+Límite conocido: los controles de alcance solo ven lo que `git` reporta dentro del repositorio.
 No detectan escrituras en archivos ignorados por git (`.gitignore`) ni fuera del
-repo, y `workspace-write` sí puede escribir fuera. Revisar a mano si importa.
+repositorio, y `workspace-write` sí puede escribir fuera. Revisar a mano si importa.
 
 Mientras corre la cadena automática, el supervisor mantiene su PID vivo y
 `execution.chain_running=true`; `status` y `wait` no la dan por terminada ni por
-rancia, y no se puede lanzar otra ejecución sobre la fase. Si el supervisor muere
+desactualizada, y no se puede lanzar otra ejecución sobre la fase. Si el supervisor muere
 a media cadena, `status` marca `chain_interrupted_without_process`.
 
 ## Revisión y corrección automáticas
 
-Un `implement` que termina en `pass` encadena solo: **tests → review →
-corrección → review final**, sin que el coordinador lance cada paso.
+Un `implement` que termina en `pass` encadena solo: **pruebas → revisión →
+corrección → revisión final**, sin que el coordinador lance cada paso.
 
-El paso de tests solo se ejecuta si el diff del `implement` no tocó ningún
+El paso de pruebas solo se ejecuta si el diff del `implement` no tocó ningún
 archivo de prueba: el supervisor lo detecta por la ruta (`__tests__/`, `tests/`,
-`*.test.*`, `*.spec.*`, `test_*.py`) y le reclama a Codex los tests que faltan
+`*.test.*`, `*.spec.*`, `test_*.py`) y le reclama a Codex las pruebas que faltan
 antes de revisar. Se desactiva con `-NoTestGate` (`--no-test-gate`) en fases de
 documentación o configuración, donde no aplica.
 
@@ -141,20 +141,20 @@ Política de corrección, aplicada por Codex en el paso intermedio:
 
 - Hallazgos de severidad **alta y media**: se corrigen siempre.
 - De **baja**: solo los directos — renombres, comentarios que quedaron
-  mentirosos, validaciones simples, duplicación evidente, manejo de error que
+  incorrectos, validaciones simples, duplicación evidente, manejo de error que
   falta.
 - De baja que impliquen rediseño o decisiones de producto: **no se tocan**, se
   listan en `next_step` para el coordinador.
 
-Si la etapa de tests no termina en `pass`, la cadena se corta con ese estado y no
-sigue al review. En `review` las `ValidationCommands` se muestran solo como
-contexto y no se ejecutan. Si el review final aún trae hallazgos, el estado queda
+Si la etapa de pruebas no termina en `pass`, la cadena se corta con ese estado y no
+sigue a la revisión. En `review` las `ValidationCommands` se muestran solo como
+contexto y no se ejecutan. Si la revisión final aún trae hallazgos, el estado queda
 `blocked`.
 
 Cada etapa queda resumida en `result.json` bajo `chain`. Se desactiva con
 `-NoAutoReview` (`--no-auto-review`) cuando la fase se quiere revisar a mano.
-Cada etapa se audita contra el estado del repo en que la recibe, así los cambios
-del `implement` previo no cuentan como escrituras del review.
+Cada etapa se audita contra el estado del repositorio en que la recibe, así los cambios
+del `implement` previo no cuentan como escrituras de la revisión.
 
 El coordinador revisa igual el diff final: la revisión automática no lo
 reemplaza, le ahorra la primera pasada.
@@ -170,31 +170,31 @@ codex exec -C <repo> -m <model> -c model_reasoning_effort=<effort>
   --output-schema <fase>/schema.json -o <fase>/last-message.json -
 ```
 
-- **Prompt por stdin** (`-`), tomado de `prompt.md`. Los archivos auxiliares
-  viven en la carpeta de fase, nunca en el repo objetivo.
+- **Instrucciones por entrada estándar (`stdin`)** (`-`), tomado de `prompt.md`. Los archivos auxiliares
+  viven en la carpeta de fase, nunca en el repositorio objetivo.
 - **Resultado por esquema.** `--output-schema` más `-o` entregan el último
   mensaje como JSON que cumple el esquema. Si `last-message.json` falta o no es
   válido, el supervisor toma el último mensaje del agente en el flujo `--json`
   y, como último recurso, el último JSON válido de la salida.
 - **Modelo y esfuerzo.** Modelo por defecto `gpt-6.1-sol` (`CodexModel`).
   Esfuerzo `medium`, `high` (por defecto) o `xhigh`.
-- **Sandbox por modo:**
+- **Entorno aislado por modo:**
   - `review` → `read-only`: Codex no puede escribir; es la garantía principal
     de revisión no invasiva.
-  - `implement` → `workspace-write`: escribe en el repo, pero `.git` queda de
-    solo lectura, así que no puede commitear ni cambiar de rama. También puede
-    escribir fuera del repo (carpetas temporales, directorios hermanos); por eso
-    `AllowedPaths` y los guardrails siguen siendo obligatorios. No tiene red.
+  - `implement` → `workspace-write`: escribe en el repositorio, pero `.git` queda de
+    solo lectura, así que no puede crear commits ni cambiar de rama. También puede
+    escribir fuera del repositorio (carpetas temporales, directorios hermanos); por eso
+    `AllowedPaths` y los controles de alcance siguen siendo obligatorios. No tiene red.
   - `closeout` → `danger-full-access`: necesita escribir `.git` y red para
     `git push` y `gh pr`. Solo se permite con `AllowGitCloseout`; sin esa
-    bandera el lanzador se niega. Se apoya en las reglas del prompt y en los
-    guardrails posteriores.
-- **`approval_policy="never"`** se pasa siempre, sin depender de la config del
+    bandera el lanzador se niega. Se apoya en las reglas del mensaje de instrucciones y en los
+    controles de alcance posteriores.
+- **`approval_policy="never"`** se pasa siempre, sin depender de la configuración del
   usuario.
 - **No usar** `--dangerously-bypass-approvals-and-sandbox`, `--worktree`,
   `--approve-for-me` ni `--ignore-user-config` (este último quitaría el modelo y
-  la autenticación de la config).
-- **Ruido de MCP.** Codex carga los MCP de la config del usuario y algunos
+  la autenticación de la configuración).
+- **Ruido de MCP.** Codex carga los MCP de la configuración del usuario y algunos
   fallan (`rmcp::transport::worker ... 127.0.0.1:8000`). Se filtran del
   diagnóstico y no cuentan como fallo.
 - **Proceso.** Corre en segundo plano sin ventana ni consola. Se guarda el PID
@@ -209,39 +209,40 @@ codex exec -C <repo> -m <model> -c model_reasoning_effort=<effort>
 
 - Exigir `AllowedPaths`. **Sin comodines**: el validador compara prefijos de
   directorio, así que `backend/src/api/x` sirve y `backend/src/api/x/**` no.
-- **Exigir tests siempre.** Toda funcionalidad nueva y todo bug fix del paquete
-  debe incluir tests nuevos o actualizar los existentes: los archivos de test
+- **Exigir pruebas siempre.** Toda funcionalidad nueva y toda corrección de errores del paquete
+  debe incluir pruebas nuevas o actualizar las existentes: los archivos de prueba
   van dentro de `AllowedPaths` y su ejecución dentro de `ValidationCommands`.
-  Un `implement` sin tests se trata como paquete mal definido y se corrige antes
-  de lanzar, no después. Es regla del usuario, no criterio del agente. Al
-  coordinador le queda comprobar que los tests que llegaron prueben algo real,
+  Un `implement` sin pruebas se trata como paquete mal definido y se corrige antes
+  de lanzar, no después. Es un requisito de este flujo: si entra en conflicto con la política
+  del proyecto, detén el inicio hasta resolverlo; no autoriza crear pruebas prohibidas. Al
+  coordinador le queda comprobar que las pruebas que llegaron prueben algo real,
   no que existan.
-- Editar solo esos paths; leer libremente y, para probar, ejecutar solo `ValidationCommands`.
+- Editar solo esas rutas; leer libremente y, para probar, ejecutar solo `ValidationCommands`.
 - Eliminar artefactos de validación que queden fuera de alcance.
-- No hacer commit, push, PR, merge ni deploy.
+- No hacer commit, push, PR, merge ni despliegue.
 
 ### `review`
 
 - Exigir esfuerzo `high` o `xhigh`.
-- Revisión adversarial estrictamente no invasiva: bugs reales, regresiones y
-  violaciones del `AGENTS.md` del repo.
-- Incluir tracked, staged y untracked.
-- No crear archivos ni ejecutar build, tests o comandos que escriban
+- Revisión adversarial estrictamente no invasiva: errores reales, regresiones y
+  violaciones del `AGENTS.md` del repositorio.
+- Incluir archivos con seguimiento, preparados y sin seguimiento.
+- No crear archivos ni ejecutar compilación, pruebas o comandos que escriban
   artefactos.
 - Pasar `ReviewSkillPath` cuando el usuario exija una skill concreta; Codex la
   lee completa y la aplica. Sin ella se usa la revisión propia descrita arriba.
 
 ### `closeout`
 
-- Exigir `AllowGitCloseout`, `AllowedPaths`, gate `pass` y autorización vigente
+- Exigir `AllowGitCloseout`, `AllowedPaths`, control previo `pass` y autorización vigente
   del usuario.
 - Usar `checkpoint` para commit+push de fase.
 - Usar `pull-request` para commit+push y crear o reutilizar un PR.
 - Pasar `UpdateExistingPr` y `PrBody` para actualizar un PR existente con
   alcance, commits, pruebas, pendientes y PR relacionados.
-- Mantener una rama feature por repo.
-- No stagear globalmente, reescribir historia, mergear, taggear ni desplegar.
-- Nunca operar sobre `main`, `master`, `develop`, `BaseBranch` o detached HEAD.
+- Mantener una rama de trabajo por repositorio.
+- No preparar todos los archivos sin selección, reescribir historia, hacer merge, crear etiquetas ni desplegar.
+- Nunca operar sobre `main`, `master`, `develop`, `BaseBranch` o HEAD separado.
 
 ## Ejecución
 
@@ -262,7 +263,7 @@ $start = & "$skill\handoff-implementation-to-codex.ps1" `
   -Launch | ConvertFrom-Json
 ```
 
-Reutilizar la fase para review:
+Reutilizar la fase para revisión:
 
 ```powershell
 & "$skill\handoff-implementation-to-codex.ps1" `
@@ -289,7 +290,7 @@ Monitorear, reportar y limpiar:
 & "$skill\remove-codex-handoff.ps1" -PhaseDirectory $start.phaseDirectory
 ```
 
-En Linux/macOS o desde cualquier harness con Python 3, usar la misma semántica:
+En Linux/macOS o desde cualquier entorno de herramientas con Python 3, usar la misma semántica:
 
 ```bash
 python3 scripts/codex_handoff.py start --mode implement \
@@ -303,13 +304,13 @@ python3 scripts/codex_handoff.py status --phase-dir /ruta/fase
 python3 scripts/codex_handoff.py wait --phase-dir /ruta/fase
 ```
 
-## Runtime y seguridad
+## Entorno de ejecución y seguridad
 
-- Pasar `RuntimeSetupCommand` cuando el repo requiera una versión concreta. En
+- Pasar `RuntimeSetupCommand` cuando el repositorio requiera una versión concreta. En
   Windows usar `fnm` o una ruta de Node comprobada; no improvisar `nvm use`.
-- No saltarse el sandbox ni las aprobaciones, y no usar worktrees del lanzador.
-- No incluir secretos, payloads sensibles ni contenido de archivos en
-  snapshots. Los snapshots guardan nombres y hashes.
+- No saltarse el entorno aislado ni las aprobaciones, y no usar worktrees del lanzador.
+- No incluir secretos, datos de solicitudes sensibles ni contenido de archivos en
+  capturas. Las capturas guardan nombres y hashes.
 - Capturar salida y errores solo como diagnóstico acotado y redactado.
 - No modificar configuración o memoria de otros agentes.
 - No lanzar servidores de desarrollo.

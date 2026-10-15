@@ -1,15 +1,15 @@
 ---
 name: crear-release
-description: Prepara o revisa un release de los repositorios configurados, relacionando el candidato con evidencia previa y condiciones operativas. Usar para crear un release o revisar su riesgo; no autoriza merge, despliegue ni cambios en ambientes.
+description: Prepara o revisa una versión de los repositorios configurados, relacionando el candidato con evidencia previa y condiciones operativas. Usar para crear una versión o revisar su riesgo; no autoriza merge, despliegue ni cambios en ambientes.
 ---
 
-# Preparar o revisar un release
+# Preparar o revisar una versión
 
-Plantilla neutral: requiere configuración local y no es una copia idéntica de reglas de un proyecto. Configurar repositorios, ramas origen/destino, convención de release, ambientes permitidos, documentación y controles obligatorios antes de operar. No inferirlos de nombres habituales.
+Plantilla neutral: requiere configuración local y no es una copia idéntica de reglas de un proyecto. Configurar repositorios, ramas origen/destino, convención de versiones, ambientes permitidos, documentación y controles obligatorios antes de operar. No inferirlos de nombres habituales.
 
 ## Alcance
 
-Revisar no autoriza corregir, publicar ni cambiar ambientes. Crear un release permite preparar la rama y su PR únicamente si ese pedido y las instrucciones aplicables autorizan la publicación. Nunca incluye merge o despliegue. Consultar antes de acciones destructivas, nuevos accesos o decisiones materiales.
+Revisar no autoriza corregir, publicar ni cambiar ambientes. Crear una versión permite preparar la rama y su PR únicamente si ese pedido y las instrucciones aplicables autorizan la publicación. Nunca incluye merge o despliegue. Consultar antes de acciones destructivas, nuevos accesos o decisiones materiales.
 
 ## Procedimiento
 

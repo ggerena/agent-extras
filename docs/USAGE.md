@@ -47,7 +47,7 @@ Si tu aplicación no puede leer archivos locales, puedes adjuntar o pegar el `SK
 | Revisar una rama o PR | [code-review](../skills/code-review/SKILL.md) | Hallazgos con evidencia en solo lectura; no corrige ni comenta en GitHub sin autorización. |
 | Respaldar o cerrar cambios de código | [cerrar-pr](../skills/cerrar-pr/SKILL.md) | Rama, commit, push y PR cuando estén autorizados; respaldo no equivale a validación final. |
 
-No necesitas combinar todas las filas. `autodev` ya compone `cambio-minimo`, `code-review` y `cerrar-pr`: sigue esas dependencias cuando llegue su etapa, sin duplicar el trabajo. Para tareas especializadas, consulta el catálogo; por ejemplo, las skills de Cloudflare solo corresponden si tu proyecto usa esos productos.
+No necesitas combinar todas las filas. `autodev` ya compone `cambio-minimo`, `code-review` y `cerrar-pr`: sigue esas dependencias cuando llegue su etapa, sin duplicar el trabajo. Para tareas especializadas, consulta las [referencias externas](SOURCES.md); por ejemplo, Cloudflare solo corresponde si tu proyecto usa esos productos. Esas referencias se consultan en origen y pueden requerir herramientas o instalación propias.
 
 ### Dependencias antes de empezar
 
@@ -56,7 +56,7 @@ No necesitas combinar todas las filas. `autodev` ya compone `cambio-minimo`, `co
 | Leer un README o razonar sobre instrucciones | Acceso de lectura o contenido adjunto; no requiere CLI de un proveedor de modelos. |
 | `mira` con un repositorio remoto que aún no está disponible localmente | `git`, conexión, acceso al remoto y permiso de escritura en una carpeta segura para clonarlo. Un encargo limitado a lectura local no autoriza ese paso. |
 | Revisar una rama local | `git` y acceso al repo. Para revisar un PR con el procedimiento documentado, también `gh` con sesión y acceso al repositorio. |
-| `cerrar-pr` y las etapas de publicación de `autodev` | `git`, `gh` autenticado en la cuenta correcta y PowerShell compatible con sus scripts. El helper invoca el ejecutable `powershell` internamente; tener solo `pwsh` no acredita compatibilidad. |
+| `cerrar-pr` y las etapas de publicación de `autodev` | `git`, `gh` autenticado en la cuenta correcta y PowerShell compatible con sus scripts. El script auxiliar invoca el ejecutable `powershell` internamente; tener solo `pwsh` no acredita compatibilidad. |
 | Traspasar trabajo a Codex o Grok | El CLI correspondiente, sesión válida y autorización para ese traspaso. `revisa-grok` también requiere la instalación local de Grok Build y PowerShell. |
 | Una revisión independiente obligatoria | Otra sesión o agente disponible, distinto de quien implementó, con acceso autorizado al material que debe revisar. |
 
@@ -104,7 +104,7 @@ Los pedidos siguientes son ejemplos para adaptar y enviar deliberadamente. Leer 
 
 **Flujo:** comprobar plan completo, repo, base y cambios existentes → implementar por fases → respaldo temprano con `cerrar-pr` en PR borrador → verificaciones y revisión requeridas → corregir y revalidar → completar el PR conforme a las reglas del proyecto. Conservar los cambios ajenos.
 
-**Destino de publicación:** comprueba el nombre y URL de push del remoto autorizado. Al usar [el helper de cerrar-pr](../skills/cerrar-pr/scripts/cerrar-pr.ps1), pasa explícitamente `-RepoPath`, `-BaseBranch` y `-Remote` con los valores comprobados. `-Remote` recibe el nombre local del remoto, no su URL. Sin ese parámetro el script prefiere `private`, luego `origin` y finalmente otro remoto disponible; no confíes en esa elección para representar el permiso del usuario. Si el destino no coincide, detente antes de publicar. Los parámetros que declaran autorización o revisión no sustituyen obtenerlas.
+**Destino de publicación:** comprueba el nombre y URL de push del remoto autorizado. Al usar [el script auxiliar de cerrar-pr](../skills/cerrar-pr/scripts/cerrar-pr.ps1), pasa explícitamente `-RepoPath`, `-BaseBranch` y `-Remote` con los valores comprobados. `-Remote` recibe el nombre local del remoto, no su URL. Sin ese parámetro el script prefiere `private`, luego `origin` y finalmente otro remoto disponible; no confíes en esa elección para representar el permiso del usuario. Si el destino no coincide, detente antes de publicar. Los parámetros que declaran autorización o revisión no sustituyen obtenerlas.
 
 **Entrega:** enlace al PR y evidencia del estado publicado. Si el plan no existe, no está completo o falta una condición obligatoria de cierre, informar el bloqueo correspondiente; un PR creado no prueba que el trabajo esté listo.
 
@@ -124,10 +124,9 @@ Codex documenta la lectura gradual y las ubicaciones `~/.agents/skills` y `.agen
 
 Antes de adoptar una skill del [catálogo](../README.md):
 
-- **Mantenida:** comprueba dependencias antes de usarla; mantenida no significa universal. Los traspasos a Codex/Grok necesitan sus respectivos CLI, y las utilidades para mantener el computador pueden depender de Windows.
-- **Plantilla portable:** configura rutas, repositorios, destinatarios y permisos fuera de esta biblioteca compartida. `mandalo-por-buzz` requiere un helper propio; `whatsapp-notify` requiere herramientas y destinatario comprobado. Ninguna autoriza enviar mensajes por estar instalada.
-- **De terceros:** conserva recursos y atribución; consulta [SOURCES.md](SOURCES.md). Son copias de versiones concretas, no actualizaciones automáticas.
-- **Retirada:** no actives `differential-review` ni `fin-sesion`; permanecen como referencia histórica.
+- **Flujo principal o utilidad propia:** comprueba las dependencias antes de usarlo; estar mantenido no significa funcionar en cualquier entorno. Los traspasos a Codex/Grok necesitan sus respectivos CLI y las utilidades para mantener el equipo pueden depender de Windows.
+- **Plantilla configurable:** define rutas, repositorios, destinatarios y permisos fuera de esta biblioteca compartida. `mandalo-por-buzz` requiere un script auxiliar propio; `whatsapp-notify` requiere herramientas y destinatario comprobado. Ninguna autoriza enviar mensajes por estar instalada.
+- **Referencia externa:** consulta el enlace de [SOURCES.md](SOURCES.md), las instrucciones y la licencia del proyecto original. No supongas que sus recursos están instalados ni que sus permisos coinciden con los de esta biblioteca.
 
 ## Cómo comprobar que el agente entendió
 

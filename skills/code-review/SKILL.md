@@ -1,60 +1,84 @@
 ---
 name: code-review
-description: Use when the user asks for code review, /revisa, /code-review, revisar un PR, revisar una rama, revisar cambios contra una base, or wants a senior adversarial review of a pull request or branch diff without editing files. Prioritize real bugs, regressions, project-instruction violations, and high-confidence findings; comment on the PR only with explicit authorization.
+description: Usar cuando el usuario pida una revisión de código, /revisa, /code-review, revisar un PR, una rama o cambios contra una base, o una revisión adversarial experta de un diff sin editar archivos. Priorizar errores reales, regresiones, incumplimientos de las instrucciones del proyecto y hallazgos de alta confianza; comentar en el PR solo con autorización explícita.
 ---
 
-# Code Review
+# Revisión de código
 
-Act as a senior code reviewer. Review a Pull Request or branch against its resolved base.
-This is a read-only skill: do not edit files, create reports in the repo, commit, push, or merge.
-Do not fix findings here. Return them to the user or to the enclosing workflow, such as `cerrar-pr`,
-which owns any authorized corrections and verification.
+Actúa como revisor experto de código. Revisa un PR o una rama contra su base comprobada.
+Esta skill es de solo lectura: no edites archivos, crees informes en el repositorio ni hagas
+commit, push o merge. No corrijas hallazgos aquí. Devuélvelos al usuario o al flujo que contiene
+esta revisión, como `cerrar-pr`, responsable de las correcciones y verificaciones autorizadas.
 
 **Qué flujo de revisión corresponde:** esta skill revisa directamente una rama o PR. Si el usuario
 pide la opinión de OTRO agente, usa un subagente disponible en el entorno actual y respeta el
 revisor indicado y las reglas del cliente. Debe ser una sesión o agente distinto del implementador;
 si no está disponible, informa la limitación sin sustituirlo por una autorrevisión. Un envío fuera
 del entorno actual requiere autorización explícita. Si hay que traspasar la implementación,
-usa el flujo de handoff correspondiente. Para un release próximo a Prod, aplica el
-procedimiento de revisión de releases del proyecto, si existe.
+usa el procedimiento de traspaso correspondiente. Para una versión próxima a Producción, aplica el
+procedimiento de revisión de versiones del proyecto, si existe.
 
-## Workflow
+## Flujo
 
-1. Identify whether the target is a PR or the current branch.
-2. If it is a PR, check that it is open and identify its current head SHA and actual base. For a
-   branch, use the base named by the user; otherwise resolve and verify the repository's default
-   trunk. Never use the tracking upstream of the current feature branch as its base, and never
-   assume `develop`. Draft PRs are
-   valid review targets: early backups are intentionally draft. A prior review does not exclude
-   a new iteration; review the current complete diff and recheck previous findings against the
-   new head. Do not reuse a verdict for a different SHA or unreviewed local changes.
-3. Read relevant project instructions such as `AGENTS.md`, `CLAUDE.md`, `.opencode`, or equivalent files for the modified paths.
-4. Read the full committed diff with `gh pr diff <n>` for a PR, or `git diff <base>...HEAD` for a
-   branch. Also inspect staged changes with `git diff --cached`, unstaged changes with `git diff`,
-   and the contents of relevant files returned by `git ls-files --others --exclude-standard`.
-   Record the reviewed base, head or merge-base, and whether local changes were included.
-5. Perform an **adversarial review**: do not only check whether the happy path looks reasonable. Try to falsify the change's guarantees with concrete abuse cases, malformed inputs, boundary conditions, concurrent operations, partial failures, stale state, permission crossings, and invariant violations that are relevant to the diff. Treat descriptions, tests, comments, and author claims as hypotheses to verify against the implementation. Identify the critical assumption on which correctness or security depends and check it against real production code and its direct and indirect consumers (callers, contracts, processes and services relying on that assumption); isolated helpers or mocks do not prove the full path. Keep this proportional to the change and do not invent speculative findings without reproducible reasoning or evidence.
-6. Review for:
-   - functional bugs and regressions,
-   - API/props/data-contract mismatches,
-   - security, permissions, secrets, or data-loss risks,
-   - violations of project instructions,
-   - comments or historical intent contradicted by the change.
-7. Use focused tests or disposable scripts outside the checkout when they can safely prove or disprove a concrete suspicion, respecting the applicable test policy. For a claimed regression test, check evidence that it failed before the fix for the intended reason, rather than an unrelated setup failure. Do not modify the reviewed worktree or weaken existing checks.
-8. Use `git blame`, local history, or earlier PRs only when they help verify a concrete suspicion.
-9. Assign both severity and confidence to each finding. Keep only findings with confidence 80 or higher:
-   - **Alta:** security exposure, data loss, production outage, major regression, or a correctness blocker.
-   - **Media:** user-visible bug, broken or incomplete contract, missing validation, or missing test coverage that makes a regression likely.
-   - **Baja:** non-blocking maintainability or minor correctness risk supported by concrete evidence.
-10. Ignore nitpicks, style-only comments, preexisting problems outside changed lines, and issues already covered by lint/typecheck/CI unless the evidence shows CI will miss them. Missing new unit/integration tests alone is not a finding when applicable policy forbids them; assess the required verification within that policy.
-11. If reviewing a PR, use `gh pr comment` only when the user explicitly authorized the external write in the current session. Otherwise report findings locally.
+1. Identifica si se revisará un PR o la rama actual.
+2. Si es un PR, comprueba que esté abierto e identifica el SHA de su último commit y su base real.
+   Para una rama, usa la base indicada por el usuario; si no la indicó, identifica y comprueba la
+   rama principal predeterminada del repositorio. Nunca uses como base la rama remota de seguimiento
+   de la rama de trabajo actual ni supongas que es `develop`. Se pueden revisar PR borradores:
+   los respaldos tempranos se crean en borrador de forma deliberada. Una revisión anterior no
+   excluye otra iteración; revisa el diff completo actual y vuelve a comprobar los hallazgos
+   anteriores contra el último commit. No reutilices un veredicto para otro SHA ni para cambios
+   locales sin revisar.
+3. Lee las instrucciones pertinentes del proyecto, como `AGENTS.md`, `CLAUDE.md`, `.opencode`
+   o archivos equivalentes aplicables a las rutas modificadas.
+4. Lee el diff completo de los commits con `gh pr diff <n>` para un PR o `git diff <base>...HEAD`
+   para una rama. Inspecciona también los cambios preparados con `git diff --cached`, los no
+   preparados con `git diff` y el contenido de los archivos pertinentes que devuelva
+   `git ls-files --others --exclude-standard`. Registra la base, el último commit o ancestro
+   común revisados y si se incluyeron cambios locales.
+5. Realiza una **revisión adversarial**: no te limites a comprobar si el caso normal parece
+   razonable. Intenta refutar las garantías del cambio mediante casos de abuso concretos,
+   entradas malformadas, condiciones límite, operaciones concurrentes, fallos parciales, estados
+   desactualizados, cruces de permisos e incumplimientos de invariantes pertinentes al diff.
+   Trata descripciones, pruebas, comentarios y afirmaciones del autor como hipótesis que debes
+   comprobar contra la implementación. Identifica el supuesto crítico del que dependa la corrección
+   o seguridad y compruébalo en código productivo real y en sus consumidores directos e indirectos
+   (llamadores, contratos, procesos y servicios que dependan del supuesto); las funciones auxiliares
+   aisladas y las simulaciones no demuestran el recorrido completo. Mantén un alcance proporcional
+   al cambio y no inventes hallazgos especulativos sin razonamiento reproducible o evidencia.
+6. Revisa si hay:
+   - errores funcionales y regresiones;
+   - incompatibilidades de API, propiedades de componentes o contratos de datos;
+   - riesgos de seguridad, permisos, secretos o pérdida de datos;
+   - incumplimientos de las instrucciones del proyecto;
+   - comentarios o intención histórica que el cambio contradiga.
+7. Usa pruebas acotadas o scripts temporales fuera de la copia de trabajo cuando permitan
+   confirmar o descartar una sospecha concreta con seguridad, respetando la política de pruebas
+   aplicable. Si se presenta una prueba de regresión, comprueba la evidencia de que fallaba antes
+   de la corrección por el motivo previsto y no por un fallo ajeno de preparación. No modifiques
+   la copia de trabajo revisada ni debilites comprobaciones existentes.
+8. Usa `git blame`, el historial local o PR anteriores solo cuando ayuden a comprobar una sospecha concreta.
+9. Asigna severidad y confianza a cada hallazgo. Conserva solo hallazgos con confianza de 80 o más:
+   - **Alta:** exposición de seguridad, pérdida de datos, caída de Producción, regresión importante
+     o impedimento para el funcionamiento correcto.
+   - **Media:** error visible para el usuario, contrato roto o incompleto, validación ausente
+     o falta de cobertura de pruebas que haga probable una regresión.
+   - **Baja:** riesgo de mantenibilidad que no impida el cierre o riesgo menor de funcionamiento
+     correcto, respaldado por evidencia concreta.
+10. Omite detalles irrelevantes, observaciones solo de estilo, problemas previos fuera de las líneas
+    cambiadas y problemas que ya detecten lint, comprobación de tipos o CI, salvo evidencia de que
+    CI no los detectará. La ausencia de pruebas unitarias o de integración nuevas no es por sí
+    sola un hallazgo cuando la política aplicable las prohíbe; evalúa la verificación requerida
+    dentro de esa política.
+11. Si revisas un PR, usa `gh pr comment` solo cuando el usuario haya autorizado expresamente
+    esa escritura externa en la sesión actual. En otro caso, informa los hallazgos localmente.
 
-## Output
+## Entrega
 
-Lead with findings ordered by severity. Include `archivo:linea` or a GitHub link, severity,
-confidence, impact, and a concrete explanation.
+Empieza por los hallazgos ordenados por severidad. Incluye `archivo:linea` o un enlace de GitHub,
+severidad, confianza, impacto y una explicación concreta.
 
-Use this shape:
+Usa esta estructura:
 
 ```markdown
 ### Code review
@@ -66,7 +90,7 @@ Se encontraron N problemas:
 <explicacion concreta>
 ```
 
-If there are no findings:
+Si no hay hallazgos:
 
 ```markdown
 ### Code review
@@ -74,11 +98,11 @@ If there are no findings:
 Sin problemas. Se realizó una revisión adversarial en busca de bugs, casos límite y cumplimiento de instrucciones del proyecto.
 ```
 
-## Notes
+## Notas
 
-- In repos with subprojects, run the diff inside the subproject being reviewed.
-- For GitHub links, use the full commit SHA.
-- State the reviewed head and whether uncommitted changes were included. Distinguish findings
-  from required tests or other reviews that are pending; no code findings does not prove that
-  those checks passed or authorize marking ready or merging.
-- Keep the final answer short and focused on risks, evidence, and verdict.
+- En repositorios con subproyectos, ejecuta el diff dentro del subproyecto que se revisa.
+- Para enlaces de GitHub, usa el SHA completo del commit.
+- Indica el último commit revisado y si se incluyeron cambios sin commit. Distingue los hallazgos
+  de las pruebas u otras revisiones requeridas que estén pendientes; no encontrar problemas de
+  código no demuestra que esas comprobaciones pasaron ni autoriza marcar el PR listo o hacer merge.
+- Mantén la respuesta final breve y centrada en riesgos, evidencia y veredicto.

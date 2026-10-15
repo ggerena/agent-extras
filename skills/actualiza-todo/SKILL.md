@@ -34,7 +34,7 @@ Exportación portable adaptada: requiere configurar las rutas y el alcance local
 
 ## Comprobación previa de Buzz
 
-Consultar el release oficial de `block/buzz`, fecha, notas, issues abiertos/cerrados y correcciones aplicables a Windows: WebView2, carga de archivos, arranque, cierres, conexión y pérdida de datos. Leer evidencia y comentarios pertinentes, no solo títulos.
+Consultar la versión oficial de `block/buzz`, fecha, notas, issues abiertos/cerrados y correcciones aplicables a Windows: WebView2, carga de archivos, arranque, cierres, conexión y pérdida de datos. Leer evidencia y comentarios pertinentes, no solo títulos.
 
 - Esperar al menos siete días completos desde la publicación del candidato; cada versión correctiva inicia su plazo. Es un margen conservador, no garantía de estabilidad. Acortarlo requiere petición explícita después de informar el resultado.
 - Conservar la versión instalada si hay fallos graves aplicables pendientes o no se puede verificar fecha/reportes. Una corrección debe estar incluida en el instalador candidato; un PR integrado no basta.

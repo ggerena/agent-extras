@@ -5,9 +5,9 @@ description: Analiza sesiones con agentes y propone mejoras verificables para re
 
 # Retrospectiva de agentes
 
-Convierte dificultades observadas en mejoras pequenas del entorno. Analiza fuentes primarias de la sesion indicada; si no se indica una, usa la actual. Una anécdota aislada no justifica una regla permanente.
+Convierte dificultades observadas en mejoras pequeñas del entorno. Analiza fuentes primarias de la sesión indicada; si no se indica una, usa la actual. Una anécdota aislada no justifica una regla permanente.
 
-## Analisis
+## Análisis
 
 1. Identifica los desvíos reales: errores, búsquedas repetidas, contexto cargado sin uso, llamadas costosas, bloqueos y correcciones del usuario.
 2. Busca primero una capacidad ya existente en instrucciones, skills, scripts, configuración o CI. Una capacidad desconectada, difícil de descubrir o rota es el hallazgo; no la dupliques.

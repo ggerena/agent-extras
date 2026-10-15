@@ -1,4 +1,4 @@
 interface:
   display_name: "Revisa Grok"
   short_description: "Audita y restaura bloqueos de Grok Build"
-  default_prompt: "Usa $revisa-grok para comprobar y, si te lo autorizo, restaurar los bloqueos locales de subidas y telemetria de Grok Build."
+  default_prompt: "Usa $revisa-grok para comprobar y, si te lo autorizo, restaurar los bloqueos locales de subidas y telemetría de Grok Build."

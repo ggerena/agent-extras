@@ -1,15 +1,15 @@
 ---
 name: mira
-description: "Use when the user says \"mira\" about a repository, asks to \"mirar este repo por encima\", or asks to read only the README and explain what the repository does at a high level. This skill is for a shallow repository overview only: clone if needed, read the README, and explain the project simply without code review, tests, servers, or file edits."
+description: 'Usar cuando el usuario diga "mira" sobre un repositorio, pida "mirar este repo por encima" o leer solo el README y explicar qué hace en términos generales. Hace una exploración superficial: clonar si hace falta, leer el README y explicar el proyecto de forma simple, sin revisar código, ejecutar pruebas, iniciar servidores ni editar archivos.'
 ---
 
 # Mira
 
-## Scope
+## Alcance
 
-Do only a superficial repository overview based on the README.
+Haz únicamente una exploración superficial del repositorio basada en su README.
 
-Use this meaning for prompts such as:
+Aplica este alcance a pedidos como:
 
 - "mira este repo"
 - "mira este repo por encima"
@@ -17,24 +17,26 @@ Use this meaning for prompts such as:
 - "mira este repo y dime que hace"
 - "mira este repo, clonalo si hace falta"
 
-## Workflow
+## Flujo
 
-1. If the repository is not local and the user gave a URL or `owner/repo`, clone it in the user's
-   configured code directory or another safe workspace location. Do not hardcode a user-specific path.
-2. Read only the main README file from the repository root, preferring `README.md`, `README.MD`, then other README variants.
-3. Explain in simple Spanish:
-   - what the project is for;
-   - what problem it solves;
-   - its main components or features, only if the README mentions them;
-   - how someone would use it at a very high level, only if the README mentions it.
-4. Keep the answer short and non-technical unless the README itself requires technical terms.
+1. Si el repositorio no está en local y el usuario proporcionó una URL o `owner/repo`, clónalo en la
+   carpeta de código configurada por el usuario o en otra ubicación segura del espacio de trabajo.
+   No fijes una ruta específica de una persona.
+2. Lee solo el README principal de la raíz, dando preferencia a `README.md`, después a `README.MD`
+   y luego a otras variantes de README.
+3. Explica en español simple:
+   - para qué sirve el proyecto;
+   - qué problema resuelve;
+   - sus componentes o funciones principales, solo si el README los menciona;
+   - cómo se usaría en términos generales, solo si el README lo menciona.
+4. Mantén la respuesta breve y sin tecnicismos, salvo que el propio README los requiera.
 
-## Boundaries
+## Límites
 
-Do not inspect source code, tests, issues, pull requests, CI files, examples, docs outside the README, or package configuration.
+No inspecciones código fuente, pruebas, issues, PR, archivos de CI, ejemplos, documentación fuera del README ni configuración de paquetes.
 
-Do not run builds, tests, linters, install commands, development servers, Docker, or dependency setup.
+No ejecutes compilaciones, pruebas, comprobaciones de estilo, comandos de instalación, servidores de desarrollo, Docker ni preparación de dependencias.
 
-Do not edit files, create commits, push, create PRs, or make recommendations unless the user explicitly asks for that after the overview.
+No edites archivos, crees commits, hagas push, crees PR ni des recomendaciones, salvo que el usuario lo pida expresamente después de la explicación general.
 
-If the README is missing, say that no root README was found and give only the minimal repository facts available from the file listing.
+Si falta el README, informa que no se encontró en la raíz y proporciona solo los datos mínimos del repositorio disponibles en el listado de archivos.

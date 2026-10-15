@@ -1,108 +1,116 @@
 ---
 name: km-analyze
-description: Analiza la salud de un repositorio con km, incluyendo complejidad, mantenibilidad, duplicacion, hotspots, acoplamiento temporal y riesgo de conocimiento. Usar cuando se pida medir calidad o deuda tecnica, encontrar archivos problematicos, duplicados, hotspots o dependencias ocultas; no usar para revisar funcionalmente un PR ni para explicar un repositorio leyendo solo su README.
+description: Analiza la salud de un repositorio con km, incluyendo complejidad, mantenibilidad, duplicación, puntos críticos, acoplamiento temporal y riesgo de concentración de conocimiento. Usar cuando se pida medir calidad o deuda técnica, encontrar archivos problemáticos, duplicados, puntos críticos o dependencias ocultas; no usar para revisar funcionalmente un PR ni para explicar un repositorio leyendo solo su README.
 ---
 
-# km — Code Metrics Analysis Skill
+# Análisis de métricas de código con km
 
-You have access to the `km` CLI tool for comprehensive code analysis. Use it to analyze repositories across multiple dimensions.
+Usa la herramienta de línea de comandos `km` para analizar un repositorio en varias dimensiones.
+Comprueba que esté disponible en el entorno antes de ejecutar el análisis.
 
-## Available Commands
+## Comandos disponibles
 
-Run these from the shell available in the current environment; the examples work in Bash and
-PowerShell. Always use `--format json` for machine-readable output.
+Ejecuta los comandos desde el intérprete disponible en el entorno actual; los ejemplos funcionan
+en Bash y PowerShell. Usa siempre `--format json` para obtener salida procesable por herramientas.
 
-### Lines of Code
+### Líneas de código
 ```bash
 km loc [PATH] --format json
 ```
-Language breakdown: files, blank lines, comment lines, code lines.
+Desglose por lenguaje: archivos, líneas vacías, líneas de comentarios y líneas de código.
 
-### Code Health Score
+### Puntuación de salud del código
 ```bash
 km score [PATH] --format json
 km score [PATH] --format json --model legacy
 ```
-Overall grade (A++ to F--). Default model (cogcom): 5 dimensions — cognitive complexity, duplication, indentation, Halstead effort, file size. Legacy model (--model legacy): 6 dimensions — MI, cyclomatic complexity, duplication, indentation, Halstead effort, file size.
+Calificación global de A++ a F--. El modelo predeterminado (`cogcom`) usa cinco dimensiones:
+complejidad cognitiva, duplicación, sangría, esfuerzo de Halstead y tamaño del archivo. El modelo
+anterior (`--model legacy`) usa seis: índice de mantenibilidad, complejidad ciclomática,
+duplicación, sangría, esfuerzo de Halstead y tamaño del archivo.
 
-### Score Diff (requires git)
+### Diferencia de puntuación (requiere Git)
 ```bash
 km score diff [PATH] --format short --git-ref HEAD~1
 ```
-Compare current code health score against a git ref. Shows per-dimension deltas.
+Compara la puntuación actual de salud del código con una referencia de Git. Muestra las diferencias
+por dimensión.
 
-### Cognitive Complexity
+### Complejidad cognitiva
 ```bash
 km cogcom [PATH] --format json --top 20
 ```
-SonarSource method (2017). Measures how difficult code is to understand, penalizing deep nesting.
+Método de SonarSource (2017). Mide la dificultad de entender el código y penaliza el anidamiento profundo.
 
-### Cyclomatic Complexity
+### Complejidad ciclomática
 ```bash
 km cycom [PATH] --format json --top 20
 ```
-Per-file and per-function complexity. High values indicate hard-to-test code.
+Complejidad por archivo y función. Los valores altos indican código difícil de probar.
 
-### Maintainability Index
+### Índice de mantenibilidad
 ```bash
 km miv [PATH] --format json --top 20
 ```
-Verifysoft variant (with comment weight). Values below 65 are hard to maintain.
+Variante de Verifysoft que pondera los comentarios. Los valores inferiores a 65 indican dificultad
+de mantenimiento.
 
-### Halstead Complexity
+### Complejidad de Halstead
 ```bash
 km hal [PATH] --format json --top 20 --sort-by effort
 ```
-Effort, volume, and estimated bugs per file.
+Esfuerzo, volumen y errores estimados por archivo.
 
-### Indentation Complexity
+### Complejidad de sangría
 ```bash
 km indent [PATH] --format json
 ```
-Indentation depth stddev — high values suggest deeply nested code.
+Desviación estándar de la profundidad de sangría: los valores altos sugieren código muy anidado.
 
-### Duplicate Code
+### Código duplicado
 ```bash
 km dups [PATH] --format json --report
 ```
-Duplicate blocks across the project.
+Bloques duplicados en el proyecto.
 
-### Hotspots (requires git)
+### Puntos críticos (requiere Git)
 ```bash
 km hotspots [PATH] --format json --top 20
 ```
-Files that change frequently AND have high complexity — top refactoring targets.
+Archivos que cambian con frecuencia y tienen alta complejidad: principales candidatos a refactorización.
 
-### Code Ownership (requires git)
+### Distribución del conocimiento del código (requiere Git)
 ```bash
 km knowledge [PATH] --format json --top 20
 ```
-Bus factor risk per file via git blame analysis.
+Riesgo por concentración del conocimiento en pocas personas para cada archivo, mediante el análisis
+de `git blame`.
 
-### Temporal Coupling (requires git)
+### Acoplamiento temporal (requiere Git)
 ```bash
 km tc [PATH] --format json --top 20
 ```
-Files that change together in commits — hidden dependencies.
+Archivos que cambian juntos en los commits: posibles dependencias ocultas.
 
-## Analysis Workflow
+## Flujo de análisis
 
-1. Start with `km score` for the overall health grade
-2. Run `km loc` for project size and language breakdown
-3. Use `km cogcom`, `km cycom` and `km miv` to find the most complex/unmaintainable files
-4. Run `km hotspots` to find high-risk change-prone files
-5. Check `km dups` for code duplication opportunities
-6. Optionally run `km knowledge` and `km tc` for team/architecture insights
-7. Use `km score diff --git-ref HEAD~N` to track score changes over time
+1. Empieza con `km score` para obtener la calificación global de salud.
+2. Ejecuta `km loc` para conocer el tamaño del proyecto y el desglose por lenguaje.
+3. Usa `km cogcom`, `km cycom` y `km miv` para encontrar los archivos más complejos o difíciles de mantener.
+4. Ejecuta `km hotspots` para localizar archivos de alto riesgo que cambian con frecuencia.
+5. Revisa `km dups` para detectar oportunidades de reducir duplicación.
+6. Opcionalmente, ejecuta `km knowledge` y `km tc` para analizar riesgos del equipo y la arquitectura.
+7. Usa `km score diff --git-ref HEAD~N` para seguir las variaciones de puntuación en el tiempo.
 
-## Output Format
+## Formato de entrega
 
-Produce a structured report with:
-- **Overview**: Project size, languages, overall grade
-- **Code Health**: Score breakdown by dimension
-- **Complexity Hotspots**: Worst files by complexity
-- **Maintainability**: Files hardest to maintain
-- **Key Findings**: Notable patterns and risks
-- **Recommendations**: Prioritized, actionable suggestions
+Prepara un informe estructurado con:
 
-Reference specific file names and metric values. Be concise but thorough.
+- **Panorama general:** tamaño del proyecto, lenguajes y calificación global.
+- **Salud del código:** puntuación desglosada por dimensión.
+- **Puntos críticos de complejidad:** archivos con mayor complejidad.
+- **Mantenibilidad:** archivos más difíciles de mantener.
+- **Hallazgos principales:** patrones y riesgos destacados.
+- **Recomendaciones:** sugerencias priorizadas y aplicables.
+
+Cita nombres concretos de archivos y valores de las métricas. Sé breve sin omitir información pertinente.

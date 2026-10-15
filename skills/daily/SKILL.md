@@ -5,7 +5,7 @@ description: Resume cambios, verificaciones y pendientes de un periodo y proyect
 
 # Resumen de actividad
 
-Plantilla neutral: configurar proyecto/rutas, clientes incluidos, zona horaria y periodo predeterminado; no es una copia idéntica de una daily personal. No incorpora contactos, organizaciones ni autorización permanente para consultar a otros agentes. Si periodo o alcance no pueden inferirse de lo pedido y la configuración, preguntar solo lo indispensable.
+Plantilla neutral: configurar proyecto/rutas, clientes incluidos, zona horaria y periodo predeterminado; no es una copia idéntica de un resumen personal de actividad. No incorpora contactos, organizaciones ni autorización permanente para consultar a otros agentes. Si periodo o alcance no pueden inferirse de lo pedido y la configuración, preguntar solo lo indispensable.
 
 ## Evidencia
 

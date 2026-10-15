@@ -1,90 +1,107 @@
 ---
 name: cerrar-pr
-description: Respalda temprano cambios de repositorios de codigo en una rama y PR borrador, y cierra la implementacion con pruebas y revision obligatorias. Usar durante cambios solicitados cuando las instrucciones vigentes autoricen ese respaldo, o con autorizacion puntual de commit, push y PR; no hacer merge ni sustituir excepciones documentales aplicables.
+description: Respalda temprano cambios de repositorios de código en una rama y PR borrador, y cierra la implementación con pruebas y revisión obligatorias. Usar durante cambios solicitados cuando las instrucciones vigentes autoricen ese respaldo, o con autorización puntual de commit, push y PR; no hacer merge ni sustituir excepciones documentales aplicables.
 ---
 
 # Cerrar PR
 
-Back up requested code changes early in a feature branch and draft PR, then stabilize the same
-branch and PR through verification and review. Request review from another agent only when the
-user or applicable instructions ask for it. This skill does not replace repo rules.
+Respalda temprano los cambios de código solicitados en una rama de trabajo y PR borrador; después
+estabiliza esa misma rama y PR mediante verificación y revisión. Pide revisión a otro agente solo
+cuando lo soliciten el usuario o las instrucciones aplicables. Esta skill no sustituye las reglas
+del repositorio.
 
-## Before Running
+## Antes de ejecutar
 
-Before either mode:
+Antes de usar cualquiera de los modos:
 
-- Confirm publication is authorized: a standing instruction to back up requested code changes
-  covers their scoped commits, pushes, and draft PR without asking again. A narrower restriction
-  takes precedence. Follow documentary direct-push exceptions in applicable client or project
-  instructions; do not duplicate their repository list here. Those workflows remain outside this
-  PR workflow and script.
-- The current branch is a feature branch, not `develop`, `main`, or `master`.
-- Inspect the complete outgoing diff, staged files and unpushed commits for secrets, sensitive
-  data, unrelated changes, generated files, and unwanted attribution. Do not publish these. The
-  script does not replace this inspection. Use scoped staging and preserve others' local changes.
-- Resolve the intended remote repository and base branch. Do not publish if their identity or
-  access is uncertain.
+- Comprueba que la publicación esté autorizada: una instrucción permanente de respaldar cambios
+  de código solicitados cubre sus commits, push y PR borrador dentro del alcance sin volver a
+  preguntar. Prevalece una restricción más acotada. Respeta las excepciones documentales de push
+  directo de las instrucciones aplicables del cliente o proyecto; no dupliques aquí su lista de
+  repositorios. Esos procedimientos quedan fuera de este flujo y script de PR.
+- Comprueba que la rama actual sea una rama de trabajo y no `develop`, `main` o `master`.
+- Inspecciona el diff saliente completo, los archivos preparados y los commits sin publicar en
+  busca de secretos, datos sensibles, cambios ajenos, archivos generados y atribuciones no deseadas.
+  No los publiques. El script no sustituye esta inspección. Prepara solo los cambios del encargo
+  y conserva los cambios locales ajenos.
+- Identifica el repositorio remoto y la rama base de destino. No publiques si su identidad o el
+  acceso son inciertos.
 
-Choose one mode:
+Elige un modo:
 
-- **Early backup (`-Backup`):** publish the first scoped code change without waiting for complete
-  tests or reviews. Create a draft PR and repeat checkpoints after meaningful changes/corrections,
-  updating that same branch and PR. Report failed, pending or unrun checks honestly (`NO PROBADO`
-  when unverified); they block completion, not safe backup. Do not claim `-ReviewPassed` here.
-- **Reviewed close-out (without `-Backup`):** finish the mandatory loop below and pass
-  `-ReviewPassed` only for the exact current diff. The script still leaves the PR draft; after
-  publication, follow step 7 for remote checks, reviews and any readiness needed to trigger CI.
+- **Respaldo temprano (`-Backup`):** publica el primer cambio de código dentro del alcance sin
+  esperar pruebas o revisiones completas. Crea un PR borrador y repite el respaldo tras cambios
+  o correcciones significativos, actualizando la misma rama y PR. Informa con precisión las
+  comprobaciones fallidas, pendientes o sin ejecutar (`NO PROBADO` si no se verificaron); bloquean
+  el cierre, pero no un respaldo seguro. No declares `-ReviewPassed` en este modo.
+- **Cierre revisado (sin `-Backup`):** completa el ciclo obligatorio indicado abajo y pasa
+  `-ReviewPassed` solo para el diff actual exacto. El script mantiene el PR en borrador; después
+  de publicar, sigue el paso 7 para las comprobaciones remotas, las revisiones y cualquier cambio
+  a listo necesario para activar CI.
 
-Build `-PrBody` from the repository PR template (`.github/pull_request_template.md` or equivalent) when one exists, completing its required sections; CI may reject a PR that omits them.
+Prepara `-PrBody` a partir de la plantilla de PR del repositorio (`.github/pull_request_template.md`
+o equivalente) cuando exista y completa sus secciones obligatorias; CI puede rechazar un PR que
+las omita.
 
-If an existing PR is ready, return it to draft before pushing another iteration. Keep the work
-incomplete until all required tests and reviews pass with no pending findings or reviews. Keep the
-PR draft too, unless applicable repository rules require `ready` to trigger CI; in that case,
-readiness starts validation and does not assert completion. A new commit invalidates prior
-completion evidence for that head. Approval or readiness never authorizes merge: require an
-explicit merge request in the current session.
+Si un PR existente está listo, devuélvelo a borrador antes de otro push. Mantén el trabajo incompleto
+hasta que pasen todas las pruebas y revisiones requeridas sin hallazgos ni revisiones pendientes.
+Mantén también el PR en borrador, salvo que las reglas aplicables del repositorio requieran `ready`
+para activar CI; en ese caso, marcarlo listo inicia la validación y no afirma que el trabajo esté
+completo. Un commit nuevo invalida la evidencia previa de cierre para el último commit anterior.
+La aprobación o el estado listo nunca autorizan merge: exige un pedido explícito de merge en la
+sesión actual.
 
-## Mandatory Local Review Loop
+## Ciclo obligatorio de revisión local
 
-Run this loop after implementation and before declaring completion, not before early backup:
+Ejecuta este ciclo después de implementar y antes de declarar el cierre; no es un requisito previo
+al respaldo temprano:
 
-Evidence from an enclosing workflow satisfies the same gate when it covers the exact content,
-base and environment. Do not rerun an unchanged check or review merely because both skills mention
-it; repeat after a change, failure, uncertainty or an explicit fresh-run requirement.
+La evidencia del flujo que contiene este procedimiento satisface la misma condición cuando cubre
+el contenido, base y entorno exactos. No repitas una comprobación o revisión sin cambios solo porque
+ambas skills la mencionan; repite tras un cambio, fallo, incertidumbre o requisito explícito de
+una ejecución nueva.
 
-1. Run the repo's relevant tests, lint, build, or equivalent non-destructive verification.
-2. Invoke `code-review` (`/revisa`) against the complete current branch and working-tree diff. The review itself stays read-only.
-3. Validate every finding. Immediately correct valid high and medium findings. Correct low findings only when the change is direct, safe, and remains within the original scope.
-4. Verify each correction under the applicable test policy, reusing relevant tests. Creating or
-   extending cases must stay within that policy; this skill grants no exception. Rerun affected checks.
-5. Repeat `/revisa` until no valid high or medium findings remain. Keep other unresolved findings
-   visible; they block completion, while readiness follows the CI trigger policy in step 7.
-6. Publish corrections with `-Backup` as needed. Invoke the reviewed mode with `-ReviewPassed`
-   only after the relevant verification and local review passed for the current diff.
-7. Record the verified head SHA and confirm the published head matches the locally verified and
-   reviewed code. Follow the repository's CI
-   trigger policy. If required CI runs only for ready PRs, use `gh pr ready` after the local gate to
-   start it, without declaring completion. Otherwise keep the PR draft until required remote checks
-   and reviews pass. Address remaining failures or findings and return the PR to draft before any
-   corrective push. Completion still requires all applicable evidence on the current head.
+1. Ejecuta las pruebas, lint, compilación o verificación no destructiva equivalente pertinentes
+   del repositorio.
+2. Invoca `code-review` (`/revisa`) sobre el diff completo de la rama actual y sus cambios locales.
+   La revisión se mantiene en solo lectura.
+3. Valida cada hallazgo. Corrige de inmediato los hallazgos altos y medios válidos. Corrige los
+   bajos solo cuando el cambio sea directo, seguro y siga dentro del alcance original.
+4. Verifica cada corrección según la política de pruebas aplicable, reutilizando las pruebas
+   pertinentes. Crear o ampliar casos debe respetar esa política; esta skill no otorga excepciones.
+   Vuelve a ejecutar las comprobaciones afectadas.
+5. Repite `/revisa` hasta que no queden hallazgos altos o medios válidos. Mantén visibles los demás
+   hallazgos sin resolver; bloquean el cierre, mientras que el estado listo sigue la política de
+   activación de CI del paso 7.
+6. Publica correcciones con `-Backup` cuando sea necesario. Invoca el modo revisado con
+   `-ReviewPassed` solo después de que la verificación pertinente y la revisión local sean
+   satisfactorias para el diff actual.
+7. Registra el SHA del último commit verificado y confirma que el último commit publicado coincida
+   con el código verificado y revisado localmente. Sigue la política de activación de CI del
+   repositorio. Si CI requerida solo se ejecuta para PR listos, usa `gh pr ready` tras aprobar
+   las comprobaciones locales para iniciarla, sin declarar el cierre. En otro caso, mantén el PR
+   en borrador hasta que pasen las comprobaciones remotas y revisiones requeridas. Resuelve los
+   fallos o hallazgos restantes y devuelve el PR a borrador antes de cualquier push correctivo.
+   El cierre sigue requiriendo toda la evidencia aplicable al último commit actual.
 
-The correction loop is already part of finishing the authorized implementation; do not pause merely
-because a valid high or medium finding appeared. Stop and ask only when a correction requires a
-material product decision, broader scope, destructive action, new access, or another authorization.
+El ciclo de corrección ya forma parte de completar la implementación autorizada; no te detengas
+solo porque aparezca un hallazgo alto o medio válido. Detente y pregunta únicamente cuando una
+corrección requiera una decisión material de producto, mayor alcance, una acción destructiva,
+un acceso nuevo u otra autorización.
 
-## Optional External Review
+## Revisión externa opcional
 
-External review is separate from this script and requires authorization for that
-PR. Use a suitable subagent available in the current environment, after the PR exists, following
-that client's delegation policy and preserving the requested reviewer and read-only or
-implementation scope. Another review must come from a distinct agent or session; if unavailable,
-report the limitation rather than substituting self-review. Sending work outside the current
-environment requires explicit authorization. Do not make external review a prerequisite for
-creating the PR.
+La revisión externa es independiente de este script y requiere autorización para ese PR.
+Usa un subagente adecuado disponible en el entorno actual cuando el PR ya exista, respetando la
+política de delegación del cliente, el revisor solicitado y el alcance de solo lectura o de
+implementación. Otra revisión debe provenir de un agente o sesión distinto; si no está disponible,
+informa la limitación sin sustituirla por una autorrevisión. Enviar trabajo fuera del entorno
+actual requiere autorización explícita. No conviertas la revisión externa en requisito previo
+para crear el PR.
 
-## Run It
+## Ejecución
 
-Early backup from the repo root, after the publication-safety inspection:
+Respaldo temprano desde la raíz del repositorio, después de la inspección de seguridad de publicación:
 
 ```powershell
 & <skill-root>\scripts\cerrar-pr.ps1 `
@@ -92,10 +109,11 @@ Early backup from the repo root, after the publication-safety inspection:
   -Pathspec @("src", "tests") -Backup -ConfirmedByUser
 ```
 
-`-ConfirmedByUser` asserts the publication authority checked above, including an applicable
-standing instruction; it does not require a new routine confirmation for every code checkpoint.
+`-ConfirmedByUser` declara la autorización de publicación comprobada antes, incluida una
+instrucción permanente aplicable; no exige una confirmación rutinaria nueva para cada respaldo
+de código.
 
-Reviewed close-out, after the mandatory local loop:
+Cierre revisado, después del ciclo local obligatorio:
 
 ```powershell
 $paths = @("src", "tests", "docs")
@@ -108,58 +126,68 @@ $paths = @("src", "tests", "docs")
   -ConfirmedByUser
 ```
 
-Use `-VerificationCommand` only for a relevant check that has not already run for this exact
-content; it is not a reason to duplicate verified work.
+Usa `-VerificationCommand` solo para una comprobación pertinente que aún no se haya ejecutado
+para este contenido exacto; no es un motivo para duplicar trabajo ya verificado.
 
-Use `-StageAll` only when every changed file belongs to the implementation. Prefer `-Pathspec` for scoped changes.
+Usa `-StageAll` solo cuando todos los archivos modificados pertenezcan a la implementación.
+Prefiere `-Pathspec` para acotar los cambios.
 
-Dry run:
+Simulación:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File <skill-root>\scripts\cerrar-pr.ps1 -DryRun -Backup -CommitMessage "..." -PrTitle "..."
 ```
 
-## Script Behavior
+## Comportamiento del script
 
 `scripts/cerrar-pr.ps1`:
 
-1. Reads repo state and blocks protected branches.
-2. Requires publication authority; reviewed mode also requires `-ReviewPassed` as the caller's
-   assertion that the mandatory local review loop passed. `-Backup` never asserts completion.
-3. Prints `git status --short`, `git diff --stat`, and staged diff stats.
-4. Runs provided verification commands after rejecting known dev-server commands.
-5. Stages either explicit `-Pathspec` entries or all files when `-StageAll` is passed.
-6. Creates a commit only when staged changes exist and `-CommitMessage` is provided.
-7. Checks for an existing PR and converts it to draft before pushing; an unreadable PR state or
-   failed conversion stops the push. Pushes to `private` when available, otherwise `origin`.
-8. Creates a draft PR toward `-BaseBranch`, or reuses the existing draft. It never marks ready or
-   merges. The caller follows step 7 for remote-head evidence and readiness.
+1. Lee el estado del repositorio y bloquea las ramas protegidas.
+2. Exige autorización para publicar; el modo revisado también exige `-ReviewPassed` como
+   declaración de quien lo invoca de que se aprobó el ciclo obligatorio de revisión local.
+   `-Backup` nunca declara que el trabajo esté completo.
+3. Muestra `git status --short`, `git diff --stat` y las estadísticas del diff preparado.
+4. Ejecuta los comandos de verificación proporcionados después de rechazar comandos conocidos
+   que inician servidores de desarrollo.
+5. Prepara las rutas explícitas de `-Pathspec` o todos los archivos cuando se pasa `-StageAll`.
+6. Crea un commit solo cuando hay cambios preparados y se proporciona `-CommitMessage`.
+7. Comprueba si existe un PR y lo convierte a borrador antes del push; si no puede leer el estado
+   del PR o falla la conversión, detiene el push. Hace push a `private` cuando está disponible
+   y, en otro caso, a `origin`.
+8. Crea un PR borrador hacia `-BaseBranch` o reutiliza el borrador existente. Nunca lo marca listo
+   ni hace merge. Quien lo invoca sigue el paso 7 para comprobar el último commit remoto y el
+   estado listo.
 
-Offline regression checks: `powershell -NoProfile -File <skill-root>\scripts\test-cerrar-pr.ps1`.
-These checks mock Git and GitHub; they do not publish anything.
+Comprobaciones de regresión sin conexión:
+`powershell -NoProfile -File <skill-root>\scripts\test-cerrar-pr.ps1`.
+Estas comprobaciones simulan Git y GitHub; no publican nada.
 
-## Safety Rules
+## Reglas de seguridad
 
-- Require `-ConfirmedByUser` unless `-DryRun` is used only for inspection.
-- Require `-ReviewPassed` before reviewed close-out; use `-Backup` for incomplete code checkpoints.
-- Never run `gh pr merge`, `git merge`, force-push, rebase, or amend.
-- Never push directly to `develop`, `main`, or `master`.
-- Never start dev servers. The script rejects common commands such as `npm run dev`, `yarn dev`, `npm start`, and `preview_start`.
-- Run browser smoke tests only when explicitly requested; ordinary relevant automated tests,
-  lint and builds remain required. Report an unperformed required check rather than claiming it.
-- Keep external review outside this script and require explicit authorization before sending it.
-- Keep review ownership with the current agent. External review is input, not authorization to merge.
+- Exige `-ConfirmedByUser`, salvo que `-DryRun` se use únicamente para inspeccionar.
+- Exige `-ReviewPassed` antes del cierre revisado; usa `-Backup` para respaldos de código incompleto.
+- Nunca ejecutes `gh pr merge`, `git merge`, push forzado, rebase ni amend.
+- Nunca hagas push directo a `develop`, `main` o `master`.
+- Nunca inicies servidores de desarrollo. El script rechaza comandos habituales como `npm run dev`,
+  `yarn dev`, `npm start` y `preview_start`.
+- Ejecuta pruebas básicas en navegador solo con un pedido explícito; las pruebas automatizadas,
+  lint y compilaciones pertinentes siguen siendo obligatorios. Informa las comprobaciones
+  requeridas sin ejecutar en vez de afirmar que se hicieron.
+- Mantén la revisión externa fuera de este script y exige autorización explícita antes de enviarla.
+- El agente actual conserva la responsabilidad de revisión. La revisión externa aporta información;
+  no autoriza merge.
 
-## Install
+## Instalación
 
-Single source lives in `skills/cerrar-pr` in this repo. Install only to authorized agent homes;
-the installer can also modify other agents, so do not run it without that explicit scope:
+La fuente única está en `skills/cerrar-pr` en este repositorio. Instala solo en las carpetas de
+agentes autorizadas; el instalador también puede modificar otros agentes, así que no lo ejecutes
+sin ese alcance explícito:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File skills\cerrar-pr\scripts\install.ps1 -Force
 ```
 
-Targets:
+Destinos:
 
 - `%USERPROFILE%\.codex\skills\cerrar-pr`
 - `%USERPROFILE%\.agents\skills\cerrar-pr`

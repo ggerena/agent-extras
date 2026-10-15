@@ -1,3 +1,3 @@
 interface:
-  display_name: "Diagnostico con evidencia"
-  short_description: "Encuentra causas con reproduccion y evidencia"
+  display_name: "Diagnóstico con evidencia"
+  short_description: "Encuentra causas con reproducción y evidencia"
