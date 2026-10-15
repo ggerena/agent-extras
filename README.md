@@ -2,6 +2,8 @@
 
 Reusable agent skills, small helper scripts, and portable templates for Codex and Claude Code.
 
+**Start here / Empieza aquí:** [how to use the skills, a copyable first prompt, and workflow examples](docs/USAGE.md). The guide also covers agents without native skill support; individual skills can still require specific tools or clients.
+
 See [sources and adaptations](docs/SOURCES.md) for original skill references and licenses, and [portability and validation](docs/PORTABILITY.md) before installing.
 
 ## Maintained workflows
