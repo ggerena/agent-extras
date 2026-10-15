@@ -25,6 +25,7 @@ Skills reutilizables para conocer un repositorio, investigar un fallo, planifica
 | Traspasar la responsabilidad de un trabajo a otro agente | [agent-handoff](skills/agent-handoff/SKILL.md) |
 | Delegar una fase y conservar la coordinación | [handoff-implementation-to-codex](skills/handoff-implementation-to-codex/SKILL.md), [handoff-implementation-to-grok](skills/handoff-implementation-to-grok/SKILL.md) |
 | Medir complejidad y salud del código | [km-analyze](skills/km-analyze/SKILL.md) |
+| Revisar o adecuar privacidad a la normativa chilena | [proteccion-datos-chile](skills/proteccion-datos-chile/SKILL.md) |
 | Preparar o revisar una versión | [crear-release](skills/crear-release/SKILL.md) |
 | Resumir actividad comprobada | [daily](skills/daily/SKILL.md) |
 | Analizar dificultades en sesiones con agentes | [retrospectiva-agentes](skills/retrospectiva-agentes/SKILL.md) |

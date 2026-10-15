@@ -2,7 +2,7 @@
 
 ## Alcance
 
-La biblioteca mantiene diecinueve skills propias: siete flujos principales y doce utilidades adicionales enumeradas en el [README](../README.md). Las skills especializadas de terceros se consultan mediante el [catálogo de referencias](SOURCES.md), que conserva fuentes y atribución sin distribuir sus recursos.
+La biblioteca mantiene veinte skills propias: siete flujos principales y trece utilidades adicionales enumeradas en el [README](../README.md). Las skills especializadas de terceros se consultan mediante el [catálogo de referencias](SOURCES.md), que conserva fuentes y atribución sin distribuir sus recursos.
 
 Las instrucciones narrativas y los metadatos descriptivos están en español. Los nombres de skills, rutas, identificadores, opciones de comandos, interfaces y ejemplos de código conservan su forma original. Los scripts y sus mensajes internos pueden contener inglés; su contenido ejecutable no se traduce. Esta edición local no implica una traducción oficial de los proyectos citados.
 
@@ -23,6 +23,7 @@ Las instrucciones narrativas y los metadatos descriptivos están en español. Lo
 | Traspasar responsabilidad con `agent-handoff` | Acceso del agente de destino a la misma ruta del repositorio. Incluye variantes PowerShell y Bash; el inicio del agente requiere su CLI. |
 | Delegar fases a Codex o Grok | CLI correspondiente, sesión válida, Python 3 o los lanzadores PowerShell y autorización para la delegación y sus acciones. No confundir con un traspaso total. |
 | Analizar métricas | `km`; las métricas de historial también requieren Git. |
+| Revisar privacidad chilena | Acceso a fuentes oficiales vigentes y evidencia autorizada del tratamiento. `proteccion-datos-chile` no requiere un plugin OWASP ni certifica cumplimiento jurídico integral; sin fuente o evidencia suficiente, la conclusión afectada queda `NO PROBADO`. |
 | Revisar o restaurar Grok | Instalación local de Grok Build y PowerShell; la auditoría no verifica por completo la preferencia remota de datos. |
 | Capturar bloqueos del equipo | Windows y PowerShell. No autoriza cerrar procesos ni reiniciar. |
 | Actualizar agentes | Windows, las herramientas seleccionadas y sus gestores de paquetes; requiere `revisa-grok`. `-CheckOnly` puede usar red y refrescar fuentes de paquetes, por lo que no es una simulación sin efectos. |

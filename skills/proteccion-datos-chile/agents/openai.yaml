@@ -1,0 +1,4 @@
+interface:
+  display_name: "Protección de datos en Chile"
+  short_description: "Revisión de privacidad chilena con evidencia"
+  default_prompt: "Usa $proteccion-datos-chile para revisar este tratamiento con la ley de protección de datos chilena y distinguir controles comprobados de pendientes."
