@@ -1,0 +1,4 @@
+interface:
+  display_name: "Preparar release"
+  short_description: "Revisa candidatos y condiciones operativas del release"
+  default_prompt: "Usa $crear-release para preparar o revisar el candidato de los repositorios configurados, sin hacer merge ni desplegar."

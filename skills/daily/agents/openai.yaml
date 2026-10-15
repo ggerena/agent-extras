@@ -1,0 +1,4 @@
+interface:
+  display_name: "Resumen de actividad"
+  short_description: "Resume cambios comprobados del proyecto y periodo elegidos"
+  default_prompt: "Usa $daily para resumir la actividad del proyecto y periodo configurados, distinguiendo cambios, pruebas y pendientes."

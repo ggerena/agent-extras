@@ -20,16 +20,16 @@ Detente en la primera opcion suficiente:
 
 ## Criterios
 
-- Antes de decidir, revisa el codigo afectado y, cuando aplique, configuracion, variables de entorno, esquema de datos y llamadas relacionadas.
+- Antes de decidir, revisa el codigo afectado y, cuando aplique, configuracion, variables de entorno, esquema de datos y llamadas relacionadas. Identifica el supuesto critico del que dependan correccion o seguridad y compruebalo en codigo productivo real, incluidos sus consumidores directos e indirectos (llamadores, contratos, procesos y servicios que dependan del supuesto); un helper aislado o un mock no acreditan el recorrido.
 - En errores, busca la causa compartida y sus consumidores. Corrige una vez en el punto comun cuando eso preserve el comportamiento esperado.
 - Si prevenir una reincidencia esta dentro del encargo, clasifica primero el fallo. Para patrones mecanicos y verificables, revisa los scripts, configuracion y CI existentes; conecta o amplia el lint, test, hook o chequeo mas barato antes de agregar otra regla para agentes. Si el repositorio no tiene ese control y crearlo no se justifica por una falla observada, informa la oportunidad sin agregar infraestructura.
 - Evita interfaces con una sola implementacion, fabricas para un solo caso, configuracion para valores fijos y estructura preparada para necesidades futuras no confirmadas.
 - Prefiere codigo claro y convencional a codigo comprimido o ingenioso. Menos lineas no justifican menor legibilidad.
 - No simplifiques validacion en limites de confianza, seguridad, accesibilidad ni manejo de errores que evite perdida de datos.
-- Si la solucion minima tiene un limite conocido y relevante, deja explicitos ese limite y la condicion observable que justificaria ampliarla. Usa un comentario en el codigo solo cuando ese contexto deba quedar junto a la implementacion.
+- Si la solucion minima tiene un limite conocido y relevante, deja explicitos ese limite y la condicion observable que justificaria ampliarla. Documentalo por las vias permitidas por las instrucciones del proyecto; no agregues comentarios si esas reglas lo prohiben.
 - Cuando el cambio afecte un comportamiento que deba comprobarse en operacion, identifica una señal existente que permita verificar su resultado o detectar su fallo. Amplia la instrumentacion solo si hay una brecha concreta dentro del encargo; no agregues infraestructura ni accedas a ambientes sin autorizacion.
 - Respeta todos los requisitos explicitos del usuario y las instrucciones del proyecto.
-- Reutiliza o amplia las pruebas existentes. Agrega la verificacion mas pequena que demuestre el comportamiento y la regresion corregida.
+- Reutiliza las pruebas existentes y la verificacion mas pequena que demuestre el comportamiento. Crear o ampliar casos debe respetar la politica aplicable; esta skill no autoriza tests nuevos fuera de ella.
 
 ## Revision de sobreingenieria
 

@@ -1,37 +1,35 @@
 # agent-extras
 
-Small collection of agent skills and helper scripts.
+Reusable agent skills, small helper scripts, and portable templates for Codex and Claude Code.
 
-For the skills listed below, `skills/` is the editable source. Keep the active installation for
-the current agent synchronized in the same change; do not maintain divergent copies.
+See [sources and adaptations](docs/SOURCES.md) for original skill references and licenses, and [portability and validation](docs/PORTABILITY.md) before installing.
 
-## Current skills
+## Maintained workflows
 
-- `skills/agent-handoff`: creates handoff notes for moving work between coding agents.
-- `skills/cerrar-pr`: reviews and corrects completed changes, verifies them, commits and pushes a safe branch, and opens or updates its PR.
-- `skills/autodev`: executes an existing plan through tests, local review, and reviewed PRs.
-- `skills/cambio-minimo`: favors the smallest maintainable implementation that solves the verified need.
-- `skills/code-review`: reviews PRs and branch diffs without modifying files.
-- `skills/diagnostico-con-evidencia`: diagnoses failures through reproduction and evidence before correction.
-- `skills/handoff-implementation-to-codex`: delegates supervised implement, review, and approved closeout phases to Codex CLI (GPT-6.1 Sol) with per-mode sandboxes and Git/path guardrails.
-- `skills/handoff-implementation-to-grok`: delegates supervised implement, review, and approved closeout phases to Grok Build with per-mode permission rules and Git/path guardrails.
-- `skills/km-analyze`: analyzes repository health with the `km` metrics CLI.
-- `skills/mira`: provides a deliberately shallow README-only repository overview.
-- `skills/retrospectiva-agentes`: turns observed agent-session friction into small, evidence-based improvements, with emphasis on reducing repeated context and calls.
-- `skills/se-pego-mi-pc`: captures a short, low-impact Windows snapshot before recovering a frozen or CPU-saturated PC or application.
+`agent-handoff`, `autodev`, `cambio-minimo`, `cerrar-pr`, `code-review`, `diagnostico-con-evidencia`, `handoff-implementation-to-codex`, `handoff-implementation-to-grok`, `km-analyze`, `mira`, `retrospectiva-agentes`, `revisa-grok`, and `se-pego-mi-pc`.
 
-## Retired backups
+For these skills, `skills/` is the editable source. Synchronize authorized changes with the active installation; preserve supporting files and do not maintain accidental divergent copies. Presence in this repository does not mean every skill is installed.
 
-These remain for recovery or historical reference and should not be installed as active skills:
+## Portable exports requiring local configuration
 
-- `skills/differential-review`: superseded by direct review plus the available delegation mechanism.
-- `skills/fin-sesion`: superseded by persistent project memory, `code-review`, and `cerrar-pr`.
-- `skills/source-command-autodev` and `skills/source-command-fin`: legacy source-command versions.
+`actualiza-todo`, `crear-release`, `crear-spec`, `daily`, `whatsapp-notify`, and `mandalo-por-buzz`.
 
-## Platform notes
+These are neutral adaptations, not identical backups of private operating rules. Configure repositories, recipients, environments, paths and permissions locally. Do not overwrite a private installation with these templates without reconciling its requirements. Buzz requires a separately configured helper; no private transport script is included.
 
-Most scripts are written in PowerShell and can run on Windows, macOS, or Linux when PowerShell 7+ (`pwsh`) is installed. `agent-handoff` also includes a Bash implementation for macOS/Linux.
+## Third-party snapshots
 
-## Repository scope
+`cloudflare`, `cloudflare-email-service`, `cloudflare-one`, `durable-objects`, `frontend-ui-engineering`, `owasp-security`, `react-best-practices`, `security-audit`, `teach`, `typesafe-ai`, `web-perf`, `workers-best-practices`, and `wrangler`.
 
-This repository is intentionally lightweight. It should not contain application code, build artifacts, local backups, private memories, credentials, or machine-specific configuration.
+Supporting resources and existing attribution are retained. Original references, licenses and differences are listed in [SOURCES.md](docs/SOURCES.md). These are snapshots of installed skills, not automatic upgrades to upstream.
+
+## Retired material
+
+`differential-review` and `fin-sesion` remain for recovery and historical reference; do not install them as active workflows. Legacy source-command variants exist only in older history.
+
+## Installation and scope
+
+Read the selected skill first and install only what is needed. Shared installations can use `~/.agents/skills`; Claude Code can access the same folders through its supported skills directory/link. Preserve `agents/` metadata and supporting resources. Client-specific tools and dependencies must be available before use; matching file layouts alone do not prove runtime compatibility.
+
+Most scripts require PowerShell; `agent-handoff` also includes Bash. `actualiza-todo` is Windows-specific. No script should be run merely to install a skill or inspect its instructions.
+
+Keep private memories, user rules, customer procedures, contacts, credentials, application code, machine-specific configuration, generated outputs and local backups outside this repository. Authorization always comes from the current user and applicable project instructions.

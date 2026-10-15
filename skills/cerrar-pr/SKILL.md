@@ -55,12 +55,14 @@ it; repeat after a change, failure, uncertainty or an explicit fresh-run require
 1. Run the repo's relevant tests, lint, build, or equivalent non-destructive verification.
 2. Invoke `code-review` (`/revisa`) against the complete current branch and working-tree diff. The review itself stays read-only.
 3. Validate every finding. Immediately correct valid high and medium findings. Correct low findings only when the change is direct, safe, and remains within the original scope.
-4. Add or update tests for each correction, then rerun the relevant verification.
+4. Verify each correction under the applicable test policy, reusing relevant tests. Creating or
+   extending cases must stay within that policy; this skill grants no exception. Rerun affected checks.
 5. Repeat `/revisa` until no valid high or medium findings remain. Keep other unresolved findings
    visible; they block completion, while readiness follows the CI trigger policy in step 7.
 6. Publish corrections with `-Backup` as needed. Invoke the reviewed mode with `-ReviewPassed`
    only after the relevant verification and local review passed for the current diff.
-7. Confirm the published head matches the locally verified code and follow the repository's CI
+7. Record the verified head SHA and confirm the published head matches the locally verified and
+   reviewed code. Follow the repository's CI
    trigger policy. If required CI runs only for ready PRs, use `gh pr ready` after the local gate to
    start it, without declaring completion. Otherwise keep the PR draft until required remote checks
    and reviews pass. Address remaining failures or findings and return the PR to draft before any

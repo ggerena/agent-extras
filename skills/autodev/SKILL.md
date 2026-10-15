@@ -33,8 +33,9 @@ Do not invent a missing plan. If no usable plan exists, stop after identifying t
    Use a worktree only when applicable client and project instructions allow it and the isolation
    materially helps preserve local changes or parallel work; otherwise prefer the existing
    checkout and a normal branch.
-3. Execute phases in dependency order. Apply `cambio-minimo` principles and include or update tests
-   for every feature and bug fix. Follow the current project rules for any permitted delegation.
+3. Execute phases in dependency order. Apply `cambio-minimo` and verify each feature or bug fix
+   under the applicable test policy; this skill does not authorize otherwise prohibited new cases.
+   Follow the current project rules for any permitted delegation.
    Choose the current agent or a suitable subagent available in the current environment for each
    implementation phase, following that client's delegation policy. Keep one writer per repo and
    branch. If no subagent is available, implement directly when capable and authorized; do not
@@ -46,9 +47,12 @@ Do not invent a missing plan. If no usable plan exists, stop after identifying t
    plan, tests or reviews to create the draft PR. Reuse the same branch and PR; convert a ready
    PR back to draft before a new push. Do not reproduce the Git/GitHub procedure here.
 5. Run the relevant tests, lint, typecheck, build, or equivalent verification in every affected
-   repository. Never start development servers. Browser smoke tests require an explicit request.
+   repository. Reuse existing verification guides and test harnesses. When repository edits are authorized, fill
+   a missing guide for the affected feature with preconditions and test data without secrets, role, actions, expected final state
+   and observable evidence; distinguish executed from pending checks. In read-only work, report the missing guide without creating it. Do not create another test system.
+   Never start development servers. Browser smoke tests require an explicit request.
 6. Run `code-review` (`/revisa`) over each complete branch and working-tree diff. Validate every
-   finding, immediately correct valid high and medium findings, update tests, rerun verification,
+   finding, immediately correct valid high and medium findings, maintain tests within policy, rerun verification,
    and repeat the review until no valid high or medium findings remain. Correct low findings only
    when the change is direct, safe, and within the plan.
    If the same verification and review already passed under an enclosing workflow for the exact

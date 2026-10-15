@@ -17,9 +17,9 @@ Determina la causa con evidencia suficiente y evita convertir una hipotesis plau
 4. Revisa primero las fuentes que pueden explicar el comportamiento sin cambiarlo: configuracion, variables de entorno, datos, dependencias, logs y limites externos cuando apliquen.
 5. Instrumenta solo lo necesario para distinguir hipotesis. Prueba una variable por vez y conserva evidencia de lo observado. En un encargo de solo lectura, limitate a logs existentes, contadores del sistema, consultas de lectura y ejecuciones aisladas; agregar trazas al codigo es una modificacion y requiere autorizacion explicita.
 6. Declara una causa solo cuando la evidencia conecte el mecanismo con el sintoma y descarte alternativas razonables. Separa siempre hechos observados, inferencias y elementos `NO PROBADO`.
-7. Si la correccion fue autorizada, aplica el cambio permanente mas pequeno en la capa responsable y agrega o adapta una prueba de regresion que detecte el fallo.
+7. Si la correccion fue autorizada, aplica el cambio permanente mas pequeno en la capa responsable y reutiliza la verificacion pertinente. Crear o ampliar tests depende de la politica aplicable: no ordenes casos nuevos fuera de ella. Si corresponde el unico test de reproduccion permitido, comprueba antes que falle por el motivo previsto, cita comando y fallo observado, y despues que pase con la correccion.
 8. Ejecuta una verificacion fresca del mismo recorrido. Una prueba distinta, un lint aislado o la confianza del agente no demuestran que el sintoma desaparecio.
-   Para regresiones de rendimiento, compara antes y despues con la misma carga, datos y condiciones; registra la metrica y su variacion. Si el resultado fluctua, repite lo suficiente para distinguir la mejora del ruido y declara los limites de la comparacion.
+   Para regresiones de rendimiento, compara con configuracion, carga, datos y condiciones equivalentes. Comprueba resultados correctos, trabajo real completado y errores en ambas versiones; omitir trabajo o fallar antes no acredita mejora. Mide el recorrido completo afectado y registra metrica y variacion. Repite lo necesario para distinguir mejora de ruido y declara los limites.
 
 ## Limites
 

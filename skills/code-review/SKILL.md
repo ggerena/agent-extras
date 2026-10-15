@@ -33,20 +33,20 @@ procedimiento de revisión de releases del proyecto, si existe.
    branch. Also inspect staged changes with `git diff --cached`, unstaged changes with `git diff`,
    and the contents of relevant files returned by `git ls-files --others --exclude-standard`.
    Record the reviewed base, head or merge-base, and whether local changes were included.
-5. Perform an **adversarial review**: do not only check whether the happy path looks reasonable. Try to falsify the change's guarantees with concrete abuse cases, malformed inputs, boundary conditions, concurrent operations, partial failures, stale state, permission crossings, and invariant violations that are relevant to the diff. Treat descriptions, tests, comments, and author claims as hypotheses to verify against the implementation. Keep this proportional to the change and do not invent speculative findings without reproducible reasoning or evidence.
+5. Perform an **adversarial review**: do not only check whether the happy path looks reasonable. Try to falsify the change's guarantees with concrete abuse cases, malformed inputs, boundary conditions, concurrent operations, partial failures, stale state, permission crossings, and invariant violations that are relevant to the diff. Treat descriptions, tests, comments, and author claims as hypotheses to verify against the implementation. Identify the critical assumption on which correctness or security depends and check it against real production code and its direct and indirect consumers (callers, contracts, processes and services relying on that assumption); isolated helpers or mocks do not prove the full path. Keep this proportional to the change and do not invent speculative findings without reproducible reasoning or evidence.
 6. Review for:
    - functional bugs and regressions,
    - API/props/data-contract mismatches,
    - security, permissions, secrets, or data-loss risks,
    - violations of project instructions,
    - comments or historical intent contradicted by the change.
-7. Use focused tests or disposable scripts outside the checkout when they can safely prove or disprove a concrete suspicion. Do not modify the reviewed worktree or weaken existing checks.
+7. Use focused tests or disposable scripts outside the checkout when they can safely prove or disprove a concrete suspicion, respecting the applicable test policy. For a claimed regression test, check evidence that it failed before the fix for the intended reason, rather than an unrelated setup failure. Do not modify the reviewed worktree or weaken existing checks.
 8. Use `git blame`, local history, or earlier PRs only when they help verify a concrete suspicion.
 9. Assign both severity and confidence to each finding. Keep only findings with confidence 80 or higher:
    - **Alta:** security exposure, data loss, production outage, major regression, or a correctness blocker.
    - **Media:** user-visible bug, broken or incomplete contract, missing validation, or missing test coverage that makes a regression likely.
    - **Baja:** non-blocking maintainability or minor correctness risk supported by concrete evidence.
-10. Ignore nitpicks, style-only comments, preexisting problems outside changed lines, and issues already covered by lint/typecheck/CI unless the evidence shows CI will miss them.
+10. Ignore nitpicks, style-only comments, preexisting problems outside changed lines, and issues already covered by lint/typecheck/CI unless the evidence shows CI will miss them. Missing new unit/integration tests alone is not a finding when applicable policy forbids them; assess the required verification within that policy.
 11. If reviewing a PR, use `gh pr comment` only when the user explicitly authorized the external write in the current session. Otherwise report findings locally.
 
 ## Output

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Crear especificación y plan"
+  short_description: "Prepara un plan verificable para implementación posterior"
+  default_prompt: "Usa $crear-spec con los repositorios y la plantilla configurados para preparar una especificación verificable sin implementarla."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Notificar por WhatsApp"
+  short_description: "Envía avisos autorizados y comprueba su aceptación"
+  default_prompt: "Usa $whatsapp-notify para enviar el mensaje autorizado al destinatario confirmado y verificar su aceptación."
