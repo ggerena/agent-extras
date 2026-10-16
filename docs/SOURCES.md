@@ -43,4 +43,6 @@ Los demás procedimientos propios y las plantillas configurables se consolidaron
 
 ## Recursos administrados por aplicaciones
 
+La interfaz utilizada por `revisar-errores-slack` se contrastó con la documentación de [conversaciones](https://github.com/shaharia-lab/slackcli/blob/v0.15.0/docs/user-guide/conversations.md) y [uso desde scripts](https://github.com/shaharia-lab/slackcli/blob/v0.15.0/docs/user-guide/scripting.md) de SlackCLI v0.15.0, proyecto de [Shaharia Lab](https://github.com/shaharia-lab/slackcli). La skill tiene redacción propia; no incluye copias de documentación ni configuración privada.
+
 Las skills suministradas por un cliente o sincronizadas por una aplicación se recuperan mediante esa aplicación o su complemento. Sus dependencias internas, derechos de distribución y versiones dependen del proveedor. Esto incluye control del navegador o del equipo, documentos, investigación, importación de memoria, informes matinales y administración de skills. No sustituyas uno de esos paquetes por otro con nombre parecido afirmando que es el mismo.

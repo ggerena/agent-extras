@@ -28,6 +28,7 @@ Skills reutilizables para conocer un repositorio, investigar un fallo, planifica
 | Revisar o adecuar privacidad a la normativa chilena | [proteccion-datos-chile](skills/proteccion-datos-chile/SKILL.md) |
 | Preparar o revisar una versión | [crear-release](skills/crear-release/SKILL.md) |
 | Resumir actividad comprobada | [daily](skills/daily/SKILL.md) |
+| Revisar errores de un canal de alertas de Slack | [revisar-errores-slack](skills/revisar-errores-slack/SKILL.md) |
 | Analizar dificultades en sesiones con agentes | [retrospectiva-agentes](skills/retrospectiva-agentes/SKILL.md) |
 | Actualizar agentes en Windows | [actualiza-todo](skills/actualiza-todo/SKILL.md) |
 | Auditar o restaurar controles locales de Grok | [revisa-grok](skills/revisa-grok/SKILL.md) |
