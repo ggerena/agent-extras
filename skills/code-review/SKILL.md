@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Usar cuando el usuario pida una revisión de código, /revisa, /code-review, revisar un PR, una rama o cambios contra una base, o una revisión adversarial experta de un diff sin editar archivos. Priorizar errores reales, regresiones, incumplimientos de las instrucciones del proyecto y hallazgos de alta confianza; comentar en el PR solo con autorización explícita.
+description: Usar cuando el usuario pida una revisión de código, /revisa, /code-review, revisar un PR, una rama o cambios contra una base, o una revisión adversarial experta de un diff sin editar archivos. Priorizar errores reales, regresiones, incumplimientos de las instrucciones del proyecto y hallazgos de alta confianza; comentar en el PR solo con autorización explícita o según las instrucciones vigentes.
 ---
 
 # Revisión de código
@@ -71,7 +71,8 @@ procedimiento de revisión de versiones del proyecto, si existe.
     sola un hallazgo cuando la política aplicable las prohíbe; evalúa la verificación requerida
     dentro de esa política.
 11. Si revisas un PR, usa `gh pr comment` solo cuando el usuario haya autorizado expresamente
-    esa escritura externa en la sesión actual. En otro caso, informa los hallazgos localmente.
+    esa escritura externa en la sesión actual o sus instrucciones vigentes lo autoricen con las
+    condiciones que fijen. En otro caso, informa los hallazgos localmente.
 
 ## Entrega
 
