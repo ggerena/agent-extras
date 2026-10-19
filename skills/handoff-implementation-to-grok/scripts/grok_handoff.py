@@ -1274,12 +1274,14 @@ def toco_tests(paths: list[str]) -> bool:
 
 TESTS_OBJECTIVE = (
     "La implementación quedó sin tests: ningún archivo de prueba cambió. "
-    "Agrega ahora los tests que faltan para lo que acabas de implementar — "
+    "Agrega ahora los tests que exija la política de pruebas del proyecto "
+    "(AGENTS.md o equivalente) para lo que acabas de implementar — "
     "funcionalidad nueva y correcciones de error, casos normales y de borde — "
     "dentro de allowed_paths, y ejecútalos junto al resto de validation_commands "
     "antes de terminar. No cambies la implementación salvo que un test revele un "
-    "error real. Es una regla del usuario, no una sugerencia: una fase sin tests "
-    "se considera incompleta."
+    "error real. Si esa política prohíbe tests nuevos de algún tipo, agrega solo "
+    "los permitidos; si no corresponde ninguno, no agregues tests, ejecuta los "
+    "existentes pertinentes y explica el motivo en el resultado."
 )
 
 REVIEW_OBJECTIVE = (

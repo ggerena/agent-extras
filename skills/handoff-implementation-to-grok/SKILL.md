@@ -138,8 +138,9 @@ ejecuciones manuales y en la práctica la revisión se saltaba.
 
 El paso de pruebas solo se ejecuta si el diff del `implement` no tocó ningún
 archivo de prueba: el supervisor lo detecta por la ruta (`__tests__/`, `tests/`,
-`*.test.*`, `*.spec.*`, `test_*.py`) y le reclama a Grok las pruebas que faltan
-antes de revisar. Delegar esto importa porque Grok omite las pruebas de forma
+`*.test.*`, `*.spec.*`, `test_*.py`) y le reclama a Grok las pruebas que exija la
+política de pruebas del proyecto antes de revisar; si esa política no permite
+ninguna nueva, Grok lo explica y ejecuta las existentes. Delegar esto importa porque Grok omite las pruebas de forma
 sistemática y detectarlo a mano le cuesta al coordinador una lectura completa
 del diff. Se desactiva con `--no-test-gate` en fases de documentación o
 configuración, donde no aplica.
@@ -194,12 +195,13 @@ fallida y conviene no revertirlo sin entender por qué está.
   directorio, así que `backend/src/api/x` sirve y `backend/src/api/x/**` no.
   Con comodines Grok toca los archivos correctos pero los controles de alcance los marcan
   fuera de alcance y la fase queda inservible.
-- **Exigir pruebas siempre.** Toda funcionalidad nueva y toda corrección de errores del paquete
-  debe incluir pruebas nuevas o actualizar las existentes: los archivos de prueba
-  van dentro de `AllowedPaths` y su ejecución dentro de `ValidationCommands`.
-  Un `implement` sin pruebas se trata como paquete mal definido y se corrige antes
-  de lanzar, no después. Es un requisito de este flujo: si entra en conflicto con la política
-  del proyecto, detén el inicio hasta resolverlo; no autoriza crear pruebas prohibidas.
+- **Exigir pruebas según la política del proyecto.** Toda funcionalidad nueva y toda corrección
+  de errores del paquete debe incluir las pruebas que esa política exija o permita, nuevas o
+  actualizadas: los archivos de prueba van dentro de `AllowedPaths` y su ejecución dentro de
+  `ValidationCommands`. Si la política no permite ninguna prueba nueva para el paquete, basta
+  con ejecutar las existentes pertinentes en `ValidationCommands`. Un `implement` sin pruebas
+  ni validación ejecutable se trata como paquete mal definido y se corrige antes de lanzar;
+  este flujo no autoriza crear pruebas prohibidas.
   Grok entrega implementaciones completas y válidas omitiendo las pruebas aunque
   estén pedidas de forma explícita; por eso el supervisor las reclama solo antes
   de revisar. Al coordinador le queda comprobar que las pruebas que llegaron

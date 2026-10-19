@@ -133,8 +133,9 @@ corrección → revisión final**, sin que el coordinador lance cada paso.
 
 El paso de pruebas solo se ejecuta si el diff del `implement` no tocó ningún
 archivo de prueba: el supervisor lo detecta por la ruta (`__tests__/`, `tests/`,
-`*.test.*`, `*.spec.*`, `test_*.py`) y le reclama a Codex las pruebas que faltan
-antes de revisar. Se desactiva con `-NoTestGate` (`--no-test-gate`) en fases de
+`*.test.*`, `*.spec.*`, `test_*.py`) y le reclama a Codex las pruebas que exija la
+política de pruebas del proyecto antes de revisar; si esa política no permite
+ninguna nueva, Codex lo explica y ejecuta las existentes. Se desactiva con `-NoTestGate` (`--no-test-gate`) en fases de
 documentación o configuración, donde no aplica.
 
 Política de corrección, aplicada por Codex en el paso intermedio:
@@ -209,12 +210,13 @@ codex exec -C <repo> -m <model> -c model_reasoning_effort=<effort>
 
 - Exigir `AllowedPaths`. **Sin comodines**: el validador compara prefijos de
   directorio, así que `backend/src/api/x` sirve y `backend/src/api/x/**` no.
-- **Exigir pruebas siempre.** Toda funcionalidad nueva y toda corrección de errores del paquete
-  debe incluir pruebas nuevas o actualizar las existentes: los archivos de prueba
-  van dentro de `AllowedPaths` y su ejecución dentro de `ValidationCommands`.
-  Un `implement` sin pruebas se trata como paquete mal definido y se corrige antes
-  de lanzar, no después. Es un requisito de este flujo: si entra en conflicto con la política
-  del proyecto, detén el inicio hasta resolverlo; no autoriza crear pruebas prohibidas. Al
+- **Exigir pruebas según la política del proyecto.** Toda funcionalidad nueva y toda corrección
+  de errores del paquete debe incluir las pruebas que esa política exija o permita, nuevas o
+  actualizadas: los archivos de prueba van dentro de `AllowedPaths` y su ejecución dentro de
+  `ValidationCommands`. Si la política no permite ninguna prueba nueva para el paquete, basta
+  con ejecutar las existentes pertinentes en `ValidationCommands`. Un `implement` sin pruebas
+  ni validación ejecutable se trata como paquete mal definido y se corrige antes de lanzar;
+  este flujo no autoriza crear pruebas prohibidas. Al
   coordinador le queda comprobar que las pruebas que llegaron prueben algo real,
   no que existan.
 - Editar solo esas rutas; leer libremente y, para probar, ejecutar solo `ValidationCommands`.
