@@ -51,7 +51,12 @@ procedimiento de revisión de versiones del proyecto, si existe.
    - incompatibilidades de API, propiedades de componentes o contratos de datos;
    - riesgos de seguridad, permisos, secretos o pérdida de datos;
    - incumplimientos de las instrucciones del proyecto;
-   - comentarios o intención histórica que el cambio contradiga.
+   - comentarios o intención histórica que el cambio contradiga;
+   - cambios difíciles de revertir después de publicarse, como migraciones, borrado o
+     transformación de datos, contratos públicos o envíos externos, sin una vía de reversión o
+     compatibilidad comprobada;
+   - errores silenciados: excepciones capturadas sin registro ni aviso, o valores por defecto,
+     reintentos y comportamientos de respaldo que ocultan una falla real.
 7. Usa pruebas acotadas o scripts temporales fuera de la copia de trabajo cuando permitan
    confirmar o descartar una sospecha concreta con seguridad, respetando la política de pruebas
    aplicable. Si se presenta una prueba de regresión, comprueba la evidencia de que fallaba antes
