@@ -59,8 +59,9 @@ No inventes un plan que falta. Si no existe un plan utilizable, detente tras ide
 6. Ejecuta `code-review` (`/revisa`) sobre el diff completo de cada rama y sus cambios locales.
    Valida cada hallazgo, corrige de inmediato los hallazgos altos y medios válidos, mantén las
    pruebas dentro de la política aplicable, vuelve a verificar y repite la revisión hasta que no
-   queden hallazgos altos o medios válidos. Corrige hallazgos bajos solo cuando el cambio sea
-   directo, seguro y esté dentro del plan.
+   queden hallazgos altos o medios válidos, con el tope de rondas de `cerrar-pr`: al alcanzarlo,
+   detén ese PR sin declarar el cierre, mantenlo en borrador e informa. Corrige hallazgos bajos
+   solo cuando el cambio sea directo, seguro y esté dentro del plan.
    Si la misma verificación y revisión ya fueron satisfactorias en un flujo que contiene este
    procedimiento para el contenido, base y entorno exactos, reutiliza esa evidencia. Repite solo
    tras un cambio, fallo, incertidumbre o instrucción que exija expresamente una nueva ejecución.
@@ -80,7 +81,8 @@ un respaldo seguro en borrador en un repositorio de código. Conserva el progres
 borrador y continúa las correcciones autorizadas. Detén la publicación si hay secretos, cambios
 ajenos que no puedas excluir con seguridad, destino incierto o falta de autorización para publicar.
 Detén el trabajo afectado ante una decisión material de producto, acción destructiva, acceso nuevo,
-operación en Producción o ampliación de alcance que el plan original no autorice. Informa los
+operación en Producción o ampliación de alcance que el plan original no autorice, o al alcanzar el
+tope de rondas de revisión de `cerrar-pr`. Informa los
 bloqueos sin afirmar que el trabajo está completo.
 
 Nunca hagas merge. No agregues atribuciones al flujo de trabajo ni a una IA en mensajes de commit,

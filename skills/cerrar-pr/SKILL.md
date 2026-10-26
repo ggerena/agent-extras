@@ -72,7 +72,10 @@ una ejecución nueva.
    Vuelve a ejecutar las comprobaciones afectadas.
 5. Repite `/revisa` hasta que no queden hallazgos altos o medios válidos. Mantén visibles los demás
    hallazgos sin resolver; bloquean el cierre, mientras que el estado listo sigue la política de
-   activación de CI del paso 7.
+   activación de CI del paso 7. Una ronda consiste en corregir y volver a ejecutar `/revisa`; la
+   revisión inicial no cuenta y el conteo es por PR. Si después de tres rondas siguen
+   apareciendo hallazgos altos o medios válidos, detén el ciclo sin declarar el cierre, mantén el
+   PR en borrador e informa al usuario los hallazgos pendientes y por qué no converge.
 6. Publica correcciones con `-Backup` cuando sea necesario. Invoca el modo revisado con
    `-ReviewPassed` solo después de que la verificación pertinente y la revisión local sean
    satisfactorias para el diff actual.
@@ -87,7 +90,7 @@ una ejecución nueva.
 El ciclo de corrección ya forma parte de completar la implementación autorizada; no te detengas
 solo porque aparezca un hallazgo alto o medio válido. Detente y pregunta únicamente cuando una
 corrección requiera una decisión material de producto, mayor alcance, una acción destructiva,
-un acceso nuevo u otra autorización.
+un acceso nuevo u otra autorización, o cuando se alcance el tope de rondas del paso 5.
 
 ## Revisión externa opcional
 
