@@ -58,7 +58,8 @@ procedimiento de revisión de versiones del proyecto, si existe.
    - errores silenciados: excepciones capturadas sin registro ni aviso, o valores por defecto,
      reintentos y comportamientos de respaldo que ocultan una falla real;
    - si el diff cambia pantallas, componentes visibles o textos para el usuario, los problemas de
-     textos y complejidad de interfaz descritos en [Cambios de interfaz](#cambios-de-interfaz).
+     textos y complejidad de interfaz descritos en [Cambios de interfaz](#cambios-de-interfaz);
+   - si `km` está disponible, las señales descritas en [Señales de km](#señales-de-km).
 7. Usa pruebas acotadas o scripts temporales fuera de la copia de trabajo cuando permitan
    confirmar o descartar una sospecha concreta con seguridad, respetando la política de pruebas
    aplicable. Si se presenta una prueba de regresión, comprueba la evidencia de que fallaba antes
@@ -81,6 +82,27 @@ procedimiento de revisión de versiones del proyecto, si existe.
 11. Si revisas un PR, usa `gh pr comment` solo cuando el usuario haya autorizado expresamente
     esa escritura externa en la sesión actual o sus instrucciones vigentes lo autoricen con las
     condiciones que fijen. En otro caso, informa los hallazgos localmente.
+
+## Señales de km
+
+Ejecuta los comandos desde la raíz del repositorio: `km impact` mide siempre todo el repositorio y
+`km docs refs` solo el directorio indicado. Son solo de lectura y tardan pocos segundos. Ninguna
+señal de km es por sí sola un hallazgo ni bloquea el cierre: confírmala en el código y repórtala
+solo con la confianza mínima de 80. Si `km` no está disponible o falla, indícalo y sigue.
+
+- **Cambios conjuntos:** si el último commit revisado está disponible localmente, ejecuta
+  `km impact . --since-ref <base> --until-ref <SHA revisado>`. `km impact . --pr <n>` sin esos
+  commits mide el parche contra la copia local sin aplicarlo; para una rama, `--since-ref <base>`
+  sin `--until-ref` incluye cambios sin commit y archivos no versionados. Indica qué variante
+  usaste. Usa la sección de archivos que suelen cambiar con el diff y no están en él
+  («Logical radius»). Por cada uno, comprueba si el cambio también debía llegar ahí, por ejemplo
+  otra vista que muestra los mismos datos. Ignora los avisos de archivos sin pruebas y de
+  documentos que solo nombran archivos cambiados.
+- **Referencias rotas:** si el diff cambia documentos Markdown o mueve, renombra o elimina
+  archivos, ejecuta `km docs refs . --since-ref <base>`. Reporta las referencias rotas que el
+  cambio introduce o que apuntan a archivos que el cambio movió o eliminó. Este comando examina
+  los archivos de la copia local: úsalo solo si esa copia corresponde al último commit revisado;
+  si no, indica esta comprobación como pendiente.
 
 ## Cambios de interfaz
 
