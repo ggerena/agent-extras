@@ -56,7 +56,9 @@ procedimiento de revisión de versiones del proyecto, si existe.
      transformación de datos, contratos públicos o envíos externos, sin una vía de reversión o
      compatibilidad comprobada;
    - errores silenciados: excepciones capturadas sin registro ni aviso, o valores por defecto,
-     reintentos y comportamientos de respaldo que ocultan una falla real.
+     reintentos y comportamientos de respaldo que ocultan una falla real;
+   - si el diff cambia pantallas, componentes visibles o textos para el usuario, los problemas de
+     textos y complejidad de interfaz descritos en [Cambios de interfaz](#cambios-de-interfaz).
 7. Usa pruebas acotadas o scripts temporales fuera de la copia de trabajo cuando permitan
    confirmar o descartar una sospecha concreta con seguridad, respetando la política de pruebas
    aplicable. Si se presenta una prueba de regresión, comprueba la evidencia de que fallaba antes
@@ -71,13 +73,61 @@ procedimiento de revisión de versiones del proyecto, si existe.
    - **Baja:** riesgo de mantenibilidad que no impida el cierre o riesgo menor de funcionamiento
      correcto, respaldado por evidencia concreta.
 10. Omite detalles irrelevantes, observaciones solo de estilo, problemas previos fuera de las líneas
-    cambiadas y problemas que ya detecten lint, comprobación de tipos o CI, salvo evidencia de que
+    cambiadas (un texto confuso o un paso innecesario que afecte a quien usa la pantalla no es
+    solo de estilo) y problemas que ya detecten lint, comprobación de tipos o CI, salvo evidencia de que
     CI no los detectará. La ausencia de pruebas unitarias o de integración nuevas no es por sí
     sola un hallazgo cuando la política aplicable las prohíbe; evalúa la verificación requerida
     dentro de esa política.
 11. Si revisas un PR, usa `gh pr comment` solo cuando el usuario haya autorizado expresamente
     esa escritura externa en la sesión actual o sus instrucciones vigentes lo autoricen con las
     condiciones que fijen. En otro caso, informa los hallazgos localmente.
+
+## Cambios de interfaz
+
+Aplica esta sección solo a pantallas, componentes o textos visibles que el diff agrega o cambia.
+Revisa desde el código y los textos reales; no levantes servidores ni abras navegador sin pedido.
+Compara con pantallas existentes del mismo proyecto antes de proponer otra forma. Redacta los
+textos propuestos en el idioma del producto.
+
+**Textos:**
+
+- Los mensajes de error dicen qué pasó y qué puede hacer la persona; no se quedan en «Error» o
+  «Algo salió mal» ni muestran códigos internos, trazas o nombres de campos de la base de datos.
+- Los botones y enlaces nombran la acción concreta («Guardar ticket», no «OK» o «Aceptar» cuando
+  hay varias acciones). Una acción destructiva o irreversible dice qué se pierde.
+- Se usa el mismo término para el mismo concepto en la pantalla y en las pantallas existentes.
+- Idioma, trato (tú o usted) y vocabulario del producto, sin mezclar idiomas ni usar jerga técnica
+  con personas usuarias finales. Revisa ortografía y tildes.
+- Los estados vacíos, de carga y de éxito explican qué pasa y, si corresponde, el siguiente paso.
+- No quedan textos de relleno, `TODO`, ejemplos usados como etiqueta ni frases genéricas de
+  marketing que no digan nada concreto del producto.
+
+**Complejidad:**
+
+- La tarea principal de la pantalla se reconoce de inmediato y tiene una sola acción principal
+  destacada, no varias con el mismo peso.
+- Cada campo, opción o paso nuevo es necesario para la tarea. Los obligatorios son los mínimos y
+  los valores por defecto evitan decisiones que la persona no sabría tomar.
+- Cuenta los pasos o clics de la tarea principal antes y después del cambio. Señala modales,
+  confirmaciones o pantallas intermedias que se agregan sin necesidad.
+- No se muestran a personas usuarias finales identificadores internos, opciones técnicas o
+  configuración que no necesitan entender.
+- Se reutilizan los componentes y patrones del proyecto. Señala elementos visuales que el resto
+  del proyecto no usa (por ejemplo degradados, tarjetas grandes, emojis decorativos o todo
+  centrado) solo como inconsistencia con el diseño existente; es **Baja** salvo que afecte la
+  lectura o la tarea.
+- Antes de proponer quitar un campo, opción, paso o confirmación, comprueba su propósito en los
+  requisitos, el backend o el recorrido existente. No propongas quitar confirmaciones de acciones
+  destructivas, validaciones ni controles de permisos o seguridad. Menos clics no basta por sí
+  solo como mejora.
+
+Severidad: usa la escala general y la confianza mínima de 80. Como guía: **Alta** si un texto
+engañoso puede llevar a pérdida de datos, una acción irreversible no deseada o exposición de datos;
+**Media** si un texto engaña, si la persona puede no entender cómo completar la tarea o si el
+cambio agrega pasos evitables a una tarea frecuente; **Baja** en los demás casos con evidencia
+concreta. Propón el texto o la simplificación concreta. Esta revisión no reemplaza una prueba con
+personas reales: indica `NO PROBADO` visualmente cuando no se vio la pantalla. Para datos extremos
+(nombres largos, listas vacías, cifras enormes), usa `break-ui` si está disponible.
 
 ## Entrega
 
