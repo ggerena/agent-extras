@@ -12,7 +12,8 @@ esta revisión, como `cerrar-pr`, responsable de las correcciones y verificacion
 
 **Qué flujo de revisión corresponde:** esta skill revisa directamente una rama o PR. Si el usuario
 pide la opinión de OTRO agente, usa un subagente disponible en el entorno actual y respeta el
-revisor indicado y las reglas del cliente. Debe ser una sesión o agente distinto del implementador;
+revisor indicado y las reglas del cliente. Debe ser una sesión o agente distinto del implementador,
+con contexto nuevo y sin heredar la conversación (no usar fork); entrégale el diff y el criterio, no tu conclusión;
 si no está disponible, informa la limitación sin sustituirlo por una autorrevisión. Un envío fuera
 del entorno actual requiere autorización explícita. Si hay que traspasar la implementación,
 usa el procedimiento de traspaso correspondiente. Para una versión próxima a Producción, aplica el
