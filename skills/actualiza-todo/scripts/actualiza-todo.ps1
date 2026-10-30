@@ -357,26 +357,6 @@ function Get-DesktopVersionSummary {
     return $lines
 }
 
-function Test-NvidiaCatalog {
-    if (-not $env:NVIDIA_API_KEY) {
-        Write-Output "NVIDIA/OpenCode: omitido porque NVIDIA_API_KEY no esta definida"
-        return
-    }
-    $openCodeMajorVersion = Get-OpenCodeMajorVersion
-    if ($openCodeMajorVersion -lt 2) {
-        Invoke-Checked opencode @("debug", "config") *> $null
-    }
-    $headers = @{ Authorization = "Bearer $env:NVIDIA_API_KEY" }
-    $api = @((Invoke-RestMethod -Uri "https://integrate.api.nvidia.com/v1/models" -Headers $headers -Method Get -TimeoutSec 30).data.id | Sort-Object -Unique)
-    $arguments = if ($openCodeMajorVersion -ge 2) { @("models", "--standalone") } else { @("models", "nvidia") }
-    $models = @(& opencode @arguments 2>$null)
-    if ($LASTEXITCODE -ne 0) { throw "No se pudo consultar el catalogo de OpenCode" }
-    $visible = @($models | Where-Object { $_ -match '^nvidia/' } | ForEach-Object { $_ -replace '^nvidia/', '' } | Sort-Object -Unique)
-    $difference = @(Compare-Object $api $visible)
-    Write-Output "NVIDIA/OpenCode: api=$($api.Count), visible=$($visible.Count), diferencias=$($difference.Count)"
-    if ($difference.Count -gt 0) { throw "El catalogo NVIDIA de OpenCode no coincide con la API" }
-}
-
 $requiredCommands = @("codex", "claude", "opencode", "grok", "npm", "winget")
 if ($IncludeBuzz) { $requiredCommands += @("gh", "git", "docker") }
 foreach ($command in $requiredCommands) { Require-Command $command }
@@ -428,7 +408,6 @@ if (Test-Path -LiteralPath $GrokAuditScript) {
 else {
     throw "No se encontro la auditoria de Grok: $GrokAuditScript"
 }
-Test-NvidiaCatalog
 
 Write-Output "=== Versiones finales ==="
 & codex --version

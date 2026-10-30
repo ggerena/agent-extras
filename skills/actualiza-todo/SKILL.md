@@ -20,7 +20,7 @@ Exportación portable adaptada: requiere configurar las rutas y el alcance local
 2. Ejecutar `scripts/actualiza-todo.ps1` solo tras autorizar la actualización completa. Sin `-IncludeBuzz`, no consulta ni modifica Buzz, su repositorio o Docker. `-CheckOnly` corresponde a un pedido de comprobar: no es una simulación sin efectos ni sin red; consulta servicios y puede refrescar fuentes de paquetes.
 3. Actualizar por canales estables, sin bajar versiones, borrar datos, cerrar aplicaciones ni iniciar sesiones de agentes. En modo actualización se restauran los controles locales de Grok después de actualizarlo y luego se auditan.
 4. Ante un bloqueo, resolver solo lo autorizado: no descartar cambios, borrar volúmenes, hacer push ni iniciar Grok. Informar fallos de reemplazo por archivos en uso sin cerrar procesos.
-5. Comprobar versiones finales, adaptadores ACP, auditoría de Grok y, si existe `NVIDIA_API_KEY`, coincidencia del catálogo de OpenCode con la API. No revelar claves, sesiones ni solicitudes.
+5. Comprobar versiones finales, adaptadores ACP y auditoría de Grok. No comprobar catálogos de modelos ni proveedores. No revelar claves, sesiones ni solicitudes.
 6. Si se incluyó Buzz, comprobar versión Desktop, revisión del relay y salud de sus dependencias. Distinguir resultados verificados y `NO PROBADO`.
 
 ## Límites
