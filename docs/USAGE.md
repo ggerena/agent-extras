@@ -118,6 +118,8 @@ Los pedidos siguientes son ejemplos para adaptar y enviar deliberadamente. Leer 
 
 ## Uso repetido e instalación opcional
 
+Para uso continuo, adopta primero las [reglas de trabajo](REGLAS-DE-TRABAJO.md) como instrucciones globales de tu agente; incluyen un mensaje copiable para integrarlas en Claude Code. Sin esas reglas, cada pedido debe declarar por sí mismo alcance, permisos, pruebas y revisión.
+
 La lectura directa de archivos sirve para empezar. Si tu aplicación descubre skills nativamente, instala únicamente las necesarias siguiendo su documentación actual y preservando toda la carpeta: `SKILL.md`, `references/`, `scripts/`, `assets/` y `agents/` cuando existan. Copiar solo `SKILL.md` puede dejar referencias rotas. Instalar o inspeccionar no requiere ejecutar los scripts.
 
 Codex documenta la lectura gradual y las ubicaciones `~/.agents/skills` y `.agents/skills` en su [guía oficial de skills](https://learn.chatgpt.com/docs/customization/overview#skills). En otras aplicaciones, comprueba su mecanismo de carga; no asumas que reconocen esas carpetas, `AGENTS.md`, los metadatos de `agents/` o comandos como `/autodev`. Puedes pedir siempre «lee este archivo y sigue sus instrucciones para esta tarea».
