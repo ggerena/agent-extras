@@ -72,6 +72,7 @@ Se leyeron y compararon con estas skills, pero no se copiaron ni instalaron: sus
 | [ub-mode](https://github.com/unclebob/ub-mode) | Robert C. Martin («Uncle Bob», autor de *Clean Code*) | Deriva de pstack, ya citado. Coincide con `cambio-minimo` y la búsqueda de la causa raíz; exige TDD y pruebas de mutación obligatorias, push a la rama principal y rediseños, que chocan con las reglas de trabajo. Sin licencia visible al revisarlo. |
 | [crapper](https://github.com/unclebob/crapper), [dryer](https://github.com/unclebob/dryer), [mutator](https://github.com/unclebob/mutator) | Robert C. Martin | Miden riesgo por complejidad y cobertura, duplicación y calidad de las pruebas. `km-analyze` cubre complejidad y duplicación; la mutación queda como opción para reglas críticas. Licencia 0BSD. |
 | [swarm-forge](https://github.com/unclebob/swarm-forge) | Robert C. Martin | Coordina varios agentes con worktrees y traspasos auditables; depende de herramientas Unix y permite más de lo que aceptan las reglas de trabajo. |
+| [«Becoming a better writer»](https://newsletter.pragmaticengineer.com/p/becoming-a-better-writer), de The Pragmatic Engineer | Gergely Orosz | Tácticas para escribir mejor sin depender del texto generado por IA: editar, usar frases cortas y pedir comentarios concretos. Lo aplicable a los agentes ya está en las [reglas de trabajo](REGLAS-DE-TRABAJO.md) (respuestas cortas, frases simples y revisión por otro modelo de documentos para terceros); el resto es hábito personal. |
 
 ## Recursos administrados por aplicaciones
 
