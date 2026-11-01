@@ -43,7 +43,11 @@ sin jerga, y haz tú los pasos en vez de pedirme comandos.
    esos lugares: no reemplaces ni borres nada mío. Si un archivo o una
    skill ya existe, o si una regla nueva choca con una mía, explícamelo
    y pregúntame qué hacer.
-6. Antes de guardar, muéstrame en palabras simples qué vas a cambiar y
+6. Si diseño, construyo o reviso pantallas (UX/UI), explícame en
+   palabras simples las skills de la sección «Diseño de interfaces
+   (UX/UI)» de docs/SOURCES.md y ofréceme instalar las que me sirvan,
+   descargándolas desde su enlace con la carpeta completa.
+7. Antes de guardar, muéstrame en palabras simples qué vas a cambiar y
    espera mi OK. Al final, dime cómo comprobar que quedó funcionando.
 ```
 

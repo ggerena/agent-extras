@@ -22,6 +22,17 @@ Esta biblioteca mantiene procedimientos propios en español. Las referencias de 
 | Enseñanza | [teach](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/productivity/teach/SKILL.md) | MIT |
 | Funciones de IA con TypeSafe | [typesafe-ai](https://github.com/typesafe-ai/skills/blob/65a39f393687675ce170e6094757de20370365b9/skills/typesafe-ai/SKILL.md) | MIT |
 
+### Diseño de interfaces (UX/UI)
+
+Selección de la tabla anterior, más `break-ui`, para quien diseña, construye o revisa pantallas. Instala cada una desde su fuente con la carpeta completa.
+
+| Skill | Para qué sirve | Requisitos y licencia |
+| --- | --- | --- |
+| [break-ui](https://github.com/emilkowalski/skills/tree/2d228630ba1446365f614a108cb8252f1feda202/skills/break-ui) | Revisa una pantalla con datos extremos realistas (nombres muy largos, listas vacías, textos en otros idiomas) e informa qué se rompe y cómo arreglarlo. La versión original además crea datos de prueba y agrega un selector en la pantalla para verlos; si solo quieres el informe, pídeselo así. | Proyecto con interfaz web. MIT. |
+| [frontend-ui-engineering](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/frontend-ui-engineering/SKILL.md) | Guía para construir interfaces accesibles, adaptables a celular y con aspecto profesional. | Proyecto con interfaz web. MIT. |
+| [web-perf](https://github.com/cloudflare/skills/blob/be68fd8db614c22ed6f4d21a439a641e4904eb94/skills/web-perf/SKILL.md) | Mide qué tan rápido carga una página y detecta problemas de rendimiento y accesibilidad. | Chrome DevTools MCP. Apache-2.0. |
+| [react-best-practices](https://github.com/vercel-labs/agent-skills/blob/063bee94c3f4df8453406c830b0a7df0f2860278/skills/react-best-practices/SKILL.md) | Buenas prácticas de rendimiento en React y Next.js. | Solo para proyectos con React o Next.js. MIT. |
+
 Las licencias y la autoría corresponden a cada fuente. Los enlaces no convierten esos proyectos en dependencias instaladas ni conceden permisos adicionales sobre sus herramientas o sobre el proyecto del usuario. Una adaptación local puede diferir de la fuente citada; comprueba ambas antes de reemplazar instrucciones existentes.
 
 ## Ideas incorporadas a procedimientos propios
