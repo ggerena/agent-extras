@@ -38,7 +38,8 @@ sin jerga, y haz tú los pasos en vez de pedirme comandos.
 4. Pregúntame cada dato que falte (por ejemplo mi idioma). No inventes valores.
 5. Agrega las reglas a mi ~/.claude/CLAUDE.md. Si habrá programación,
    copia también VERIFICACION.md a ~/.claude/ y ajusta sus enlaces.
-   Instala en ~/.claude/skills/ solo las skills que me sirvan, copiando
+   Instala en ~/.claude/skills/ solo las skills que me sirvan según la
+   tabla «Qué instalar según tu rol» de docs/GUIA-SIMPLE.md, copiando
    la carpeta completa de cada una. Antes, revisa lo que ya existe en
    esos lugares: no reemplaces ni borres nada mío. Si un archivo o una
    skill ya existe, o si una regla nueva choca con una mía, explícamelo

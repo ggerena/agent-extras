@@ -4,7 +4,7 @@ Skills reutilizables para conocer un repositorio, investigar un fallo, planifica
 
 **Empieza aquí:** [cómo usar las skills, primer mensaje copiable y ejemplos de flujo](docs/USAGE.md). Puedes leerlas sin instalarlas; algunas etapas requieren herramientas concretas y permisos explícitos.
 
-**Para trabajar como nosotros:** adopta también las [reglas de trabajo](docs/REGLAS-DE-TRABAJO.md) y su guía de [verificación](docs/VERIFICACION.md). Las skills dicen cómo hacer cada etapa; las reglas fijan cuándo actuar, preguntar, respaldar, verificar y revisar. Si no eres técnico, basta con [pegar un mensaje en Claude Code](docs/REGLAS-DE-TRABAJO.md#integrarla-en-claude-code-con-un-mensaje).
+**Para trabajar como nosotros:** adopta también las [reglas de trabajo](docs/REGLAS-DE-TRABAJO.md) y su guía de [verificación](docs/VERIFICACION.md). Las skills dicen cómo hacer cada etapa; las reglas fijan cuándo actuar, preguntar, respaldar, verificar y revisar. Si no eres técnico, empieza por la [guía simple](docs/GUIA-SIMPLE.md): instalar, actualizar, qué usar según tu rol y un glosario.
 
 ## Siete flujos principales
 
@@ -51,3 +51,7 @@ Instala únicamente lo necesario y en los destinos autorizados. La presencia de 
 El [catálogo de fuentes e influencias](docs/SOURCES.md) enlaza bibliotecas públicas para trabajos especializados. Consulta sus instrucciones, herramientas y licencias en origen; son referencias externas al catálogo mantenido aquí.
 
 Mantén memorias privadas, reglas personales, datos de clientes, contactos, credenciales, código de aplicaciones, configuración de máquina, archivos generados y respaldos locales fuera de esta biblioteca.
+
+## Licencia
+
+El contenido propio de esta biblioteca se publica con licencia [MIT](LICENSE). Las fuentes externas citadas en [SOURCES.md](docs/SOURCES.md) conservan sus propias licencias.

@@ -24,7 +24,7 @@ Esta biblioteca mantiene procedimientos propios en español. Las referencias de 
 
 ### Diseño de interfaces (UX/UI)
 
-Selección de la tabla anterior, más `break-ui`, para quien diseña, construye o revisa pantallas. Instala cada una desde su fuente con la carpeta completa.
+Selección de la tabla anterior, más `break-ui` y `frontend-design`, para quien diseña, construye o revisa pantallas. Instala cada una desde su fuente con la carpeta completa.
 
 | Skill | Para qué sirve | Requisitos y licencia |
 | --- | --- | --- |
@@ -32,6 +32,7 @@ Selección de la tabla anterior, más `break-ui`, para quien diseña, construye 
 | [frontend-ui-engineering](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/frontend-ui-engineering/SKILL.md) | Guía para construir interfaces accesibles, adaptables a celular y con aspecto profesional. | Proyecto con interfaz web. MIT. |
 | [web-perf](https://github.com/cloudflare/skills/blob/be68fd8db614c22ed6f4d21a439a641e4904eb94/skills/web-perf/SKILL.md) | Mide qué tan rápido carga una página y detecta problemas de rendimiento y accesibilidad. | Chrome DevTools MCP. Apache-2.0. |
 | [react-best-practices](https://github.com/vercel-labs/agent-skills/blob/063bee94c3f4df8453406c830b0a7df0f2860278/skills/react-best-practices/SKILL.md) | Buenas prácticas de rendimiento en React y Next.js. | Solo para proyectos con React o Next.js. MIT. |
+| [frontend-design](https://github.com/anthropics/skills/tree/41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f/skills/frontend-design) (Anthropic) | Ayuda a elegir una dirección visual propia (colores, tipografía, diagramación) para que la interfaz no se vea como una plantilla genérica. | Proyecto con interfaz web. Apache-2.0. |
 
 Las licencias y la autoría corresponden a cada fuente. Los enlaces no convierten esos proyectos en dependencias instaladas ni conceden permisos adicionales sobre sus herramientas o sobre el proyecto del usuario. Una adaptación local puede diferir de la fuente citada; comprueba ambas antes de reemplazar instrucciones existentes.
 
@@ -49,11 +50,28 @@ Estas ideas se contrastaron con procedimientos existentes y se incorporaron de f
 | Limitar las rondas de revisión entre agentes cuando no convergen | [Addy Osmani, «How the Claude Code team does code review»](https://x.com/addyosmani/status/2114604912520921136) | `cerrar-pr`, `autodev`, con tope de tres rondas y aviso al usuario |
 | Una prueba de regresión debe fallar por el motivo previsto | [pstack tdd](https://github.com/michael-denyer/pstack-claude/blob/94f5ce95abe8a9dec976967d79941f631cf477cd/plugins/pstack/skills/tdd/SKILL.md) | `diagnostico-con-evidencia`, `code-review`, según la política de pruebas del usuario |
 | Una guía reutilizable para comprobar el comportamiento afectado | [create-verification-skill](https://github.com/michael-denyer/pstack-claude/blob/94f5ce95abe8a9dec976967d79941f631cf477cd/plugins/pstack/skills/create-verification-skill/SKILL.md), [maintain-verification-skill](https://github.com/michael-denyer/pstack-claude/blob/94f5ce95abe8a9dec976967d79941f631cf477cd/plugins/pstack/skills/maintain-verification-skill/SKILL.md) | `autodev`, sin iniciar servidores ni escribir en un encargo de solo lectura |
+| Resolver con el menor cambio que deba mantenerse, reutilizando y evitando la sobreingeniería | [DietrichGebert, Ponytail](https://github.com/dietrichgebert/ponytail), licencia MIT | `cambio-minimo`, redacción propia; se revisó entre agosto y septiembre de 2026 y no se instaló |
+| El revisor independiente parte con contexto nuevo, sin heredar la conversación | [Matt Pocock, mattpocock/skills#1341](https://github.com/mattpocock/skills/pull/1341), licencia MIT | `code-review` |
+| Revisar textos, estados vacíos y complejidad innecesaria en cambios de interfaz | [Nate Berkopec, publicación sobre proyectos hechos con IA](https://x.com/nateberkopec/status/2115263368064045136) | `code-review`, sección de cambios de interfaz |
+| Medir salud del código, duplicación y archivos que suelen cambiar juntos | [Kimün (`km`), de Eduardo Díaz](https://github.com/lnds/kimun), licencia MIT | `km-analyze` y señales de `km` en `code-review`; la herramienta se instala aparte |
+| Pedir evidencia, encargar con objetivo y verificación, y revisar las reglas al cambiar de modelo | [Addy Osmani, «You're probably overprompting Claude»](https://x.com/addyosmani/status/2115688494865465370) | [Reglas de trabajo](REGLAS-DE-TRABAJO.md) |
 | Merge expresamente autorizado, vinculado al último commit verificado | [pstack merge safety](https://github.com/michael-denyer/pstack-claude/blob/94f5ce95abe8a9dec976967d79941f631cf477cd/plugins/pstack/skills/poteto-mode/references/merge-safety.md), [manual de GitHub CLI](https://cli.github.com/manual/gh_pr_merge) | Política personal o del proyecto, fuera de esta biblioteca; `cerrar-pr` nunca hace merge |
+
+Las filas de `pstack` enlazan [pstack-claude](https://github.com/michael-denyer/pstack-claude) de Michael Denyer (MIT), versión para Claude Code y otros clientes del pstack original de Lauren ([poteto](https://github.com/poteto)).
 
 La discusión pública que motivó comparar las guías de verificación es [la publicación de Daniel Lockyer](https://x.com/DanielLockyer/status/2110035356737232942). El porcentaje que menciona es una experiencia personal, no una medición de estas skills.
 
-Los demás procedimientos propios y las plantillas configurables se consolidaron desde instrucciones locales. No se estableció una skill externa original para ellos; no deduzcas autoría a partir de nombres o comportamientos parecidos. Las notas históricas mencionan Ponytail y una revisión de mattpocock/skills como influencias sobre la simplificación, pero no identifican archivos fuente exactos para esos cambios; no se les atribuye una relación más precisa.
+Los demás procedimientos propios y las plantillas configurables se consolidaron desde instrucciones locales. No se estableció una skill externa original para ellos; no deduzcas autoría a partir de nombres o comportamientos parecidos. Las notas históricas también mencionan una revisión general de mattpocock/skills como influencia sobre la simplificación, sin identificar archivos fuente exactos; no se le atribuye una relación más precisa.
+
+## Referencias revisadas sin incorporar
+
+Se leyeron y compararon con estas skills, pero no se copiaron ni instalaron: sus ideas útiles ya estaban cubiertas o chocaban con las reglas de trabajo. Se citan como lectura recomendada.
+
+| Referencia | Autor | Por qué no se incorporó |
+| --- | --- | --- |
+| [ub-mode](https://github.com/unclebob/ub-mode) | Robert C. Martin («Uncle Bob», autor de *Clean Code*) | Deriva de pstack, ya citado. Coincide con `cambio-minimo` y la búsqueda de la causa raíz; exige TDD y pruebas de mutación obligatorias, push a la rama principal y rediseños, que chocan con las reglas de trabajo. Sin licencia visible al revisarlo. |
+| [crapper](https://github.com/unclebob/crapper), [dryer](https://github.com/unclebob/dryer), [mutator](https://github.com/unclebob/mutator) | Robert C. Martin | Miden riesgo por complejidad y cobertura, duplicación y calidad de las pruebas. `km-analyze` cubre complejidad y duplicación; la mutación queda como opción para reglas críticas. Licencia 0BSD. |
+| [swarm-forge](https://github.com/unclebob/swarm-forge) | Robert C. Martin | Coordina varios agentes con worktrees y traspasos auditables; depende de herramientas Unix y permite más de lo que aceptan las reglas de trabajo. |
 
 ## Recursos administrados por aplicaciones
 
