@@ -23,17 +23,39 @@ Actualiza la biblioteca agent-extras que instalaste antes
 4. Antes de guardar, muéstrame qué vas a cambiar y espera mi OK.
 ```
 
-## Configuración recomendada de Claude Code
+## Configuración recomendada
 
-Compactar la conversación a los 400.000 tokens. Cuando una conversación se alarga, Claude Code la resume para seguir trabajando (compactación automática). Si tu modelo admite más contexto (por ejemplo, 1 millón de tokens), resumir antes, a los 400.000, evita que crezca hasta el máximo. Como cada mensaje vuelve a leer toda la conversación, una más corta consume menos cuota por mensaje; el ahorro total depende de cómo trabajes, porque resumir también consume. Se configura en `~/.claude/settings.json`:
+Una subsección por herramienta. Usa solo la de las herramientas que tengas instaladas.
+
+### Claude Code
+
+Estos ajustes van en `~/.claude/settings.json`. Si el archivo ya existe, se agregan sin borrar ni cambiar lo demás.
 
 ```json
 {
-  "autoCompactWindow": 400000
+  "autoCompactWindow": 400000,
+  "outputStyle": "Concise",
+  "attribution": { "commit": "", "pr": "" },
+  "pluginConfigs": {
+    "cc-plugin-agents-md@builtin": {
+      "options": { "instructionFiles": "claude-md-and-agents-md" }
+    }
+  }
 }
 ```
 
-Si el archivo ya existe, se agrega solo esa línea, sin borrar lo demás. Con modelos de 200.000 tokens o menos no cambia nada. Más detalles en la [documentación de Claude Code](https://code.claude.com/docs/en/settings).
+- **Compactar a los 400.000 tokens (`autoCompactWindow`).** Cuando una conversación se alarga, Claude Code la resume para seguir trabajando (compactación automática). Si tu modelo admite más contexto (por ejemplo, 1 millón de tokens), resumir antes, a los 400.000, evita que crezca hasta el máximo. Como cada mensaje vuelve a leer toda la conversación, una más corta consume menos cuota por mensaje; el ahorro total depende de cómo trabajes, porque resumir también consume. Con modelos de 200.000 tokens o menos no cambia nada.
+- **Respuestas concisas (`outputStyle`).** Claude va al resultado, sin rodeos. Si un día necesitas más detalle, basta con pedirlo.
+- **Sin firma de IA en commits ni PR (`attribution`).** Claude Code no agrega su firma; así lo piden las reglas.
+- **Leer también los `AGENTS.md` (`pluginConfigs`).** Claude lee los `CLAUDE.md` y además los `AGENTS.md` de cada proyecto, que es donde otras IAs, como Codex, buscan sus reglas. Así todas siguen las mismas.
+- **Solo en Windows:** agregar `"env": { "PYTHONIOENCODING": "utf-8" }` para que tildes y eñes no salgan con símbolos raros cuando Claude usa Python.
+- **Recordatorio al cerrar (opcional).** Pídele a Claude un hook `UserPromptSubmit` que, cuando escribas algo como «terminamos», «por hoy» o «gracias», le recuerde guardar lo aprendido en la sesión (decisiones, correcciones, pendientes) en tus reglas o en la documentación del proyecto, donde otras IAs también lo lean.
+
+Más detalles en la [documentación de Claude Code](https://code.claude.com/docs/en/settings).
+
+### Codex
+
+En `~/.codex/config.toml`, `model_verbosity = "low"` pide respuestas más cortas y directas.
 
 ## Segunda opinión de otra empresa
 

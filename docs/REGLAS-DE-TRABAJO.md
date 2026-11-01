@@ -49,9 +49,9 @@ sin jerga, y haz tú los pasos en vez de pedirme comandos.
    palabras simples las skills de la sección «Diseño de interfaces
    (UX/UI)» de docs/SOURCES.md y ofréceme instalar las que me sirvan,
    descargándolas desde su enlace con la carpeta completa.
-7. Aplica la «Configuración recomendada de Claude Code» de
-   docs/GUIA-SIMPLE.md en mi ~/.claude/settings.json, sin borrar ni
-   cambiar lo que ya tenga.
+7. Aplica la «Configuración recomendada» de docs/GUIA-SIMPLE.md
+   para las herramientas que tengo, sin borrar ni cambiar lo que
+   ya tenga.
 8. Antes de guardar, muéstrame en palabras simples qué vas a cambiar y
    espera mi OK. Al final, dime cómo comprobar que quedó funcionando.
 ```
