@@ -127,7 +127,7 @@ Codex documenta la lectura gradual y las ubicaciones `~/.agents/skills` y `.agen
 Antes de adoptar una skill del [catálogo](../README.md):
 
 - **Flujo principal o utilidad propia:** comprueba las dependencias antes de usarlo; estar mantenido no significa funcionar en cualquier entorno. Los traspasos a Codex/Grok necesitan sus respectivos CLI y las utilidades para mantener el equipo pueden depender de Windows.
-- **Plantilla configurable:** define rutas, repositorios, destinatarios y permisos fuera de esta biblioteca compartida. `mandalo-por-buzz` requiere un script auxiliar propio; `whatsapp-notify` requiere herramientas y destinatario comprobado. Ninguna autoriza enviar mensajes por estar instalada.
+- **Plantilla configurable:** define rutas, repositorios, destinatarios y permisos fuera de esta biblioteca compartida.  `whatsapp-notify` requiere herramientas y destinatario comprobado. Ninguna autoriza enviar mensajes por estar instalada.
 - **Referencia externa:** consulta el enlace de [SOURCES.md](SOURCES.md), las instrucciones y la licencia del proyecto original. No supongas que sus recursos están instalados ni que sus permisos coinciden con los de esta biblioteca.
 
 ## Cómo comprobar que el agente entendió

@@ -23,6 +23,22 @@ Actualiza la biblioteca agent-extras que instalaste antes
 4. Antes de guardar, muéstrame qué vas a cambiar y espera mi OK.
 ```
 
+## Configuración recomendada de Claude Code
+
+Compactar la conversación a los 400.000 tokens. Cuando una conversación se alarga, Claude Code la resume para seguir trabajando (compactación automática). Si tu modelo admite más contexto (por ejemplo, 1 millón de tokens), resumir antes, a los 400.000, evita que crezca hasta el máximo. Como cada mensaje vuelve a leer toda la conversación, una más corta consume menos cuota por mensaje; el ahorro total depende de cómo trabajes, porque resumir también consume. Se configura en `~/.claude/settings.json`:
+
+```json
+{
+  "autoCompactWindow": 400000
+}
+```
+
+Si el archivo ya existe, se agrega solo esa línea, sin borrar lo demás. Con modelos de 200.000 tokens o menos no cambia nada. Más detalles en la [documentación de Claude Code](https://code.claude.com/docs/en/settings).
+
+## Segunda opinión de otra empresa
+
+Las reglas piden que un modelo de otra empresa revise los trabajos importantes antes de darlos por listos: un modelo de la misma empresa suele pasar por alto los mismos errores. Por ejemplo, si usas Claude, puedes instalar Codex (de OpenAI, con una cuenta de ChatGPT). Pídele a Claude que te ayude a instalarlo, revisa antes si tiene costo y dile que quede escrito en tus reglas como revisor: así ya cuenta con tu autorización para enviarle los trabajos a revisar. Sin él, Claude te avisa que no hay revisor externo y usa una sesión separada como respaldo; ese respaldo no sirve para documentos o recomendaciones que vayan a otras personas, que siempre necesitan un modelo de otra empresa.
+
 ## Qué instalar según tu rol
 
 Las reglas de trabajo sirven a todos. Las skills conviene instalarlas solo si las vas a usar.
@@ -34,7 +50,7 @@ Las reglas de trabajo sirven a todos. Las skills conviene instalarlas solo si la
 | Gestión o coordinación | [crear-spec](../skills/crear-spec/SKILL.md) para preparar planes que otra persona o IA implementa, [daily](../skills/daily/SKILL.md) para resumir lo hecho en un periodo y [retrospectiva-agentes](../skills/retrospectiva-agentes/SKILL.md) para mejorar cómo se trabaja con la IA. |
 | Desarrollo | Los siete flujos principales del [README](../README.md), más [km-analyze](../skills/km-analyze/SKILL.md) para medir la calidad del código y [proteccion-datos-chile](../skills/proteccion-datos-chile/SKILL.md) si el sistema trata datos personales. |
 
-Las demás skills dependen de herramientas concretas (Codex, Grok, Buzz, WhatsApp, Slack) o de Windows; revisa sus requisitos en [PORTABILITY.md](PORTABILITY.md) antes de instalarlas.
+Las demás skills dependen de herramientas concretas (Codex, Grok, WhatsApp, Slack) o de Windows; revisa sus requisitos en [PORTABILITY.md](PORTABILITY.md) antes de instalarlas.
 
 ## Glosario
 
@@ -50,7 +66,7 @@ Las demás skills dependen de herramientas concretas (Codex, Grok, Buzz, WhatsAp
 | Push | Subir los commits a GitHub. |
 | PR (pull request) | Solicitud para sumar los cambios de una rama a la versión principal; ahí se revisan. Un PR borrador aún no está listo. |
 | Merge | Sumar definitivamente los cambios de un PR a la versión principal. |
-| Revisión de código | Otra persona u otro modelo lee los cambios buscando errores. |
+| Revisión de código | Otra persona o un modelo de otra empresa lee los cambios buscando errores. |
 | Test (prueba) | Programa que comprueba automáticamente que algo funciona. |
 | Ambientes (Dev, QA, Prod) | Copias del sistema para desarrollo, para pruebas y la de producción, que usan los clientes. |
 | Desplegar | Publicar una versión en un ambiente. |

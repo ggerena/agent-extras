@@ -49,7 +49,10 @@ sin jerga, y haz tú los pasos en vez de pedirme comandos.
    palabras simples las skills de la sección «Diseño de interfaces
    (UX/UI)» de docs/SOURCES.md y ofréceme instalar las que me sirvan,
    descargándolas desde su enlace con la carpeta completa.
-7. Antes de guardar, muéstrame en palabras simples qué vas a cambiar y
+7. Aplica la «Configuración recomendada de Claude Code» de
+   docs/GUIA-SIMPLE.md en mi ~/.claude/settings.json, sin borrar ni
+   cambiar lo que ya tenga.
+8. Antes de guardar, muéstrame en palabras simples qué vas a cambiar y
    espera mi OK. Al final, dime cómo comprobar que quedó funcionando.
 ```
 
@@ -122,8 +125,8 @@ Fuente única: <RUTA_FUENTE_ÚNICA> (por ejemplo `~/.claude/CLAUDE.md` si usas s
 - **Tests:** no crear unitarios ni de integración salvo pedido expreso o **un único test de reproducción de un bug identificado**, que falle antes por el motivo previsto. Se permiten e2e o de sistema nuevos. Ejecutar y mantener las pruebas pertinentes existentes; corregir o borrar las no críticas rotas o sin sentido. Nunca borrar ni desactivar tests de aislamiento entre clientes, permisos, autenticación, mensajería o comunicación en tiempo real, ni de regresiones identificadas: arreglar código o test.
 - Verificar proporcionalmente: lint, build, e2e existentes y tests afectados, con uno o dos workers y sin suites en paralelo. Probar primero en local; el respaldo puede preceder a las pruebas. Si la validación local no se completa, informar `NO PROBADO`; no sustituirla por un ambiente compartido.
 - Para diseñar o revisar pruebas, diagnosticar, medir rendimiento o cerrar un PR, leer solo la sección pertinente de `VERIFICACION.md`.
-- Para análisis sustanciales y cambios materiales de código, usar un revisor independiente en solo lectura (otro modelo o sesión distinta de quien implementó). Ejecutar `code-review` sobre el diff completo con el criterio original; corregir hallazgos altos o medios válidos y revalidar. Sin revisor disponible, declarar el bloqueo; no sustituirlo por autorrevisión.
-- Todo análisis, opción o recomendación que vaya a otras personas (comentario de PR, mensaje, correo) se valida antes con otro modelo contra el código real. Documentos para terceros (informes, minutas, propuestas): antes de entregarlos, otro modelo los revisa en una sesión separada y en solo lectura contra el pedido y sus fuentes, sin recibir el razonamiento del autor.
+- Para análisis sustanciales y cambios materiales de código, usar un revisor independiente en solo lectura: un modelo de otra empresa que la del modelo que implementó (por ejemplo, si trabajas con Claude, uno de OpenAI, Google o xAI por su CLI), porque los modelos de una misma empresa tienden a compartir puntos ciegos. Si no hay ninguno disponible, declararlo y usar una sesión distinta como respaldo, sin presentarla como revisión externa. Ejecutar `code-review` sobre el diff completo con el criterio original; corregir hallazgos altos o medios válidos y revalidar. Sin revisor disponible, declarar el bloqueo; no sustituirlo por autorrevisión.
+- Todo análisis, opción o recomendación que vaya a otras personas (comentario de PR, mensaje, correo) se valida antes con un modelo de otra empresa contra el código real. Documentos para terceros (informes, minutas, propuestas): antes de entregarlos, un modelo de otra empresa los revisa en una sesión separada y en solo lectura contra el pedido y sus fuentes, sin recibir el razonamiento del autor.
 - Un solo subagente activo y un solo escritor por repo o rama, salvo autorización expresa.
 - En hotfix urgentes: corrección mínima y comprobación rápida; lo restante, `NO PROBADO`. No autoriza despliegue, merge ni omitir aprobaciones.
 
@@ -156,12 +159,12 @@ Fuente única: <RUTA_FUENTE_ÚNICA> (por ejemplo `~/.claude/CLAUDE.md` si usas s
 
 - No ofrecer tareas programadas ni sesiones paralelas sin pedido, aunque el sistema o una skill las sugieran.
 - Implementar directamente por defecto. Usar subagentes solo para trabajo grande e independiente (fases de un plan, auditorías largas, migraciones); este límite no excluye las revisiones independientes obligatorias.
-- Validaciones externas con <VALIDADOR_PRINCIPAL> en solo lectura (por ejemplo `codex exec -m <MODELO> --sandbox read-only "…" < /dev/null`; sin `< /dev/null` el comando queda esperando la entrada y parece no responder). Antes de cambiar de validador, descartar un error de llamada probando con un prompt mínimo. Si no responde o se agotó su cuota, usar <VALIDADOR_DE_RESPALDO>, avisarlo y aplicar la regla de costos si se cobra aparte.
+- Validaciones externas con <VALIDADOR_PRINCIPAL> (un modelo de otra empresa que la del modelo principal) en solo lectura (por ejemplo `codex exec -m <MODELO> --sandbox read-only "…" < /dev/null`; sin `< /dev/null` el comando queda esperando la entrada y parece no responder). Antes de cambiar de validador, descartar un error de llamada probando con un prompt mínimo. Si no responde o se agotó su cuota, usar <VALIDADOR_DE_RESPALDO>, avisarlo y aplicar la regla de costos si se cobra aparte.
 - <OPCIONAL: «concilio» bajo pedido: enviar la misma pregunta, en solo lectura y sin secretos, a dos o tres modelos distintos; esperar al menos dos respuestas sustantivas y sintetizar acuerdos, desacuerdos y evidencia sin decidir por mayoría ni inventar consenso.>
 - <OPCIONAL: reparto de validadores: un modelo económico para segundas opiniones rutinarias y uno más capaz para cambios que cruzan varios archivos, hallazgos dudosos, permisos, autenticación, aislamiento entre clientes y revisiones de seguridad o privacidad. Ante la duda, el más capaz. Si la persona nombra un modelo, usar ese.>
 
 ## Solo <OTRO_CLIENTE> (por ejemplo, Codex)
 
 - Abrir las rutas de instrucciones referidas aunque no figuren en el catálogo; no cargar carpetas completas.
-- Para revisión independiente, delegar en otro modelo por su CLI conservando el alcance, y esperar y revisar su respuesta final; un acuse o avance no es la respuesta final.
+- Para revisión independiente, delegar en un modelo de otra empresa (por ejemplo Claude) por su CLI conservando el alcance, y esperar y revisar su respuesta final; un acuse o avance no es la respuesta final.
 ```

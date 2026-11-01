@@ -36,7 +36,6 @@ Skills reutilizables para conocer un repositorio, investigar un fallo, planifica
 | Auditar o restaurar controles locales de Grok | [revisa-grok](skills/revisa-grok/SKILL.md) |
 | Capturar evidencia de un bloqueo de Windows | [se-pego-mi-pc](skills/se-pego-mi-pc/SKILL.md) |
 | Enviar un mensaje autorizado por WhatsApp | [whatsapp-notify](skills/whatsapp-notify/SKILL.md) |
-| Encargar trabajo por Buzz con autorización específica | [mandalo-por-buzz](skills/mandalo-por-buzz/SKILL.md) |
 
 ## Uso y requisitos
 

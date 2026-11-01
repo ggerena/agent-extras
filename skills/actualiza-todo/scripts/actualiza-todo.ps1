@@ -1,9 +1,6 @@
 [CmdletBinding()]
 param(
     [switch]$CheckOnly,
-    [switch]$IncludeBuzz,
-    [string]$BuzzRepo = (Join-Path $env:USERPROFILE "Code\buzz"),
-    [string]$BuzzComposeProject = "buzz",
     [string]$GrokRepairScript = (Join-Path $env:USERPROFILE ".agents\skills\revisa-grok\scripts\asegura-grok.ps1"),
     [string]$GrokAuditScript = (Join-Path $env:USERPROFILE ".agents\skills\revisa-grok\scripts\revisa-grok.ps1")
 )
@@ -78,119 +75,6 @@ function Update-NpmPackage {
     Write-Output "npm ${Package}: instalado=$installed, latest=$latest, actualizar=$needsUpdate"
     if ($needsUpdate -and -not $CheckOnly) {
         Invoke-Checked npm @("install", "-g", "$Package@latest")
-    }
-}
-
-function Get-BuzzDesktopVersion {
-    $paths = @(
-        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
-        "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
-        "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
-    )
-    $entry = Get-ItemProperty $paths -ErrorAction SilentlyContinue |
-        Where-Object { $_.DisplayName -eq "Buzz" } |
-        Select-Object -First 1
-    return [string]$entry.DisplayVersion
-}
-
-function Update-BuzzDesktop {
-    $release = (& gh release view --repo block/buzz --json tagName,assets | Out-String) | ConvertFrom-Json
-    if ($LASTEXITCODE -ne 0) { throw "No se pudo consultar el release de Buzz" }
-    $latest = ([string]$release.tagName) -replace '^desktop-v', ''
-    $installed = Get-BuzzDesktopVersion
-    $needsUpdate = -not $installed -or (Compare-SemVer $installed $latest) -lt 0
-    Write-Output "Buzz Desktop: instalado=$installed, latest=$latest, actualizar=$needsUpdate"
-    if (-not $needsUpdate -or $CheckOnly) { return }
-
-    $asset = $release.assets |
-        Where-Object { $_.name -match '^Buzz_.+_x64-setup.*\.exe$' } |
-        Select-Object -First 1
-    if (-not $asset -or -not $asset.digest) {
-        throw "El release no contiene un instalador x64 con digest"
-    }
-    $installer = Join-Path $env:TEMP $asset.name
-    if (-not (Test-Path -LiteralPath $installer)) {
-        Invoke-Checked gh @("release", "download", $release.tagName, "--repo", "block/buzz", "--pattern", $asset.name, "--dir", $env:TEMP)
-    }
-    $actualDigest = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant()
-    $expectedDigest = ([string]$asset.digest) -replace '^sha256:', ''
-    if ($actualDigest -ne $expectedDigest) {
-        throw "El SHA-256 del instalador de Buzz no coincide con el release oficial"
-    }
-    $process = Start-Process -FilePath $installer -ArgumentList "/S" -Wait -PassThru -WindowStyle Hidden
-    if ($process.ExitCode -ne 0) { throw "El instalador de Buzz termino con codigo $($process.ExitCode)" }
-}
-
-function Test-DockerReady {
-    $previousEap = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
-    try {
-        docker info *> $null
-        return ($LASTEXITCODE -eq 0)
-    }
-    finally {
-        $ErrorActionPreference = $previousEap
-    }
-}
-
-function Ensure-Docker {
-    if (Test-DockerReady) { return }
-    if ($CheckOnly) { throw "Docker Desktop no esta iniciado" }
-    $candidates = @(
-        "C:\Program Files\Docker\Docker\Docker Desktop.exe",
-        (Join-Path $env:LOCALAPPDATA "Docker\Docker Desktop.exe")
-    )
-    $executable = $candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
-    if (-not $executable) { throw "No se encontro Docker Desktop" }
-    Start-Process -FilePath $executable -WindowStyle Hidden
-    $deadline = (Get-Date).AddSeconds(120)
-    do {
-        Start-Sleep -Seconds 3
-        if (Test-DockerReady) { return }
-    } while ((Get-Date) -lt $deadline)
-    throw "Docker Desktop no quedo listo dentro de 120 segundos"
-}
-
-function Update-BuzzRelay {
-    if (-not (Test-Path -LiteralPath $BuzzRepo)) { throw "No existe el repositorio Buzz: $BuzzRepo" }
-    $compose = Join-Path $BuzzRepo "deploy\compose\compose.yml"
-    if (-not (Test-Path -LiteralPath $compose)) { throw "No existe el compose de Buzz" }
-
-    $dirty = @(& git -C $BuzzRepo status --porcelain)
-    Invoke-Checked git @("-C", $BuzzRepo, "fetch", "origin", "main", "--quiet")
-    $local = [string]((& git -C $BuzzRepo rev-parse HEAD) | Select-Object -First 1)
-    $remote = [string]((& git -C $BuzzRepo rev-parse origin/main) | Select-Object -First 1)
-    Write-Output "Buzz repo: local=$local, remote=$remote, limpio=$($dirty.Count -eq 0)"
-    if ($local -ne $remote -and $dirty.Count -gt 0) {
-        throw "Buzz tiene cambios locales; no se hara pull ni se descartara nada"
-    }
-    if ($local -ne $remote -and -not $CheckOnly) {
-        Invoke-Checked git @("-C", $BuzzRepo, "pull", "--ff-only", "origin", "main")
-    }
-    if ($CheckOnly) { return }
-
-    Ensure-Docker
-    Push-Location $BuzzRepo
-    try {
-        Invoke-Checked docker @("compose", "-p", $BuzzComposeProject, "-f", $compose, "pull", "relay")
-        Invoke-Checked docker @("compose", "-p", $BuzzComposeProject, "-f", $compose, "up", "-d")
-        $deadline = (Get-Date).AddSeconds(90)
-        $previousEap = $ErrorActionPreference
-        $ErrorActionPreference = "Continue"
-        try {
-            do {
-                $health = [string]((& docker inspect "${BuzzComposeProject}-relay-1" --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}') | Select-Object -First 1)
-                if ($health -eq "healthy") { break }
-                Start-Sleep -Seconds 2
-            } while ((Get-Date) -lt $deadline)
-        }
-        finally {
-            $ErrorActionPreference = $previousEap
-        }
-        if ($health -ne "healthy") { throw "El relay de Buzz no alcanzo estado healthy" }
-    }
-    finally {
-        Pop-Location
     }
 }
 
@@ -358,7 +242,6 @@ function Get-DesktopVersionSummary {
 }
 
 $requiredCommands = @("codex", "claude", "opencode", "grok", "npm", "winget")
-if ($IncludeBuzz) { $requiredCommands += @("gh", "git", "docker") }
 foreach ($command in $requiredCommands) { Require-Command $command }
 
 Write-Output "=== Actualizar agentes ==="
@@ -391,15 +274,6 @@ foreach ($package in $npmPackages) { Update-NpmPackage $package }
 
 Update-DesktopApps
 
-if ($IncludeBuzz) {
-    Write-Output "=== Actualizar Buzz ==="
-    Update-BuzzDesktop
-    Update-BuzzRelay
-}
-else {
-    Write-Output "Buzz omitido: Desktop, repositorio y relay conservados. Usar -IncludeBuzz solo por pedido explicito."
-}
-
 Write-Output "=== Verificaciones ==="
 if (Test-Path -LiteralPath $GrokAuditScript) {
     & $GrokAuditScript -Json
@@ -414,7 +288,6 @@ Write-Output "=== Versiones finales ==="
 & claude --version
 & opencode --version
 & grok --version
-if ($IncludeBuzz) { Write-Output "Buzz Desktop: $(Get-BuzzDesktopVersion)" }
 Get-DesktopVersionSummary | ForEach-Object { Write-Output $_ }
 if ($CheckOnly) {
     Write-Output "Comprobacion integral completada."
