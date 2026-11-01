@@ -20,3 +20,7 @@ memories/
 *.db3
 *.sqlite-shm
 *.sqlite-wal
+
+# Python bytecode
+__pycache__/
+*.pyc
