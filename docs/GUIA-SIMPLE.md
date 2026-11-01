@@ -2,6 +2,15 @@
 
 Para quien no programa o recién empieza a trabajar con Claude Code. No necesitas usar comandos: Claude hace los pasos y te pide tu OK antes de guardar.
 
+## Dos principios clave
+
+Todo lo demás se apoya en estas dos ideas:
+
+1. **Evidencia antes que palabras.** Claude no da nada por hecho ni por terminado sin mostrar una prueba: el resultado de lo que ejecutó, una captura o el dato exacto de donde lo sacó. Lo que no pudo comprobar lo marca `NO PROBADO`, en vez de suponer que funciona. Ante un problema, primero encuentra la causa con pruebas y recién después propone corregirlo. Esto vale para cualquier trabajo, no solo para programar. Si una respuesta no trae su prueba, pídesela.
+2. **Cambio mínimo.** Antes de construir algo nuevo, Claude busca si ya se resuelve con lo que existe: un ajuste de configuración, una función que la herramienta ya trae o algo ya hecho que se pueda reutilizar. Si hay que cambiar, toca solo lo necesario, en el lugar que corresponde. Mínimo no significa cambiar menos líneas ni dejar un parche a medias, sino resolver el problema completo dejando menos complejidad que mantener.
+
+Las skills [diagnostico-con-evidencia](../skills/diagnostico-con-evidencia/SKILL.md) y [cambio-minimo](../skills/cambio-minimo/SKILL.md) aplican estas ideas paso a paso en trabajos de programación.
+
 ## Instalar
 
 Sigue los tres pasos de [Integrarla en Claude Code con un mensaje](REGLAS-DE-TRABAJO.md#integrarla-en-claude-code-con-un-mensaje): abrir Claude Code, pegar un mensaje y responder lo que te pregunte.

@@ -32,8 +32,8 @@ sin jerga, y haz tú los pasos en vez de pedirme comandos.
    pedir trabajos de programación, aunque los hagas tú (por ejemplo,
    crear una página o una aplicación). Si no, adopta solo las reglas
    sobre la forma de trabajar (respuestas cortas, preguntar antes de
-   acciones riesgosas o de enviar algo a terceros, verificar y decir
-   qué no está comprobado) y deja fuera las de código, Git, PRs y
+   acciones riesgosas o de enviar algo a terceros, mostrar la prueba
+   de lo que afirma y decir qué no está comprobado) y deja fuera las de código, Git, PRs y
    pruebas, junto con VERIFICACION.md.
 4. Pregúntame cada dato que falte (por ejemplo mi idioma). No inventes valores.
 5. Agrega las reglas a mi ~/.claude/CLAUDE.md. Si habrá programación,
@@ -66,6 +66,11 @@ Si eres técnico y prefieres hacerlo a mano: las reglas van en `~/.claude/CLAUDE
 # Instrucciones globales (todos los agentes)
 
 Fuente única: <RUTA_FUENTE_ÚNICA> (por ejemplo `~/.claude/CLAUDE.md` si usas solo Claude Code, o `~/.agents/AGENTS.md` enlazado o importado por cada cliente). Editar solo la fuente.
+
+## Dos principios que guían todo lo demás
+
+- **Evidencia:** no afirmar que algo funciona, está terminado o es la causa sin una prueba a la vista (comando y salida, captura, archivo y línea o dato con su fuente). Lo no comprobado se marca `NO PROBADO`. Ante un fallo, encontrar la causa con evidencia antes de corregir; diagnosticar no autoriza modificar.
+- **Cambio mínimo:** antes de escribir código, preferir configuración, capacidades nativas, reutilización o una solución operativa suficiente. Si hay que cambiar, tocar solo lo necesario, en la capa responsable y sobre la causa, sin abstracciones ni rediseños no pedidos. Mínimo no es un parche incompleto: el problema queda resuelto con la menor complejidad que mantener.
 
 ## Prioridad y alcance
 
