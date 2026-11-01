@@ -1,6 +1,6 @@
 ---
 name: handoff-implementation-to-grok
-description: Usar cuando Codex o Claude Code deban reducir el consumo de cuota del coordinador mientras Grok Build implementa, valida, revisa, corrige y completa el cierre operativo de una fase grande y coherente de código. Preferir paquetes sustanciales y autocontenidos, con un repositorio y rama por fase. Incluye selección de esfuerzo medium/high, sesiones de dos archivos, hash del plan fuente, controles de revisión en solo lectura, controles automáticos de Git y rutas, seguimiento en segundo plano, cierre autorizado con commit/push/PR sin merge, informes Markdown, limpieza y lanzadores Python/PowerShell portables. No usar para traspaso total de responsabilidad, merge, despliegue ni una segunda opinión aislada.
+description: Delega una fase grande y autocontenida de código a Grok Build, que implementa, valida, revisa y cierra con commit, push y PR sin merge, para ahorrar cuota del coordinador (Codex o Claude Code). Un repositorio y una rama por fase. No usar para una segunda opinión aislada, traspaso total de responsabilidad, merge ni despliegue.
 ---
 
 # Delegación supervisada a Grok Build

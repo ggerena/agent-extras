@@ -1,6 +1,6 @@
 ---
 name: handoff-implementation-to-codex
-description: 'Usar cuando el usuario pida delegar una fase grande y coherente de código a Codex CLI (GPT-6.1 Sol) para reducir el consumo de cuota del coordinador mientras Codex implementa, valida, revisa, corrige y completa el cierre operativo. Preferir paquetes sustanciales y autocontenidos, con un repositorio y rama por fase. Incluye esfuerzos medium/high/xhigh, sesiones de dos archivos, hash del plan fuente, entornos aislados por modo (revisión read-only e implementación workspace-write), controles automáticos de Git y rutas, seguimiento en segundo plano, cierre autorizado con commit/push/PR sin merge, informes Markdown, limpieza y lanzadores Python/PowerShell portables. No usar para una pregunta o segunda opinión puntual (ejecutar codex exec directamente), traspaso total de responsabilidad, merge ni despliegue.'
+description: Usar cuando el usuario pida delegar a Codex CLI (Sol) una fase grande y autocontenida de código, que implementa, valida, revisa y cierra con commit, push y PR sin merge, para ahorrar cuota del coordinador. Un repositorio y una rama por fase. No usar para una segunda opinión puntual (usar codex exec directamente), traspaso total de responsabilidad, merge ni despliegue.
 ---
 
 # Delegación supervisada a Codex
