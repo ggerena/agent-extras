@@ -6,6 +6,8 @@ Skills reutilizables para conocer un repositorio, investigar un fallo, planifica
 
 **Para trabajar como nosotros:** adopta también las [reglas de trabajo](docs/REGLAS-DE-TRABAJO.md) y su guía de [verificación](docs/VERIFICACION.md). Las skills dicen cómo hacer cada etapa; las reglas fijan cuándo actuar, preguntar, respaldar, verificar y revisar. Si no eres técnico, empieza por la [guía simple](docs/GUIA-SIMPLE.md): instalar, actualizar, qué usar según tu rol y un glosario.
 
+**¿Ya trabajas con agentes?** Compara tu forma de trabajo con esta biblioteca y propón mejoras con [este mensaje](docs/COMPARAR-Y-MEJORAR.md).
+
 **Dos principios guían todo:** *evidencia* (nada se da por hecho sin una prueba a la vista; lo no comprobado se marca `NO PROBADO`, y un fallo se diagnostica antes de corregirlo) y *cambio mínimo* (resolver con lo que ya existe y tocar solo lo necesario, en la capa que corresponde). Están explicados en la [guía simple](docs/GUIA-SIMPLE.md#dos-principios-clave) y los aplican [diagnostico-con-evidencia](skills/diagnostico-con-evidencia/SKILL.md) y [cambio-minimo](skills/cambio-minimo/SKILL.md).
 
 ## Siete flujos principales

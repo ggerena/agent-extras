@@ -21,9 +21,9 @@ rama, con rutas explícitas.
 - Dividir solo por una frontera real: repositorios o ramas distintos, bloqueo externo,
   autorización diferente, riesgo operacional independiente o un conjunto de
   `AllowedPaths` que deje de ser auditable.
-- Mantener una fase auditable por repositorio, pero lanzar en paralelo todas las fases
-  grandes que puedan avanzar con un contrato esperado explícito. No serializar
-  repositorios por defecto: una dependencia parcial no obliga a esperar si Codex puede
+- Mantener una fase auditable por repositorio, y, solo con autorización expresa de trabajo en paralelo, lanzar a la vez
+  las fases grandes que puedan avanzar con un contrato esperado explícito. Con esa
+  autorización, no serializar repositorios: una dependencia parcial no obliga a esperar si Codex puede
   implementar, probar y reportar el punto de integración pendiente sin inventar
   el contrato.
 - No interrumpir a Codex para asignarle trabajo adicional que ya podía incluirse
@@ -51,7 +51,7 @@ rama, con rutas explícitas.
 9. Generar el reporte Markdown y limpiar la fase cuando su información ya esté
    absorbida.
 
-Lanzar en paralelo las fases de repositorios distintos siempre que el mensaje de instrucciones declare
+Con autorización expresa de trabajo en paralelo, lanzar a la vez las fases de repositorios distintos siempre que el mensaje de instrucciones declare
 el contrato esperado, los puntos todavía pendientes y la prohibición de
 inventarlos. Esperar el resultado de otra fase solo cuando sea materialmente
 imposible implementar o validar sin su diff definitivo.
