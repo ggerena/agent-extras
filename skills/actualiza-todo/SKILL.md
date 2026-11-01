@@ -12,7 +12,7 @@ Exportación portable adaptada: requiere configurar las rutas y el alcance local
 - Confirmar qué herramientas ya instaladas se van a actualizar y la autorización para hacerlo. El script espera Codex, Claude Code, OpenCode, Grok Build, npm y winget; no usarlo para un alcance más estrecho sin ajustar la selección.
 - `-GrokRepairScript` y `-GrokAuditScript` apuntan por defecto a `revisa-grok` bajo `.agents/skills` del perfil de Windows; pasarlos explícitamente si la instalación difiere.
 - Buzz requiere pedido específico, `-IncludeBuzz` y comprobar `-BuzzRepo` y `-BuzzComposeProject` contra la instalación real. Sus valores genéricos predeterminados no acreditan que exista ni que sea el destino autorizado. Con Buzz se requieren también gh, git y Docker.
-- Consultar instrucciones de los productos cuando estén disponibles; para Grok, aplicar `revisa-grok`. No reinstalar herramientas ausentes o excluidas del encargo.
+- Consultar instrucciones de los productos cuando estén disponibles (por ejemplo `openai-docs` para Codex); para Grok, aplicar `revisa-grok`. No reinstalar herramientas ausentes o excluidas del encargo.
 
 ## Flujo
 
@@ -20,7 +20,7 @@ Exportación portable adaptada: requiere configurar las rutas y el alcance local
 2. Ejecutar `scripts/actualiza-todo.ps1` solo tras autorizar la actualización completa. Sin `-IncludeBuzz`, no consulta ni modifica Buzz, su repositorio o Docker. `-CheckOnly` corresponde a un pedido de comprobar: no es una simulación sin efectos ni sin red; consulta servicios y puede refrescar fuentes de paquetes.
 3. Actualizar por canales estables, sin bajar versiones, borrar datos, cerrar aplicaciones ni iniciar sesiones de agentes. En modo actualización se restauran los controles locales de Grok después de actualizarlo y luego se auditan.
 4. Ante un bloqueo, resolver solo lo autorizado: no descartar cambios, borrar volúmenes, hacer push ni iniciar Grok. Informar fallos de reemplazo por archivos en uso sin cerrar procesos.
-5. Comprobar versiones finales, adaptadores ACP y auditoría de Grok. No comprobar catálogos de modelos ni proveedores. No revelar claves, sesiones ni solicitudes.
+5. Comprobar versiones finales, adaptadores ACP y auditoría de Grok en `OK`, con cola vacía y protecciones activas. No comprobar catálogos de modelos ni proveedores. No revelar claves, sesiones ni solicitudes.
 6. Si se incluyó Buzz, comprobar versión Desktop, revisión del relay y salud de sus dependencias. Distinguir resultados verificados y `NO PROBADO`.
 
 ## Límites
