@@ -4,6 +4,39 @@ El catálogo siguiente reúne enlaces públicos para trabajos especializados. La
 
 Esta biblioteca mantiene procedimientos propios en español. Las referencias de terceros se ofrecen como enlaces, sin copias de sus skills ni de sus recursos. La traducción local de la biblioteca no es una traducción oficial de esas fuentes ni una copia textual de sus versiones originales.
 
+## Repositorios recomendados
+
+Resumen de los repositorios de terceros que conviene conocer. El detalle de qué se tomó de cada uno está en las secciones siguientes. Antes de instalar algo, lee su README y su licencia.
+
+### Base de esta biblioteca
+
+| Repositorio | Autor | Para qué sirve | Relación con esta biblioteca | Licencia |
+| --- | --- | --- | --- | --- |
+| [kimun](https://github.com/lnds/kimun) | Eduardo Díaz (lnds) | Herramienta `km`: nota de salud del código, complejidad, duplicación, puntos críticos y alcance de un cambio. | Necesaria para `km-analyze` y las señales de `km` en `code-review`; se instala aparte. | MIT |
+| [compliance-cl](https://github.com/Lelemon-studio/compliance-cl) | Lelemon Studio | Skill de auditoría y cumplimiento de las leyes chilenas 21.719 (datos personales) y 21.595 (delitos económicos). | Punto de partida de `proteccion-datos-chile`, con redacción propia. | MIT |
+| [pstack-claude](https://github.com/michael-denyer/pstack-claude) | Michael Denyer, sobre el pstack de Lauren ([poteto](https://github.com/poteto)) | Flujos rigurosos para agentes: pruebas, verificación, impacto de un cambio y merge seguro. | Varias ideas en `diagnostico-con-evidencia`, `cambio-minimo`, `code-review` y `autodev`. | MIT |
+| [ponytail](https://github.com/DietrichGebert/ponytail) | DietrichGebert | Hace que el agente escriba el mínimo código necesario. | Base de `cambio-minimo`. | MIT |
+| [agent-skills](https://github.com/addyosmani/agent-skills) | Addy Osmani | Skills de ingeniería para agentes, entre ellas `frontend-ui-engineering`. | Recomendada para interfaces. | MIT |
+| [skills](https://github.com/emilkowalski/skills) | Emil Kowalski | Skills de diseño de interfaces y animación, entre ellas `break-ui`. | Recomendada para UX/UI. | MIT |
+| [skills](https://github.com/anthropics/skills) | Anthropic | Skills oficiales: diseño de interfaces (`frontend-design`), documentos, PDF, planillas y creación de skills. | `frontend-design` recomendada para UX/UI. | Indicada en cada skill |
+| [skills](https://github.com/mattpocock/skills) | Matt Pocock | Skills de ingeniería tomadas de su propia configuración. | Idea del revisor con contexto nuevo en `code-review`. | MIT |
+| [skills](https://github.com/cloudflare/skills) | Cloudflare | Skills de productos de Cloudflare, rendimiento web (`web-perf`) y seguridad. | Recomendadas solo si usas Cloudflare o para medir rendimiento web. | Apache-2.0 |
+
+### Otros repositorios populares
+
+Recomendados en una [publicación de neerajjj6785](https://x.com/neerajjj6785/status/2104895659157684597) (septiembre de 2026). Se revisaron por encima, leyendo su README; no se instalaron ni se probaron (`NO PROBADO`). Que sean populares no demuestra que sean mejores.
+
+| Repositorio | Autor | Para qué sirve | Licencia |
+| --- | --- | --- | --- |
+| [superpowers](https://github.com/obra/superpowers) | Jesse Vincent (obra) | Metodología completa con skills de pruebas, revisión, depuración y planes. Gran parte ya está cubierta por las skills de esta biblioteca. | MIT |
+| [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | nextlevelbuilder | Criterios de diseño para construir interfaces profesionales en varias plataformas. | MIT |
+| [impeccable](https://github.com/pbakaus/impeccable) | Paul Bakaus | Vocabulario de diseño para pulir, criticar y auditar interfaces. | Apache-2.0 |
+| [graphify](https://github.com/Graphify-Labs/graphify) | Graphify Labs | Convierte un repositorio y su documentación en un grafo de conocimiento consultable. | Apache-2.0 |
+| [Understand-Anything](https://github.com/Egonex-AI/Understand-Anything) | Egonex AI | Convierte código en un grafo interactivo para entenderlo. | MIT |
+| [archify](https://github.com/tt-a1i/archify) | tt-a1i | Convierte una idea, un plan o un repositorio en un diagrama interactivo. | Apache-2.0 |
+| [caveman](https://github.com/JuliusBrussee/caveman) | Julius Brussee | Respuestas más breves del agente para gastar menos tokens. | Apache-2.0 |
+| [awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills) | Composio | Directorio de skills y recursos para Claude. | Apache-2.0 según su README; cada skill enlazada tiene su propia licencia |
+
 ## Skills especializadas
 
 | Referencia | Fuente pública | Licencia indicada en la referencia |
