@@ -4,7 +4,7 @@ Skills reutilizables para conocer un repositorio, investigar un fallo, planifica
 
 **Empieza aquí:** [cómo usar las skills, primer mensaje copiable y ejemplos de flujo](docs/USAGE.md). Puedes leerlas sin instalarlas; algunas etapas requieren herramientas concretas y permisos explícitos.
 
-**Para trabajar como nosotros:** adopta también las [reglas de trabajo](docs/REGLAS-DE-TRABAJO.md) y su guía de [verificación](docs/VERIFICACION.md). Las skills dicen cómo hacer cada etapa; las reglas fijan cuándo actuar, preguntar, respaldar, verificar y revisar.
+**Para trabajar como nosotros:** adopta también las [reglas de trabajo](docs/REGLAS-DE-TRABAJO.md) y su guía de [verificación](docs/VERIFICACION.md). Las skills dicen cómo hacer cada etapa; las reglas fijan cuándo actuar, preguntar, respaldar, verificar y revisar. Si no eres técnico, basta con [pegar un mensaje en Claude Code](docs/REGLAS-DE-TRABAJO.md#integrarla-en-claude-code-con-un-mensaje).
 
 ## Siete flujos principales
 

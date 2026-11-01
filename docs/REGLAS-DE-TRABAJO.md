@@ -13,28 +13,43 @@ Las reglas no otorgan herramientas: si una exige un revisor, un CLI o un navegad
 
 ### Integrarla en Claude Code con un mensaje
 
-Si usas solo Claude Code, basta con `~/.claude/CLAUDE.md` para las reglas y `~/.claude/skills/<nombre>/` para las skills. Con una copia local de esta biblioteca, puedes pedirle a tu Claude que haga la adaptación:
+No necesitas saber programar ni descargar nada a mano. Solo necesitas **Claude Code**: la pestaña **Code** de la aplicación de escritorio de Claude. En el chat normal de claude.ai esto no funciona.
+
+1. Abre Claude Code y empieza una sesión nueva. Elige **Local** (tu computador, no la nube) y la carpeta Documentos. No uses la carpeta Descargas: las páginas web pueden dejar ahí archivos con instrucciones.
+2. Copia el mensaje de abajo, pégalo y envíalo.
+3. Responde las preguntas que te haga. Antes de guardar, Claude te mostrará qué va a cambiar; revísalo y dale tu OK.
 
 ```text
-La biblioteca agent-extras está en <RUTA_AGENT_EXTRAS>.
-Lee docs/REGLAS-DE-TRABAJO.md y docs/VERIFICACION.md.
-Quiero adoptar esas reglas como mis instrucciones globales de Claude Code.
+Quiero que trabajes con las reglas y skills de este repositorio:
+https://github.com/ggerena/agent-extras
 
-1. Muéstrame cada campo <...> y cada regla marcada OPCIONAL, y pregúntame
-   qué valor uso o si la quito. No inventes valores.
-2. Lee mi ~/.claude/CLAUDE.md actual si existe. Conserva lo que ya tengo,
-   agrega la plantilla adaptada y avísame de cualquier regla que choque.
-3. Copia VERIFICACION.md a ~/.claude/VERIFICACION.md. Ajusta su enlace
-   inicial para que apunte a ~/.claude/CLAUDE.md, y en las reglas
-   reemplaza la fuente única por ~/.claude/CLAUDE.md.
-4. Copia a ~/.claude/skills/ las carpetas completas de estas skills:
-   mira, diagnostico-con-evidencia, cambio-minimo, crear-spec, autodev,
-   code-review y cerrar-pr. Quita de la lista las que no apliquen a
-   mis herramientas (cerrar-pr requiere git, gh y PowerShell).
-5. Muéstrame el diff final antes de guardar y dime qué quedó pendiente.
+No tengo conocimientos técnicos. Explícame todo en palabras simples,
+sin jerga, y haz tú los pasos en vez de pedirme comandos.
+
+1. Descarga el repositorio en una carpeta de mi computador.
+2. Lee docs/REGLAS-DE-TRABAJO.md y docs/VERIFICACION.md.
+3. Pregúntame, de a una pregunta, para qué uso Claude y si te voy a
+   pedir trabajos de programación, aunque los hagas tú (por ejemplo,
+   crear una página o una aplicación). Si no, adopta solo las reglas
+   sobre la forma de trabajar (respuestas cortas, preguntar antes de
+   acciones riesgosas o de enviar algo a terceros, verificar y decir
+   qué no está comprobado) y deja fuera las de código, Git, PRs y
+   pruebas, junto con VERIFICACION.md.
+4. Pregúntame cada dato que falte (por ejemplo mi idioma). No inventes valores.
+5. Agrega las reglas a mi ~/.claude/CLAUDE.md. Si habrá programación,
+   copia también VERIFICACION.md a ~/.claude/ y ajusta sus enlaces.
+   Instala en ~/.claude/skills/ solo las skills que me sirvan, copiando
+   la carpeta completa de cada una. Antes, revisa lo que ya existe en
+   esos lugares: no reemplaces ni borres nada mío. Si un archivo o una
+   skill ya existe, o si una regla nueva choca con una mía, explícamelo
+   y pregúntame qué hacer.
+6. Antes de guardar, muéstrame en palabras simples qué vas a cambiar y
+   espera mi OK. Al final, dime cómo comprobar que quedó funcionando.
 ```
 
-En una sesión nueva, comprueba que Claude cita las reglas (por ejemplo, pide un merge y verifica que se niega sin un pedido explícito para ese PR).
+Para comprobarlo, abre otra sesión nueva y pregúntale: «¿Qué reglas sigues al trabajar conmigo?». Debería nombrar las que elegiste.
+
+Si eres técnico y prefieres hacerlo a mano: las reglas van en `~/.claude/CLAUDE.md` y cada skill en `~/.claude/skills/<nombre>/`, con su carpeta completa. Reemplaza cada campo `<...>`, decide las reglas marcadas OPCIONAL y ajusta la fuente única a `~/.claude/CLAUDE.md`.
 
 ## Plantilla
 
