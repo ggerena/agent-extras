@@ -16,8 +16,9 @@ Actualiza la biblioteca agent-extras que instalaste antes
 
 1. Descarga la versión nueva en la misma carpeta de antes.
 2. Explícame en palabras simples qué cambió desde la última vez.
-3. Compara mis reglas en ~/.claude/CLAUDE.md, mi ~/.claude/VERIFICACION.md
-   si lo tengo y mis skills en ~/.claude/skills/ con las versiones nuevas. No borres ni reemplaces
+3. Compara mis reglas en ~/.claude/CLAUDE.md, las guías que copiaste
+   en ~/.claude/ (VERIFICACION.md y DESARROLLOS-LARGOS.md, si las tengo) y mis skills en ~/.claude/skills/
+   con las versiones nuevas. No borres ni reemplaces
    lo que yo haya cambiado: si algo choca, muéstramelo y pregúntame.
 4. Antes de guardar, muéstrame qué vas a cambiar y espera mi OK.
 ```
@@ -44,6 +45,8 @@ Las demás skills dependen de herramientas concretas (Codex, Grok, Buzz, WhatsAp
 | `CLAUDE.md` | Archivo donde Claude Code lee tus instrucciones permanentes. |
 | Commit | Un cambio guardado en el historial, con una descripción. |
 | Rama (branch) | Copia paralela del proyecto para trabajar sin tocar la versión principal. |
+| `develop` y `main` | Ramas permanentes: `develop` junta lo terminado y `main` (o `master`) es la versión de producción. |
+| Hotfix | Corrección urgente de producción, que después se lleva también a `develop`. |
 | Push | Subir los commits a GitHub. |
 | PR (pull request) | Solicitud para sumar los cambios de una rama a la versión principal; ahí se revisan. Un PR borrador aún no está listo. |
 | Merge | Sumar definitivamente los cambios de un PR a la versión principal. |
