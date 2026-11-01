@@ -25,11 +25,17 @@ Actualiza la biblioteca agent-extras que instalaste antes
 
 1. Descarga la versión nueva en la misma carpeta de antes.
 2. Explícame en palabras simples qué cambió desde la última vez.
-3. Compara mis reglas en ~/.claude/CLAUDE.md, las guías que copiaste
-   en ~/.claude/ (VERIFICACION.md y DESARROLLOS-LARGOS.md, si las tengo) y mis skills en ~/.claude/skills/
-   con las versiones nuevas. No borres ni reemplaces
-   lo que yo haya cambiado: si algo choca, muéstramelo y pregúntame.
-4. Antes de guardar, muéstrame qué vas a cambiar y espera mi OK.
+3. Compara mis reglas en ~/.claude/CLAUDE.md (o en el archivo que
+   importe, si las tengo en una fuente única), las guías que copiaste
+   en ~/.claude/ (VERIFICACION.md y DESARROLLOS-LARGOS.md, si las
+   tengo) y mis skills en ~/.claude/skills/ con las versiones nuevas.
+   No borres ni reemplaces lo que yo haya cambiado: si algo choca,
+   muéstramelo y pregúntame. Si una skill que tengo instalada ya no
+   está en la biblioteca, consérvala y avísame.
+4. Revisa también la «Configuración recomendada» de
+   docs/GUIA-SIMPLE.md para las herramientas que tengo y muéstrame
+   las diferencias con mi configuración.
+5. Antes de guardar, muéstrame qué vas a cambiar y espera mi OK.
 ```
 
 ## Configuración recomendada

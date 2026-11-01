@@ -2,7 +2,7 @@
 
 ## Alcance
 
-La biblioteca mantiene veinte skills propias: siete flujos principales y trece utilidades adicionales enumeradas en el [README](../README.md). Las skills especializadas de terceros se consultan mediante el [catálogo de referencias](SOURCES.md), que conserva fuentes y atribución sin distribuir sus recursos.
+La biblioteca mantiene diecinueve skills propias: siete flujos principales y doce utilidades adicionales enumeradas en el [README](../README.md). Las skills especializadas de terceros se consultan mediante el [catálogo de referencias](SOURCES.md), que conserva fuentes y atribución sin distribuir sus recursos.
 
 Las instrucciones narrativas y los metadatos descriptivos están en español. Los nombres de skills, rutas, identificadores, opciones de comandos, interfaces y ejemplos de código conservan su forma original. Los scripts y sus mensajes internos pueden contener inglés; su contenido ejecutable no se traduce. Esta edición local no implica una traducción oficial de los proyectos citados.
 
@@ -11,7 +11,7 @@ Las instrucciones narrativas y los metadatos descriptivos están en español. Lo
 - Un agente con lectura de archivos puede consultar las instrucciones Markdown directamente. La aplicación determina qué herramientas están disponibles y el modelo debe interpretar correctamente el alcance; las instrucciones no imponen controles por sí mismas.
 - La detección nativa de skills, los metadatos de `agents/` y los comandos como `/autodev` dependen del cliente. Consulta su documentación vigente antes de instalar.
 - Copia la carpeta completa de cada skill necesaria para conservar scripts, metadatos y referencias. Una estructura de archivos coincidente no acredita compatibilidad de ejecución.
-- Las plantillas `crear-spec`, `crear-release`, `daily`, `actualiza-todo`, y `whatsapp-notify` requieren configuración local. Mantén rutas, destinatarios, accesos y permisos fuera de esta biblioteca.
+- Las plantillas `crear-spec`, `crear-release`, `daily` y `whatsapp-notify` requieren configuración local. Mantén rutas, destinatarios, accesos y permisos fuera de esta biblioteca.
 
 ## Dependencias concretas
 
@@ -26,7 +26,6 @@ Las instrucciones narrativas y los metadatos descriptivos están en español. Lo
 | Revisar privacidad chilena | Acceso a fuentes oficiales vigentes y evidencia autorizada del tratamiento. `proteccion-datos-chile` no requiere un plugin OWASP ni certifica cumplimiento jurídico integral; sin fuente o evidencia suficiente, la conclusión afectada queda `NO PROBADO`. |
 | Revisar o restaurar Grok | Instalación local de Grok Build y PowerShell; la auditoría no verifica por completo la preferencia remota de datos. |
 | Capturar bloqueos del equipo | Windows y PowerShell. No autoriza cerrar procesos ni reiniciar. |
-| Actualizar agentes | Windows, las herramientas seleccionadas y sus gestores de paquetes; requiere `revisa-grok`. `-CheckOnly` puede usar red y refrescar fuentes de paquetes, por lo que no es una simulación sin efectos. |
 | Enviar por WhatsApp | `wacli` con sesión vinculada. Cada envío requiere autorización. |
 | Revisión independiente obligatoria | Otro agente o sesión autorizado y distinto del implementador. No se puede sustituir por una autorrevisión. |
 

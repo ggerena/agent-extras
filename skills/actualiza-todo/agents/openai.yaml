@@ -1,4 +1,0 @@
-interface:
-  display_name: "Actualizar agentes Windows"
-  short_description: "Actualiza los agentes en Windows"
-  default_prompt: "Usa $actualiza-todo para verificar el alcance configurado y actualizar los agentes autorizados."

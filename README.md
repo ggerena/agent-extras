@@ -34,7 +34,6 @@ Skills reutilizables para conocer un repositorio, investigar un fallo, planifica
 | Resumir actividad comprobada | [daily](skills/daily/SKILL.md) |
 | Revisar errores de un canal de alertas de Slack | [revisar-errores-slack](skills/revisar-errores-slack/SKILL.md) |
 | Analizar dificultades en sesiones con agentes | [retrospectiva-agentes](skills/retrospectiva-agentes/SKILL.md) |
-| Actualizar agentes en Windows | [actualiza-todo](skills/actualiza-todo/SKILL.md) |
 | Auditar o restaurar controles locales de Grok | [revisa-grok](skills/revisa-grok/SKILL.md) |
 | Capturar evidencia de un bloqueo de Windows | [se-pego-mi-pc](skills/se-pego-mi-pc/SKILL.md) |
 | Enviar un mensaje autorizado por WhatsApp | [whatsapp-notify](skills/whatsapp-notify/SKILL.md) |
