@@ -43,6 +43,25 @@ Prepara `-PrBody` a partir de la plantilla de PR del repositorio (`.github/pull_
 o equivalente) cuando exista y completa sus secciones obligatorias; CI puede rechazar un PR que
 las omita.
 
+Antes de declarar el cierre, completa en el cuerpo del PR lo siguiente, aprovechando las secciones
+de la plantilla y la evidencia existente. Resume al usuario el resultado y los pendientes en pocas
+líneas:
+
+- **Cambio de comportamiento:** qué hace distinto la aplicación y qué otras funciones afecta.
+- **Decisiones de riesgo o difíciles de revertir:** motivo y alternativas consideradas, cuando
+  corresponda.
+- **Riesgos pertinentes:** evidencia concreta y sus límites ante abuso desde el cliente, solicitudes
+  simultáneas o efectos sobre datos existentes. Marca lo no comprobado como `NO PROBADO`; no basta
+  afirmar «pasan las pruebas».
+- **Comprobación humana:** pasos o comando existente, condiciones necesarias y resultado esperado,
+  sin sustituir la verificación del agente.
+- **Si falla en producción:** señales para detectarlo y procedimiento de recuperación o reversión,
+  indicando sus límites, especialmente sobre datos.
+
+Omite lo que no aplique y ajusta el detalle al cambio. Este bloque no exige repetir comprobaciones
+vigentes ni autoriza nuevas pruebas o acciones en producción. Las verificaciones necesarias
+pendientes siguen bloqueando el cierre.
+
 Si un PR existente está listo, devuélvelo a borrador antes de otro push. Mantén el trabajo incompleto
 hasta que pasen todas las pruebas y revisiones requeridas sin hallazgos ni revisiones pendientes.
 Mantén también el PR en borrador, salvo que las reglas aplicables del repositorio requieran `ready`
