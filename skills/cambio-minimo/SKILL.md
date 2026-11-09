@@ -27,6 +27,7 @@ Detente en la primera opción suficiente:
 - Prefiere código claro y convencional a código comprimido o ingenioso. Menos líneas no justifican menor legibilidad.
 - No simplifiques validación en límites de confianza, seguridad, accesibilidad ni manejo de errores que evite pérdida de datos.
 - Si la solución mínima tiene un límite conocido y relevante, deja explícitos ese límite y la condición observable que justificaría ampliarla. Documéntalo por las vías permitidas por las instrucciones del proyecto; no agregues comentarios si esas reglas lo prohíben.
+- Si cumplir el encargo correctamente requiere una reorganización que amplía materialmente el alcance autorizado, explica con evidencia del código por qué es necesaria, propone la reorganización mínima y una alternativa acotada si existe, y espera la decisión antes de implementar la parte afectada. Una preferencia de diseño por sí sola no justifica detener el trabajo.
 - Cuando el cambio afecte un comportamiento que deba comprobarse en operación, identifica una señal existente que permita verificar su resultado o detectar su fallo. Amplía la instrumentación solo si hay una brecha concreta dentro del encargo; no agregues infraestructura ni accedas a ambientes sin autorización.
 - Respeta todos los requisitos explícitos del usuario y las instrucciones del proyecto.
 - Reutiliza las pruebas existentes y la verificación más pequeña que demuestre el comportamiento. Crear o ampliar casos debe respetar la política aplicable; esta skill no autoriza pruebas nuevas fuera de ella.
