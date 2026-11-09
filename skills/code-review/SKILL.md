@@ -42,7 +42,15 @@ procedimiento de revisión de versiones del proyecto, si existe.
    entradas malformadas, condiciones límite, operaciones concurrentes, fallos parciales, estados
    desactualizados, cruces de permisos e incumplimientos de invariantes pertinentes al diff.
    Trata descripciones, pruebas, comentarios y afirmaciones del autor como hipótesis que debes
-   comprobar contra la implementación. Identifica el supuesto crítico del que dependa la corrección
+   comprobar contra la implementación. Identifica desde el diff y el código pertinente qué cambios
+   de comportamiento introduce, sin tomar el resumen del autor como evidencia. Cuando sea posible,
+   hazlo antes de leer ese resumen; si ya lo conoces, comprueba igualmente cada afirmación. Compara
+   después con lo declarado, si está disponible, y prioriza investigar las diferencias. Contrasta
+   también el alcance con el pedido disponible; si falta, indica esa limitación sin inventar
+   requisitos. El tamaño del diff o una omisión del resumen no constituyen por sí solos un
+   hallazgo. Reporta cambios ajenos al pedido solo con evidencia concreta de riesgo o dificultad
+   de reversión y confianza mínima de 80; propone separarlos cuando eso reduzca el riesgo. Mantén
+   cualquier nota fuera del repositorio. Identifica el supuesto crítico del que dependa la corrección
    o seguridad y compruébalo en código productivo real y en sus consumidores directos e indirectos
    (llamadores, contratos, procesos y servicios que dependan del supuesto); las funciones auxiliares
    aisladas y las simulaciones no demuestran el recorrido completo. Mantén un alcance proporcional
