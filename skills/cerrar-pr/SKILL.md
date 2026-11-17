@@ -109,7 +109,8 @@ una ejecución nueva.
 El ciclo de corrección ya forma parte de completar la implementación autorizada; no te detengas
 solo porque aparezca un hallazgo alto o medio válido. Detente y pregunta únicamente cuando una
 corrección requiera una decisión material de producto, mayor alcance, una acción destructiva,
-un acceso nuevo u otra autorización, o cuando se alcance el tope de rondas del paso 5.
+un acceso nuevo u otra autorización, cuando se alcance el tope de rondas del paso 5, o cuando
+una misma comprobación siga fallando por la misma falla tras tres intentos de corrección distintos.
 
 ## Revisión externa opcional
 
