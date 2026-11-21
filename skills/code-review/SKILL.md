@@ -89,9 +89,38 @@ procedimiento de revisión de versiones del proyecto, si existe.
      o falta de cobertura de pruebas que haga probable una regresión.
    - **Baja:** riesgo de mantenibilidad que no impida el cierre o riesgo menor de funcionamiento
      correcto, respaldado por evidencia concreta.
+
+   Antes de fijar la severidad, incluida la que proponga otro modelo revisor, haz este triage:
+   - Di en una frase qué le sale mal a la persona o al equipo que mantiene el sistema. Si esa
+     frase no describe un perjuicio concreto, no es un hallazgo.
+   - Para errores de funcionamiento y de seguridad, escribe la secuencia exacta de pasos que lo
+     provoca, comprueba en el código que el sistema la permite y di quién la hace y por qué. En
+     errores de funcionamiento, di también con qué frecuencia ocurre en el uso real; en
+     seguridad, quién puede hacerlo con los permisos que ya tiene. Si el código muestra que la
+     secuencia no es posible, no lo reportes; si falta un dato externo para saberlo, como una
+     configuración, va a no resueltos.
+   - Una condición rara en el uso real del producto deja el hallazgo en Baja: una falla del
+     entorno en el instante justo, borrar o reiniciar algo mientras corre, datos que solo una
+     versión no publicada pudo escribir, un dispositivo no soportado o dos condiciones poco
+     comunes que deban darse juntas. La concurrencia (dos personas o pestañas sobre lo mismo, dos
+     acciones en el mismo segundo) es rara solo si el uso real lo confirma: en una cola atendida
+     por varias personas o ante un doble clic, es frecuente.
+   - La excepción es cruzar una línea roja: ver o modificar datos de otra empresa o de otro
+     usuario, datos privados o secretos expuestos, saltarse la autenticación o usar una sesión
+     cerrada o revocada, acceso sin permiso a una acción restringida, trabajo perdido o
+     duplicado, un resultado incorrecto que nadie nota, una caída o bloqueo del servicio para
+     otras personas o una escritura irreversible que nadie aprobó. Eso conserva la severidad aunque sea raro.
+   - En seguridad, compara contra lo que los permisos legítimos del atacante ya le autorizan, no
+     contra otro error existente que ya le diera ese acceso.
+   - Marca cada hallazgo como INTRODUCIDO o PREEXISTENTE, comprobándolo contra la base
+     (`git show <sha-base>:<archivo>`, con la ruta anterior si el archivo se movió). Si el
+     cambio vuelve alcanzable un error que ya existía, es INTRODUCIDO.
+   - Si falta un dato esencial para decidir, lístalo aparte como no resuelto, sin inflarlo ni
+     callarlo. Para un caso raro sin línea roja, propone limitarlo o rechazarlo con un mensaje
+     claro antes que agregar lógica nueva.
 10. Omite detalles irrelevantes, observaciones solo de estilo, problemas previos fuera de las líneas
-    cambiadas (un texto confuso o un paso innecesario que afecte a quien usa la pantalla no es
-    solo de estilo) y problemas que ya detecten lint, comprobación de tipos o CI, salvo evidencia de que
+    cambiadas salvo que sean Alta o que el cambio los vuelva alcanzables (un texto confuso o un
+    paso innecesario que afecte a quien usa la pantalla no es solo de estilo) y problemas que ya detecten lint, comprobación de tipos o CI, salvo evidencia de que
     CI no los detectará. La ausencia de pruebas unitarias o de integración nuevas no es por sí
     sola un hallazgo cuando la política aplicable las prohíbe; evalúa la verificación requerida
     dentro de esa política.
@@ -179,9 +208,13 @@ Usa esta estructura:
 
 Se encontraron N problemas:
 
-1. [Alta|Media|Baja] <hallazgo> (confianza: <80-100>)
+1. [Alta|Media|Baja] [INTRODUCIDO|PREEXISTENTE] <hallazgo> (confianza: <80-100>)
 <archivo:linea o enlace>
+Daño: <una frase>
+Secuencia: <pasos exactos, quién los hace y con qué frecuencia, si aplica>
 <explicacion concreta>
+
+No resueltos: <datos que faltan para decidir, si los hay>
 ```
 
 Si no hay hallazgos:
@@ -190,6 +223,15 @@ Si no hay hallazgos:
 ### Code review
 
 Sin problemas. Se realizó una revisión adversarial en busca de bugs, casos límite y cumplimiento de instrucciones del proyecto.
+```
+
+Si no hay hallazgos confirmados pero quedan datos no resueltos, no escribas «Sin problemas»:
+
+```markdown
+### Code review
+
+Sin hallazgos confirmados, pero no se puede dar por limpio hasta resolver:
+- <dato que falta y qué hallazgo posible decide>
 ```
 
 ## Notas
