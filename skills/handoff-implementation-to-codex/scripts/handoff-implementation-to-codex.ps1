@@ -31,7 +31,7 @@ param(
   [switch] $UpdateExistingPr,
   [switch] $NoAutoReview,
   [switch] $NoTestGate,
-  [string] $CodexModel = 'gpt-6.1-sol',
+  [string] $CodexModel = 'gpt-6.2-sol',
   [ValidateSet('medium', 'high', 'xhigh')]
   [string] $CodexReasoningEffort = '',
   [string] $ReasoningRationale = '',

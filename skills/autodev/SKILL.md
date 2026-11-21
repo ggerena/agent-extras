@@ -55,7 +55,9 @@ No inventes un plan que falta. Si no existe un plan utilizable, detente tras ide
    con condiciones previas, datos de prueba sin secretos, rol, acciones, estado final esperado y
    evidencia observable; distingue comprobaciones ejecutadas y pendientes. En un trabajo de solo
    lectura, informa que falta la guía sin crearla. No crees otro sistema de pruebas.
-   Nunca inicies servidores de desarrollo. Las pruebas básicas en navegador requieren un pedido explícito.
+   Inicia servidores de desarrollo solo cuando las instrucciones del usuario o del proyecto lo autoricen
+   (por ejemplo, apps locales para pruebas e2e). Las pruebas básicas en navegador requieren un pedido
+   explícito o que esas instrucciones las exijan.
 6. Ejecuta `code-review` (`/revisa`) sobre el diff completo de cada rama y sus cambios locales.
    Valida cada hallazgo, corrige de inmediato los hallazgos altos y medios válidos, mantén las
    pruebas dentro de la política aplicable, vuelve a verificar y repite la revisión hasta que no

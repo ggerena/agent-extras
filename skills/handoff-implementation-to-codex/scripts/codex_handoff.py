@@ -24,7 +24,7 @@ SCHEMA_VERSION = 4
 PROTECTED_BRANCHES = {"main", "master", "develop"}
 ABSENT = "absent"
 FINAL_STATES = {"pass", "blocked", "needs-user", "failed"}
-DEFAULT_MODEL = "gpt-6.1-sol"
+DEFAULT_MODEL = "gpt-6.2-sol"
 EFFORTS = ("medium", "high", "xhigh")
 SANDBOX_BY_MODE = {
     "review": "read-only",

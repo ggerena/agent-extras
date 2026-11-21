@@ -5,7 +5,7 @@ description: Usar cuando el usuario pida delegar a Codex CLI (Sol) una fase gran
 
 # Delegación supervisada a Codex
 
-Mantener al invocador como coordinador y aprobador. Delegar a Codex (GPT-6.1
+Mantener al invocador como coordinador y aprobador. Delegar a Codex (GPT-6.2
 Sol) la mayor fase coherente y verificable que quepa dentro de un repositorio y una
 rama, con rutas explícitas.
 
@@ -39,14 +39,20 @@ rama, con rutas explícitas.
    - `high` es el valor por defecto y sirve para casi todo.
    - `medium` solo si el cambio es trivial y quieres que termine antes.
    - `xhigh` para lo realmente delicado: seguridad, concurrencia o migraciones.
-3. Exigir un control previo `pass`; no usar `SkipReviewGate` salvo autorización
-   explícita mediante `ForceHandoff` y `ForceReason`.
+3. Exigir un control previo `pass`: el coordinador revisa el plan o paquete y
+   resume en `ReviewSummary` que no tiene bloqueantes (el lanzador se niega sin
+   ese resumen). No usar `SkipReviewGate` salvo autorización explícita mediante
+   `ForceHandoff` y `ForceReason`.
 4. Iniciar `implement` y conservar su `phaseDirectory`.
 5. Monitorear con `wait-codex-handoff.ps1` en ventanas de hasta 55 segundos. El
    estado efectivo debe tener controles de alcance sin violaciones.
-6. Reutilizar la misma fase para una ejecución separada `review` en `high` o `xhigh`.
-7. Si hay hallazgos, reutilizarla para `implement` correctivo y luego otro
-   `review`. El coordinador revisa el diff después de la revisión de Codex.
+6. Por defecto, un `implement` en `pass` ya encadena pruebas, revisión y corrección
+   (ver «Revisión y corrección automáticas»). Lanzar un `review` separado en `high`
+   o `xhigh` solo si la fase usó `-NoAutoReview`.
+7. Si la cadena o el `review` terminan `blocked` con hallazgos, reutilizar la fase
+   para un `implement` correctivo, que vuelve a encadenar la revisión; solo con
+   `-NoAutoReview`, lanzar después otro `review`. El coordinador revisa el diff
+   final en todos los casos.
 8. Tras aprobación, reutilizarla para `closeout`.
 9. Generar el reporte Markdown y limpiar la fase cuando su información ya esté
    absorbida.
@@ -177,7 +183,7 @@ codex exec -C <repo> -m <model> -c model_reasoning_effort=<effort>
   mensaje como JSON que cumple el esquema. Si `last-message.json` falta o no es
   válido, el supervisor toma el último mensaje del agente en el flujo `--json`
   y, como último recurso, el último JSON válido de la salida.
-- **Modelo y esfuerzo.** Modelo por defecto `gpt-6.1-sol` (`CodexModel`).
+- **Modelo y esfuerzo.** Modelo por defecto `gpt-6.2-sol` (`CodexModel`).
   Esfuerzo `medium`, `high` (por defecto) o `xhigh`.
 - **Entorno aislado por modo:**
   - `review` → `read-only`: Codex no puede escribir; es la garantía principal
@@ -265,7 +271,7 @@ $start = & "$skill\handoff-implementation-to-codex.ps1" `
   -Launch | ConvertFrom-Json
 ```
 
-Reutilizar la fase para revisión:
+Reutilizar la fase para revisión (solo si la fase usó `-NoAutoReview`):
 
 ```powershell
 & "$skill\handoff-implementation-to-codex.ps1" `
@@ -274,7 +280,7 @@ Reutilizar la fase para revisión:
   -Objective "Revisar la fase de forma adversarial" `
   -PlanPath "C:\ruta\PLAN.md" `
   -PlanReadPolicy auto `
-  -ReviewSkillPath "C:\ruta\revisa\SKILL.md" `
+  -ReviewSkillPath "C:\ruta\code-review\SKILL.md" `
   -CodexReasoningEffort high `
   -ReasoningRationale "Gate independiente obligatorio." `
   -ReviewSummary "Implementación terminada y validada." `

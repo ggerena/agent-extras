@@ -89,9 +89,9 @@ una ejecución nueva.
 4. Verifica cada corrección según la política de pruebas aplicable, reutilizando las pruebas
    pertinentes. Crear o ampliar casos debe respetar esa política; esta skill no otorga excepciones.
    Vuelve a ejecutar las comprobaciones afectadas.
-5. Repite `/revisa` hasta que no queden hallazgos altos o medios válidos. Mantén visibles los demás
-   hallazgos sin resolver; bloquean el cierre, mientras que el estado listo sigue la política de
-   activación de CI del paso 7. Una ronda consiste en corregir y volver a ejecutar `/revisa`; la
+5. Repite `/revisa` hasta que no queden hallazgos altos o medios válidos. Los altos o medios sin
+   resolver bloquean el cierre. Los bajos que no corrijas no lo bloquean, pero quedan visibles en
+   el informe o en el PR. El estado listo sigue la política de activación de CI del paso 7. Una ronda consiste en corregir y volver a ejecutar `/revisa`; la
    revisión inicial no cuenta y el conteo es por PR. Si después de tres rondas siguen
    apareciendo hallazgos altos o medios válidos, detén el ciclo sin declarar el cierre, mantén el
    PR en borrador e informa al usuario los hallazgos pendientes y por qué no converge.
@@ -114,7 +114,8 @@ una misma comprobación siga fallando por la misma falla tras tres intentos de c
 
 ## Revisión externa opcional
 
-La revisión externa es independiente de este script y requiere autorización para ese PR.
+La revisión externa es independiente de este script y requiere autorización para ese PR o
+instrucciones vigentes del usuario que la exijan.
 Usa un subagente adecuado disponible en el entorno actual cuando el PR ya exista, respetando la
 política de delegación del cliente, el revisor solicitado y el alcance de solo lectura o de
 implementación. Otra revisión debe provenir de un agente o sesión distinto; si no está disponible,
@@ -123,6 +124,8 @@ actual requiere autorización explícita. No conviertas la revisión externa en 
 para crear el PR.
 
 ## Ejecución
+
+`<skill-root>` es la carpeta donde está instalado este `SKILL.md`.
 
 Respaldo temprano desde la raíz del repositorio, después de la inspección de seguridad de publicación:
 
@@ -191,12 +194,15 @@ Estas comprobaciones simulan Git y GitHub; no publican nada.
 - Exige `-ReviewPassed` antes del cierre revisado; usa `-Backup` para respaldos de código incompleto.
 - Nunca ejecutes `gh pr merge`, `git merge`, push forzado, rebase ni amend.
 - Nunca hagas push directo a `develop`, `main` o `master`.
-- Nunca inicies servidores de desarrollo. El script rechaza comandos habituales como `npm run dev`,
-  `yarn dev`, `npm start` y `preview_start`.
-- Ejecuta pruebas básicas en navegador solo con un pedido explícito; las pruebas automatizadas,
+- No inicies servidores de desarrollo desde este script: rechaza comandos habituales como
+  `npm run dev`, `yarn dev`, `npm start` y `preview_start`. Fuera del script, inícialos solo cuando
+  las instrucciones del usuario o del proyecto lo autoricen (por ejemplo, apps locales para e2e).
+- Ejecuta pruebas básicas en navegador solo con un pedido explícito o cuando las instrucciones del
+  usuario o del proyecto las exijan; las pruebas automatizadas,
   lint y compilaciones pertinentes siguen siendo obligatorios. Informa las comprobaciones
   requeridas sin ejecutar en vez de afirmar que se hicieron.
-- Mantén la revisión externa fuera de este script y exige autorización explícita antes de enviarla.
+- Mantén la revisión externa fuera de este script y exige autorización explícita o instrucciones vigentes
+  del usuario que la exijan antes de enviarla.
 - El agente actual conserva la responsabilidad de revisión. La revisión externa aporta información;
   no autoriza merge.
 

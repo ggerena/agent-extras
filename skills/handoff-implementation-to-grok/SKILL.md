@@ -1,6 +1,6 @@
 ---
 name: handoff-implementation-to-grok
-description: Delega una fase grande y autocontenida de código a Grok Build, que implementa, valida, revisa y cierra con commit, push y PR sin merge, para ahorrar cuota del coordinador (Codex o Claude Code). Un repositorio y una rama por fase. No usar para una segunda opinión aislada, traspaso total de responsabilidad, merge ni despliegue.
+description: Delega una fase grande y autocontenida de código a Grok Build, que implementa, valida, revisa y cierra con commit, push y PR sin merge, para ahorrar cuota del coordinador (Codex, Claude Code o Antigravity). Un repositorio y una rama por fase. No usar para una segunda opinión aislada, traspaso total de responsabilidad, merge ni despliegue.
 ---
 
 # Delegación supervisada a Grok Build
@@ -41,15 +41,21 @@ explícitas.
      resultado.
    - `medium` solo si el cambio es trivial y quieres que termine antes.
    - `max` para lo realmente delicado: seguridad, concurrencia o migraciones.
-3. Exigir un control previo `pass`; no usar `SkipReviewGate` salvo autorización
-   explícita mediante `ForceHandoff` y `ForceReason`.
+3. Exigir un control previo `pass`: el coordinador revisa el plan o paquete y
+   resume en `ReviewSummary` que no tiene bloqueantes (el lanzador se niega sin
+   ese resumen). No usar `SkipReviewGate` salvo autorización explícita mediante
+   `ForceHandoff` y `ForceReason`.
 4. Iniciar `implement` y conservar su `phaseDirectory`.
 5. Monitorear con `wait-grok-handoff.ps1` en ventanas de hasta 55 segundos. El
    estado efectivo debe tener controles de alcance sin violaciones.
-6. Reutilizar la misma fase para una ejecución separada `review` en `high`.
-7. Si hay hallazgos, reutilizarla para `implement` correctivo y luego otro
-   `review`. El coordinador (Codex o Claude Code, quien haya invocado la skill)
-   revisa el diff después de la revisión de Grok.
+6. Por defecto, un `implement` en `pass` ya encadena pruebas, revisión y corrección
+   (ver la cadena automática más abajo). Lanzar un `review` separado en `high` solo
+   si la fase usó `-NoAutoReview`.
+7. Si la cadena o el `review` terminan `blocked` con hallazgos, reutilizar la fase
+   para un `implement` correctivo, que vuelve a encadenar la revisión; solo con
+   `-NoAutoReview`, lanzar después otro `review`. El coordinador (el agente que
+   invocó la skill: Codex, Claude Code o Antigravity) revisa el diff final en todos
+   los casos.
 8. Tras aprobación, reutilizarla para `closeout`.
 9. Generar el reporte Markdown y limpiar la fase cuando su información ya esté
    absorbida.
@@ -246,22 +252,22 @@ $start = & "$skill\handoff-implementation-to-grok.ps1" `
   -ValidationCommands "npm test -- x.test.ts","npm run build" `
   -PlanPath "C:\ruta\PLAN.md" `
   -PlanReadPolicy auto `
-  -GrokReasoningEffort medium `
+  -GrokReasoningEffort high `
   -ReasoningRationale "Cambio acotado con contrato definido." `
   -ReviewSummary "Plan revisado sin bloqueantes." `
   -Launch | ConvertFrom-Json
 ```
 
-Reutilizar la fase para revisión:
+Reutilizar la fase para revisión (solo si la fase usó `-NoAutoReview`):
 
 ```powershell
 & "$skill\handoff-implementation-to-grok.ps1" `
   -PhaseDirectory $start.phaseDirectory `
   -Mode review `
-  -Objective "Ejecutar /revisa high sobre la fase" `
+  -Objective "Revisar la fase de forma adversarial con code-review" `
   -PlanPath "C:\ruta\PLAN.md" `
   -PlanReadPolicy auto `
-  -ReviewSkillPath "C:\ruta\revisa\SKILL.md" `
+  -ReviewSkillPath "C:\ruta\code-review\SKILL.md" `
   -GrokReasoningEffort high `
   -ReasoningRationale "Gate independiente obligatorio." `
   -ReviewSummary "Implementación terminada y validada." `
@@ -285,7 +291,7 @@ En Linux/macOS o desde cualquier entorno de herramientas con Python 3, usar la m
 python3 scripts/grok_handoff.py start --mode implement \
   --objective "Implementar solo X" \
   --allowed-path backend/src/x.ts \
-  --reasoning-effort medium \
+  --reasoning-effort high \
   --reasoning-rationale "Cambio acotado" \
   --review-summary "Plan aprobado" \
   --launch
