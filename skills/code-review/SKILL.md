@@ -109,9 +109,14 @@ procedimiento de revisión de versiones del proyecto, si existe.
      usuario, datos privados o secretos expuestos, saltarse la autenticación o usar una sesión
      cerrada o revocada, acceso sin permiso a una acción restringida, trabajo perdido o
      duplicado, un resultado incorrecto que nadie nota, una caída o bloqueo del servicio para
-     otras personas o una escritura irreversible que nadie aprobó. Eso conserva la severidad aunque sea raro.
+     otras personas o una escritura irreversible que nadie aprobó. Eso impide bajarlo a Baja
+     aunque sea raro. Fija su severidad con la escala de este paso según el daño comprobado,
+     sin heredar la etiqueta que puso otro revisor.
    - En seguridad, compara contra lo que los permisos legítimos del atacante ya le autorizan, no
-     contra otro error existente que ya le diera ese acceso.
+     contra otro error existente que ya le diera ese acceso. Para descartar o bajar un hallazgo
+     porque el atacante ya tenía ese permiso, cita el código o la configuración de la base que
+     se lo daba. Si no lo encuentras, no lo descartes ni lo bajes; si ese permiso depende de un
+     dato externo que no puedes ver, como roles en la base de datos, va a no resueltos.
    - Marca cada hallazgo como INTRODUCIDO o PREEXISTENTE, comprobándolo contra la base
      (`git show <sha-base>:<archivo>`, con la ruta anterior si el archivo se movió). Si el
      cambio vuelve alcanzable un error que ya existía, es INTRODUCIDO.
